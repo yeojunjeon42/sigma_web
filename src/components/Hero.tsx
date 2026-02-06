@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Hero() {
   return (
     <section id="home" className="relative z-40 overflow-hidden pb-24 pt-28 sm:pt-36 lg:pb-[120px] lg:pt-[170px] bg-white dark:bg-dark">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-16">
         <div className="-mx-4 flex flex-wrap items-center">
           <div className="w-full px-4 lg:w-1/2">
             <div className="mx-auto mb-12 max-w-[530px] text-center lg:mb-0 lg:ml-0 lg:text-left">
@@ -15,7 +15,7 @@ export default function Hero() {
                 Sigma Intelligence
               </h1>
               <p className="mb-12 text-base font-medium text-gray dark:text-gray/80">
-                Pioneering the future of robotics and artificial intelligence. We build, innovate, and compete to push the boundaries of technology.
+                국내 최초 설립 대학 로봇동아리. Est. 1984.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-4 lg:justify-start">
                 <Link

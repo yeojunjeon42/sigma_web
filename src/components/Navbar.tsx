@@ -16,11 +16,11 @@ export default function Navbar() {
 
   return (
     <header className="absolute left-0 top-0 z-50 w-full bg-transparent">
-      <div className="container mx-auto flex flex-wrap items-center justify-between px-4 py-4 lg:px-8">
+      <div className="container mx-auto flex flex-wrap items-center justify-between px-8 py-4 lg:px-16">
         {/* Logo */}
         <div className="relative z-50 max-w-[250px] pr-4">
           <Link href="/" className="text-2xl font-bold text-dark dark:text-white">
-            Sigma<span className="text-bright-red">Intelligence</span>
+            Sigma <span className="text-bright-red">Intelligence</span>
           </Link>
         </div>
 
