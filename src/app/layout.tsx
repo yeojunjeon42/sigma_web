@@ -21,6 +21,24 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Sigma Intelligence",
     description: "Official website for Sigma Intelligence (SNU Robotics Club)",
+    locale: "en_US",
+  },
+  alternates: {
+    languages: {
+      'ko': '/ko',
+      'en': '/en',
+    },
+  },
+};
+
+// For Korean version
+export const metadataKo: Metadata = {
+  title: "시그마 인텔리전스",
+  description: "서울대학교 로봇 동아리 공식 웹사이트",
+  openGraph: {
+    title: "시그마 인텔리전스",
+    description: "서울대학교 로봇 동아리 공식 웹사이트",
+    locale: "ko_KR",
   },
 };
 
