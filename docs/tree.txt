@@ -1,0 +1,46 @@
+.
+├── README.md
+├── eslint.config.mjs
+├── next-env.d.ts
+├── next.config.ts
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
+├── public
+│   ├── favicon.ico
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── icons
+│   │   └── linkedin-svgrepo-com.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── sanity.cli.ts
+├── sanity.config.ts
+├── src
+│   ├── app
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   └── studio
+│   │       └── [[...tool]]
+│   │           └── page.tsx
+│   ├── components
+│   │   ├── Footer.tsx
+│   │   ├── Hero.tsx
+│   │   └── Navbar.tsx
+│   ├── proxy.ts
+│   └── sanity
+│       ├── env.ts
+│       ├── lib
+│       │   ├── client.ts
+│       │   ├── image.ts
+│       │   └── live.ts
+│       ├── schemaTypes
+│       │   ├── index.ts
+│       │   └── postType.ts
+│       └── structure.ts
+├── tree.txt
+└── tsconfig.json
+
+11 directories, 33 files
