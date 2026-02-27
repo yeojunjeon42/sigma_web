@@ -29,14 +29,12 @@ export default function Hero() {
           width={750}
           height={750}
           priority
-          className="object-contain opacity-20"
+          className="object-contain"
         />
       </div>
 
-      {/* Gradient overlay — z-[1], paints above the image */}
-      <div className="absolute inset-0 z-[1] pointer-events-none bg-[radial-gradient(ellipse_80%_60%_at_50%_50%,_transparent_40%,_rgba(255,255,255,0.85)_100%)]" />
-      <div className="absolute inset-x-0 top-0 z-[1] h-48 pointer-events-none bg-gradient-to-b from-white to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 z-[1] h-48 pointer-events-none bg-gradient-to-t from-white to-transparent" />
+      {/* Gradient overlay — z-[1], visible color gradients above the image */}
+      <div className="absolute inset-0 z-[1] pointer-events-none bg-gradient-to-br from-[#2B2D42]/50 to-bright-red/30" />
 
       {/* Centered content */}
       <div className="relative z-[2] mx-auto max-w-3xl px-6 text-center">
