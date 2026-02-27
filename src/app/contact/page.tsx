@@ -6,20 +6,20 @@ export default function ContactPage() {
     <div className="min-h-screen bg-white text-dark dark:bg-dark dark:text-white">
       <Navbar />
       <main className="container mx-auto px-6 pt-32 pb-16 md:px-10 lg:px-16">
-        <section className="mb-14">
-          <p className="mb-3 inline-block rounded-full bg-bright-red/10 px-4 py-2 text-sm font-semibold text-bright-red">
+        <section data-anim="reveal-group" className="mb-14">
+          <p data-anim="reveal-item" className="mb-3 inline-block rounded-full bg-bright-red/10 px-4 py-2 text-sm font-semibold text-bright-red">
             Reach Out
           </p>
-          <h1 className="mb-4 text-4xl font-bold md:text-5xl">Contact</h1>
-          <p className="max-w-2xl text-lg text-gray">
+          <h1 data-anim="reveal-item" className="mb-4 text-4xl font-bold md:text-5xl">Contact</h1>
+          <p data-anim="reveal-item" className="max-w-2xl text-lg text-gray">
             Have a question, want to collaborate, or interested in sponsoring?
             We&apos;d love to hear from you.
           </p>
         </section>
 
-        <div className="grid gap-12 lg:grid-cols-2">
+        <div data-anim="reveal-group" className="grid gap-12 lg:grid-cols-2">
           {/* Contact Info */}
-          <section className="space-y-8">
+          <section data-anim="reveal-item" className="space-y-8">
             <div>
               <h2 className="mb-2 text-lg font-semibold">Email</h2>
               <a
@@ -73,7 +73,7 @@ export default function ContactPage() {
           </section>
 
           {/* Contact Form */}
-          <section>
+          <section data-anim="reveal-item">
             <form className="space-y-5">
               <div>
                 <label

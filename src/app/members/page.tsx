@@ -51,9 +51,9 @@ export default async function MembersPage() {
     <div className="min-h-screen bg-white text-dark dark:bg-dark dark:text-white">
       <Navbar />
       <main className="container mx-auto px-6 pt-32 pb-16 md:px-10 lg:px-16">
-        <section className="mb-14 text-center">
-          <h1 className="mb-4 text-4xl font-bold md:text-5xl">Members</h1>
-          <p className="mx-auto max-w-2xl text-lg text-gray">
+        <section data-anim="reveal-group" className="mb-14 text-center">
+          <h1 data-anim="reveal-item" className="mb-4 text-4xl font-bold md:text-5xl">Members</h1>
+          <p data-anim="reveal-item" className="mx-auto max-w-2xl text-lg text-gray">
             The people behind Sigma Intelligence.
           </p>
         </section>
@@ -63,7 +63,7 @@ export default async function MembersPage() {
             <p className="text-lg">Members will be listed here soon.</p>
           </div>
         ) : (
-          <section>
+          <section data-anim="reveal-group">
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {members.map((member) => (
                 <MemberCard key={member._id} member={member} />
@@ -83,7 +83,7 @@ function MemberCard({ member }: { member: Member }) {
     : null;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray/20 bg-white dark:border-white/10 dark:bg-white/5">
+    <div data-anim="card" className="overflow-hidden rounded-xl border border-gray/20 bg-white dark:border-white/10 dark:bg-white/5" tabIndex={0}>
       <div className="relative flex aspect-square w-full items-center justify-center bg-dark/10 dark:bg-dark/50">
         {imageUrl ? (
           <Image
