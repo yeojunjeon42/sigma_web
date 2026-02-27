@@ -22,7 +22,7 @@ export default function Navbar() {
         {/* Logo */}
         <div className="relative z-50 max-w-[250px] pr-4">
           <Link href="/" className="text-2xl font-bold text-dark dark:text-white">
-            Sigma <span className="text-bright-red">Intelligence</span>
+            SIGMA Intelligence
           </Link>
         </div>
 
