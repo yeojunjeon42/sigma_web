@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
+import { T } from "@/components/T";
 
 interface Member {
   _id: string;
@@ -52,15 +53,15 @@ export default async function MembersPage() {
       <Navbar />
       <main className="container mx-auto px-6 pt-32 pb-16 md:px-10 lg:px-16">
         <section data-anim="reveal-group" className="mb-14 text-center">
-          <h1 data-anim="reveal-item" className="mb-4 text-4xl font-bold md:text-5xl">Members</h1>
+          <h1 data-anim="reveal-item" className="mb-4 text-4xl font-bold md:text-5xl"><T en="Members" ko="멤버" /></h1>
           <p data-anim="reveal-item" className="mx-auto max-w-2xl text-lg text-gray">
-            The people behind Sigma Intelligence.
+            <T en="The people behind Sigma Intelligence." ko="시그마 인텔리전스를 이끄는 사람들." />
           </p>
         </section>
 
         {members.length === 0 ? (
           <div className="py-24 text-center text-gray">
-            <p className="text-lg">Members will be listed here soon.</p>
+            <p className="text-lg"><T en="Members will be listed here soon." ko="멤버 정보가 곧 업데이트됩니다." /></p>
           </div>
         ) : (
           <section data-anim="reveal-group">

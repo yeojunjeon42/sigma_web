@@ -1,7 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useLanguage } from "@/context/LanguageContext";
+import { dict } from "@/lib/i18n";
 
 export default function Hero() {
+  const { lang } = useLanguage();
+  const h = dict.hero;
+
   return (
     <section
       id="home"
@@ -17,10 +24,10 @@ export default function Hero() {
         sizes="100vw"
       />
 
-      {/* Dark gradient overlay — top heavy so navbar stays readable */}
+      {/* Dark gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-dark/80 via-dark/60 to-dark/80" />
 
-      {/* Subtle red accent glow */}
+      {/* Red accent glow */}
       <div className="absolute inset-0 bg-gradient-to-tr from-bright-red/10 via-transparent to-transparent" />
 
       {/* Centered content */}
@@ -30,7 +37,7 @@ export default function Hero() {
           className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm font-semibold text-white backdrop-blur-sm"
         >
           <span className="h-2 w-2 rounded-full bg-bright-red" />
-          SNU Robotics Club
+          {h.badge[lang]}
         </span>
 
         <h1
@@ -45,7 +52,7 @@ export default function Hero() {
           data-anim="hero-sub"
           className="mb-12 text-lg font-medium text-white/70 md:text-xl"
         >
-          국내 최초 설립 대학 로봇동아리. Est. 1984.
+          {h.tagline[lang]}
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-4">
@@ -54,21 +61,23 @@ export default function Hero() {
             href="/projects"
             className="inline-flex items-center justify-center rounded-md bg-bright-red px-8 py-3 text-base font-semibold text-white transition-colors hover:bg-darker-red"
           >
-            Our Projects
+            {h.projects[lang]}
           </Link>
           <Link
             data-anim="hero-cta"
             href="/about"
             className="inline-flex items-center justify-center rounded-md border border-white/30 bg-white/10 px-8 py-3 text-base font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
           >
-            Learn More
+            {h.learn[lang]}
           </Link>
         </div>
       </div>
 
       {/* Scroll indicator */}
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/40">
-        <span className="text-xs font-medium tracking-widest uppercase">Scroll</span>
+        <span className="text-xs font-medium tracking-widest uppercase">
+          {h.scroll[lang]}
+        </span>
         <div className="h-10 w-px bg-gradient-to-b from-white/40 to-transparent" />
       </div>
     </section>

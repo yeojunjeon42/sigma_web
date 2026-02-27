@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
+import { T } from "@/components/T";
 
 interface Sponsor {
   _id: string;
@@ -50,9 +51,9 @@ export default async function SponsorsPage() {
       <Navbar />
       <main className="container mx-auto px-6 pt-32 pb-24 md:px-10 lg:px-16">
         <section data-anim="reveal-group" className="mb-16 text-center">
-          <h1 data-anim="reveal-item" className="mb-4 text-4xl font-bold md:text-5xl">Sponsors</h1>
+          <h1 data-anim="reveal-item" className="mb-4 text-4xl font-bold md:text-5xl"><T en="Sponsors" ko="후원사" /></h1>
           <p data-anim="reveal-item" className="mx-auto max-w-xl text-base text-gray">
-            Your support makes Sigma Intelligence possible.
+            <T en="Your support makes Sigma Intelligence possible." ko="여러분의 후원이 Sigma Intelligence를 가능하게 합니다." />
           </p>
         </section>
 
@@ -80,16 +81,18 @@ export default async function SponsorsPage() {
         )}
 
         <section data-anim="reveal-group" className="mt-24 rounded-2xl border border-white/10 bg-white/5 px-8 py-12 text-center">
-          <h2 data-anim="reveal-item" className="mb-4 text-2xl font-bold">Become a Sponsor</h2>
+          <h2 data-anim="reveal-item" className="mb-4 text-2xl font-bold"><T en="Become a Sponsor" ko="후원사가 되세요" /></h2>
           <p data-anim="reveal-item" className="mx-auto mb-8 max-w-xl text-gray">
-            Partner with Sigma Intelligence and support the next generation of
-            robotics engineers at Seoul National University.
+            <T
+              en="Partner with Sigma Intelligence and support the next generation of robotics engineers at Seoul National University."
+              ko="시그마 인텔리전스와 함께 서울대학교 차세대 로봇 엔지니어들을 후원해 주세요."
+            />
           </p>
           <a
             href="mailto:record.snusigma@gmail.com"
             className="inline-block rounded-full bg-bright-red px-8 py-3 font-semibold text-white hover:bg-darker-red transition-colors"
           >
-            Get in Touch
+            <T en="Get in Touch" ko="문의하기" />
           </a>
         </section>
       </main>
