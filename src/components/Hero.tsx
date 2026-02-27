@@ -2,39 +2,47 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { dict } from "@/lib/i18n";
+import { initHeroMotion } from "@/lib/motion";
 
 export default function Hero() {
   const { lang } = useLanguage();
   const h = dict.hero;
 
+  useEffect(() => {
+    initHeroMotion();
+  }, []);
+
   return (
     <section
       id="home"
       className="relative flex min-h-screen items-center justify-center overflow-hidden"
+      style={{ background: "#ffffff" }}
     >
-      {/* Background image */}
-      <Image
-        src="/images/about/sigma-img-p1-1.jpg"
-        alt="Sigma Intelligence team"
-        fill
-        priority
-        className="object-cover object-center"
-        sizes="100vw"
-      />
+      {/* Background image — z-0, sits below gradient */}
+      <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+        <Image
+          src="/images/about/sigma_notext.png"
+          alt=""
+          width={750}
+          height={750}
+          priority
+          className="object-contain opacity-20"
+        />
+      </div>
 
-      {/* Dark gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-dark/80 via-dark/60 to-dark/80" />
-
-      {/* Red accent glow */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-bright-red/10 via-transparent to-transparent" />
+      {/* Gradient overlay — z-[1], paints above the image */}
+      <div className="absolute inset-0 z-[1] pointer-events-none bg-[radial-gradient(ellipse_80%_60%_at_50%_50%,_transparent_40%,_rgba(255,255,255,0.85)_100%)]" />
+      <div className="absolute inset-x-0 top-0 z-[1] h-48 pointer-events-none bg-gradient-to-b from-white to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 z-[1] h-48 pointer-events-none bg-gradient-to-t from-white to-transparent" />
 
       {/* Centered content */}
-      <div className="relative z-10 mx-auto max-w-3xl px-6 text-center">
+      <div className="relative z-[2] mx-auto max-w-3xl px-6 text-center">
         <span
           data-anim="hero-badge"
-          className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm font-semibold text-white backdrop-blur-sm"
+          className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#2B2D42]/15 bg-[#2B2D42]/5 px-5 py-2 text-sm font-semibold text-[#2B2D42]"
         >
           <span className="h-2 w-2 rounded-full bg-bright-red" />
           {h.badge[lang]}
@@ -42,15 +50,15 @@ export default function Hero() {
 
         <h1
           data-anim="hero-title"
-          className="mb-6 text-5xl font-bold leading-tight text-white sm:text-6xl md:text-7xl"
+          className="mb-6 text-5xl font-bold leading-tight text-[#2B2D42] sm:text-6xl md:text-7xl"
         >
-          Sigma{" "}
+          SIGMA{" "}
           <span className="text-bright-red">Intelligence</span>
         </h1>
 
         <p
           data-anim="hero-sub"
-          className="mb-12 text-lg font-medium text-white/70 md:text-xl"
+          className="mb-12 text-lg font-medium text-[#8D99AE] md:text-xl"
         >
           {h.tagline[lang]}
         </p>
@@ -66,7 +74,7 @@ export default function Hero() {
           <Link
             data-anim="hero-cta"
             href="/about"
-            className="inline-flex items-center justify-center rounded-md border border-white/30 bg-white/10 px-8 py-3 text-base font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+            className="inline-flex items-center justify-center rounded-md border border-[#2B2D42]/20 bg-[#2B2D42]/5 px-8 py-3 text-base font-semibold text-[#2B2D42] transition-colors hover:bg-[#2B2D42]/10"
           >
             {h.learn[lang]}
           </Link>
@@ -74,11 +82,11 @@ export default function Hero() {
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/40">
+      <div className="absolute bottom-10 left-1/2 z-[2] -translate-x-1/2 flex flex-col items-center gap-2 text-[#8D99AE]/50">
         <span className="text-xs font-medium tracking-widest uppercase">
           {h.scroll[lang]}
         </span>
-        <div className="h-10 w-px bg-gradient-to-b from-white/40 to-transparent" />
+        <div className="h-10 w-px bg-gradient-to-b from-[#8D99AE]/40 to-transparent" />
       </div>
     </section>
   );
