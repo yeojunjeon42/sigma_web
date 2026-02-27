@@ -49,9 +49,9 @@ export default async function SponsorsPage() {
     <div className="min-h-screen bg-dark text-white">
       <Navbar />
       <main className="container mx-auto px-6 pt-32 pb-24 md:px-10 lg:px-16">
-        <section className="mb-16 text-center">
-          <h1 className="mb-4 text-4xl font-bold md:text-5xl">Sponsors</h1>
-          <p className="mx-auto max-w-xl text-base text-gray">
+        <section data-anim="reveal-group" className="mb-16 text-center">
+          <h1 data-anim="reveal-item" className="mb-4 text-4xl font-bold md:text-5xl">Sponsors</h1>
+          <p data-anim="reveal-item" className="mx-auto max-w-xl text-base text-gray">
             Your support makes Sigma Intelligence possible.
           </p>
         </section>
@@ -79,9 +79,9 @@ export default async function SponsorsPage() {
           <FallbackSponsors />
         )}
 
-        <section className="mt-24 rounded-2xl border border-white/10 bg-white/5 px-8 py-12 text-center">
-          <h2 className="mb-4 text-2xl font-bold">Become a Sponsor</h2>
-          <p className="mx-auto mb-8 max-w-xl text-gray">
+        <section data-anim="reveal-group" className="mt-24 rounded-2xl border border-white/10 bg-white/5 px-8 py-12 text-center">
+          <h2 data-anim="reveal-item" className="mb-4 text-2xl font-bold">Become a Sponsor</h2>
+          <p data-anim="reveal-item" className="mx-auto mb-8 max-w-xl text-gray">
             Partner with Sigma Intelligence and support the next generation of
             robotics engineers at Seoul National University.
           </p>

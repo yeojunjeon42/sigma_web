@@ -24,22 +24,23 @@ export default function AboutPage() {
     <div className="min-h-screen bg-white text-dark dark:bg-dark dark:text-white">
       <Navbar />
       <main className="container mx-auto px-6 pt-32 pb-16 md:px-10 lg:px-16">
-        <section className="mb-14">
-          <p className="mb-3 inline-block rounded-full bg-bright-red/10 px-4 py-2 text-sm font-semibold text-bright-red">
+        <section data-anim="reveal-group" className="mb-14">
+          <p data-anim="reveal-item" className="mb-3 inline-block rounded-full bg-bright-red/10 px-4 py-2 text-sm font-semibold text-bright-red">
             About SIGMA
           </p>
-          <h1 className="mb-4 text-4xl font-bold md:text-5xl">Sigma Intelligence</h1>
-          <p className="max-w-3xl text-lg text-gray">
+          <h1 data-anim="reveal-item" className="mb-4 text-4xl font-bold md:text-5xl">Sigma Intelligence</h1>
+          <p data-anim="reveal-item" className="max-w-3xl text-lg text-gray">
             서울대학교 로봇 동아리 Sigma Intelligence는 문제를 구조화하고,
             직접 만들고, 실전에서 검증하는 팀입니다. 아래는 현재 운영진입니다.
           </p>
         </section>
 
-        <section className="mb-16">
-          <h2 className="mb-6 text-2xl font-bold">운영진</h2>
+        <section data-anim="reveal-group" className="mb-16">
+          <h2 data-anim="reveal-item" className="mb-6 text-2xl font-bold">운영진</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {leadership.map((member) => (
               <div
+                data-anim="reveal-item"
                 key={`${member.role}-${member.name}`}
                 className="rounded-xl border border-gray/25 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-white/5"
               >
@@ -50,14 +51,15 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section>
-          <h2 className="mb-6 text-2xl font-bold">활동 사진</h2>
-          <p className="mb-6 text-gray">
+        <section data-anim="reveal-group">
+          <h2 data-anim="reveal-item" className="mb-6 text-2xl font-bold">활동 사진</h2>
+          <p data-anim="reveal-item" className="mb-6 text-gray">
             아래 이미지는 시그마 홍보 자료(시그마_홍보PPT.pdf)에서 발췌했습니다.
           </p>
           <div className="grid gap-5 md:grid-cols-2">
             {gallery.map((src) => (
               <div
+                data-anim="reveal-item"
                 key={src}
                 className="overflow-hidden rounded-xl border border-gray/20 bg-gray/5 dark:border-white/10 dark:bg-white/5"
               >

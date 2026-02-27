@@ -4,15 +4,15 @@ import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col bg-white dark:bg-dark text-dark dark:text-white">
+    <div className="flex min-h-screen flex-col bg-dark text-white">
       <Navbar />
       <main className="flex-grow">
         <Hero />
         {/* Placeholder for future sections */}
-        <section className="py-20 bg-gray/5 dark:bg-dark/50">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold mb-8">Our Mission</h2>
-            <p className="max-w-2xl mx-auto text-lg text-gray">
+        <section data-anim="reveal-group" className="py-24 bg-dark">
+          <div className="container mx-auto px-6 text-center md:px-10 lg:px-16">
+            <h2 data-anim="reveal-item" className="mb-6 text-3xl font-bold text-white">Our Mission</h2>
+            <p data-anim="reveal-item" className="mx-auto max-w-2xl text-lg text-gray">
               To inspire and educate the next generation of roboticists through hands-on projects, competition, and collaboration.
             </p>
           </div>
