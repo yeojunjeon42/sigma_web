@@ -1,5 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { T } from "@/components/T";
+import { ContactForm } from "@/components/ContactForm";
 
 export default function ContactPage() {
   return (
@@ -8,12 +10,16 @@ export default function ContactPage() {
       <main className="container mx-auto px-6 pt-32 pb-16 md:px-10 lg:px-16">
         <section data-anim="reveal-group" className="mb-14">
           <p data-anim="reveal-item" className="mb-3 inline-block rounded-full bg-bright-red/10 px-4 py-2 text-sm font-semibold text-bright-red">
-            Reach Out
+            <T en="Reach Out" ko="문의하기" />
           </p>
-          <h1 data-anim="reveal-item" className="mb-4 text-4xl font-bold md:text-5xl">Contact</h1>
+          <h1 data-anim="reveal-item" className="mb-4 text-4xl font-bold md:text-5xl">
+            <T en="Contact" ko="연락처" />
+          </h1>
           <p data-anim="reveal-item" className="max-w-2xl text-lg text-gray">
-            Have a question, want to collaborate, or interested in sponsoring?
-            We&apos;d love to hear from you.
+            <T
+              en="Have a question, want to collaborate, or interested in sponsoring? We'd love to hear from you."
+              ko="질문이 있거나 협업을 원하시거나 후원에 관심이 있으신가요? 언제든지 연락해 주세요."
+            />
           </p>
         </section>
 
@@ -21,7 +27,7 @@ export default function ContactPage() {
           {/* Contact Info */}
           <section data-anim="reveal-item" className="space-y-8">
             <div>
-              <h2 className="mb-2 text-lg font-semibold">Email</h2>
+              <h2 className="mb-2 text-lg font-semibold"><T en="Email" ko="이메일" /></h2>
               <a
                 href="mailto:record.snusigma@gmail.com"
                 className="text-bright-red hover:text-darker-red transition-colors"
@@ -30,12 +36,12 @@ export default function ContactPage() {
               </a>
             </div>
             <div>
-              <h2 className="mb-2 text-lg font-semibold">Location</h2>
+              <h2 className="mb-2 text-lg font-semibold"><T en="Location" ko="위치" /></h2>
               <p className="text-gray">Seoul National University</p>
               <p className="text-gray">Seoul, South Korea</p>
             </div>
             <div>
-              <h2 className="mb-4 text-lg font-semibold">Follow Us</h2>
+              <h2 className="mb-4 text-lg font-semibold"><T en="Follow Us" ko="팔로우" /></h2>
               <div className="flex gap-4">
                 <a
                   href="https://www.instagram.com/sigma_intelligence_/"
@@ -74,56 +80,7 @@ export default function ContactPage() {
 
           {/* Contact Form */}
           <section data-anim="reveal-item">
-            <form className="space-y-5">
-              <div>
-                <label
-                  htmlFor="name"
-                  className="mb-1.5 block text-sm font-medium text-dark dark:text-white"
-                >
-                  Name
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  placeholder="Your name"
-                  className="w-full rounded-lg border border-gray/30 bg-white px-4 py-3 text-dark placeholder-gray/60 outline-none focus:border-bright-red dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray/50"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="email"
-                  className="mb-1.5 block text-sm font-medium text-dark dark:text-white"
-                >
-                  Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  className="w-full rounded-lg border border-gray/30 bg-white px-4 py-3 text-dark placeholder-gray/60 outline-none focus:border-bright-red dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray/50"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="message"
-                  className="mb-1.5 block text-sm font-medium text-dark dark:text-white"
-                >
-                  Message
-                </label>
-                <textarea
-                  id="message"
-                  rows={5}
-                  placeholder="Tell us about your inquiry..."
-                  className="w-full resize-none rounded-lg border border-gray/30 bg-white px-4 py-3 text-dark placeholder-gray/60 outline-none focus:border-bright-red dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray/50"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full rounded-lg bg-bright-red px-6 py-3 font-semibold text-white hover:bg-darker-red transition-colors"
-              >
-                Send Message
-              </button>
-            </form>
+            <ContactForm />
           </section>
         </div>
       </main>

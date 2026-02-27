@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { T } from "@/components/T";
 
 const leadership = [
   { role: "회장", name: "전여준" },
@@ -26,17 +27,19 @@ export default function AboutPage() {
       <main className="container mx-auto px-6 pt-32 pb-16 md:px-10 lg:px-16">
         <section data-anim="reveal-group" className="mb-14">
           <p data-anim="reveal-item" className="mb-3 inline-block rounded-full bg-bright-red/10 px-4 py-2 text-sm font-semibold text-bright-red">
-            About SIGMA
+            <T en="About SIGMA" ko="시그마 소개" />
           </p>
           <h1 data-anim="reveal-item" className="mb-4 text-4xl font-bold md:text-5xl">Sigma Intelligence</h1>
           <p data-anim="reveal-item" className="max-w-3xl text-lg text-gray">
-            서울대학교 로봇 동아리 Sigma Intelligence는 문제를 구조화하고,
-            직접 만들고, 실전에서 검증하는 팀입니다. 아래는 현재 운영진입니다.
+            <T
+              en="Sigma Intelligence at Seoul National University structures problems, builds solutions, and validates them in the field."
+              ko="서울대학교 로봇 동아리 Sigma Intelligence는 문제를 구조화하고, 직접 만들고, 실전에서 검증하는 팀입니다. 아래는 현재 운영진입니다."
+            />
           </p>
         </section>
 
         <section data-anim="reveal-group" className="mb-16">
-          <h2 data-anim="reveal-item" className="mb-6 text-2xl font-bold">운영진</h2>
+          <h2 data-anim="reveal-item" className="mb-6 text-2xl font-bold"><T en="Leadership" ko="운영진" /></h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {leadership.map((member) => (
               <div
@@ -52,9 +55,12 @@ export default function AboutPage() {
         </section>
 
         <section data-anim="reveal-group">
-          <h2 data-anim="reveal-item" className="mb-6 text-2xl font-bold">활동 사진</h2>
+          <h2 data-anim="reveal-item" className="mb-6 text-2xl font-bold"><T en="Gallery" ko="활동 사진" /></h2>
           <p data-anim="reveal-item" className="mb-6 text-gray">
-            아래 이미지는 시그마 홍보 자료(시그마_홍보PPT.pdf)에서 발췌했습니다.
+            <T
+              en="Images from Sigma Intelligence promotional materials."
+              ko="아래 이미지는 시그마 홍보 자료(시그마_홍보PPT.pdf)에서 발췌했습니다."
+            />
           </p>
           <div className="grid gap-5 md:grid-cols-2">
             {gallery.map((src) => (
