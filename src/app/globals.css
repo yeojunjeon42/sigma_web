@@ -20,8 +20,7 @@
   --color-white: var(--white);
   --color-bright-red: var(--bright-red);
   --color-darker-red: var(--darker-red);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-darker-grotesque);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -34,5 +33,64 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Inter, sans-serif;
+  font-family: var(--font-darker-grotesque), sans-serif;
+}
+
+/* ── Motion: initial hidden states ────────────────────────────────────
+   Elements start invisible so Anime.js can reveal them.
+   Wrapped in prefers-reduced-motion: no-preference so users who
+   opt out of motion never see a flash of hidden content. */
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-anim="hero-badge"],
+  [data-anim="hero-title"],
+  [data-anim="hero-sub"],
+  [data-anim="hero-cta"] {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  [data-anim="hero-visual"] {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  [data-anim="reveal-item"],
+  [data-anim="reveal-group"] [data-anim="card"] {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+/* ── Motion: will-change hints ────────────────────────────────────────
+   Applied broadly to animated elements so the compositor can
+   promote layers ahead of time. */
+
+[data-anim^="hero-"],
+[data-anim="reveal-item"],
+[data-anim="card"] {
+  will-change: transform, opacity;
+}
+
+[data-anim="card"] {
+  transition: box-shadow 220ms ease;
+}
+[data-anim="card"]:hover,
+[data-anim="card"]:focus-within {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Navbar compact transition ────────────────────────────────────────
+   Padding change on a fixed-position navbar doesn't reflow the
+   document, so this is an acceptable exception to "transforms only". */
+
+[data-nav="inner"] {
+  transition:
+    padding-top 220ms cubic-bezier(0.4, 0, 0.2, 1),
+    padding-bottom 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-compact [data-nav="inner"] {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
