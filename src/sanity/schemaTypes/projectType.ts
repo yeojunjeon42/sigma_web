@@ -34,13 +34,6 @@ export const projectType = defineType({
       initialValue: 'planned',
     }),
     defineField({
-      name: 'category',
-      title: 'Category',
-      type: 'string',
-      description: 'Short label shown on the card (e.g. "Autonomous Vehicle", "Robotic Arm")',
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
       name: 'images',
       title: 'Images',
       type: 'array',
