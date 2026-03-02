@@ -40,13 +40,13 @@ export default function Hero({ backgroundImageUrl }: HeroProps) {
       )}
 
       {/* Gradient overlay — z-[1], visible color gradients above the image */}
-      <div className="absolute inset-0 z-[1] pointer-events-none bg-gradient-to-br from-[#2B2D42]/50 to-bright-red/30" />
+      <div className="absolute inset-0 z-[1] pointer-events-none bg-gradient-to-br from-[#2B2D42]/30 to-bright-red/10" />
 
       {/* Centered content */}
       <div className="relative z-[2] mx-auto max-w-3xl px-6 text-center">
         <span
           data-anim="hero-badge"
-          className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#2B2D42]/15 bg-[#2B2D42]/5 px-5 py-2 text-sm font-semibold text-[#2B2D42]"
+          className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#FAFAFA]/15 bg-[#FAFAFA]/5 px-5 py-2 text-sm font-semibold text-[#FAFAFA] [text-shadow:0_1px_2px_rgba(0,0,0,0.25)]"
         >
           <span className="h-2 w-2 rounded-full bg-bright-red" />
           {h.badge[lang]}
@@ -54,7 +54,7 @@ export default function Hero({ backgroundImageUrl }: HeroProps) {
 
         <h1
           data-anim="hero-title"
-          className="mb-6 text-5xl font-bold leading-tight text-[#FAFAFA] sm:text-6xl md:text-7xl"
+          className="mb-6 text-5xl font-bold leading-tight text-[#FAFAFA] sm:text-6xl md:text-7xl [text-shadow:0_1px_3px_rgba(0,0,0,0.3)]"
         >
           SIGMA{" "}
           <span className="text-bright-red">Intelligence</span>
@@ -65,7 +65,7 @@ export default function Hero({ backgroundImageUrl }: HeroProps) {
 
         <p
           data-anim="hero-sub"
-          className="mb-12 text-lg font-medium text-[#FAFAFA] md:text-xl"
+          className="mb-12 text-lg font-medium text-[#FAFAFA] md:text-xl [text-shadow:0_1px_2px_rgba(0,0,0,0.25)]"
         >
           {h.tagline[lang]}
         </p>
@@ -81,7 +81,7 @@ export default function Hero({ backgroundImageUrl }: HeroProps) {
           <Link
             data-anim="hero-cta"
             href="/about"
-            className="inline-flex items-center justify-center rounded-md border border-[#FAFAFA]/20 bg-[#FAFAFA]/5 px-8 py-3 text-base font-semibold text-[#2B2D42] transition-colors hover:bg-[#2B2D42]/10"
+            className="inline-flex items-center justify-center rounded-md border border-[#FAFAFA]/20 bg-[#FAFAFA]/5 px-8 py-3 text-base font-semibold text-[#FAFAFA] transition-colors hover:bg-[#2B2D42]/10 [text-shadow:0_1px_2px_rgba(0,0,0,0.25)]"
           >
             {h.learn[lang]}
           </Link>
@@ -90,7 +90,7 @@ export default function Hero({ backgroundImageUrl }: HeroProps) {
 
       {/* Scroll indicator */}
       <div className="absolute bottom-10 left-1/2 z-[2] -translate-x-1/2 flex flex-col items-center gap-2 text-[#FAFAFA]/50">
-        <span className="text-xs font-medium tracking-widest uppercase">
+        <span className="text-xs font-medium tracking-widest uppercase [text-shadow:0_1px_2px_rgba(0,0,0,0.2)]">
           {h.scroll[lang]}
         </span>
         <div className="h-10 w-px bg-gradient-to-b from-[#FAFAFA]/40 to-transparent" />
