@@ -56,7 +56,7 @@ export default function Hero() {
 
         <p
           data-anim="hero-sub"
-          className="mb-12 text-lg font-medium text-[#8D99AE] md:text-xl"
+          className="mb-12 text-lg font-medium text-[#FAFAFA] md:text-xl"
         >
           {h.tagline[lang]}
         </p>
@@ -72,7 +72,7 @@ export default function Hero() {
           <Link
             data-anim="hero-cta"
             href="/about"
-            className="inline-flex items-center justify-center rounded-md border border-[#2B2D42]/20 bg-[#2B2D42]/5 px-8 py-3 text-base font-semibold text-[#2B2D42] transition-colors hover:bg-[#2B2D42]/10"
+            className="inline-flex items-center justify-center rounded-md border border-[#FAFAFA]/20 bg-[#FAFAFA]/5 px-8 py-3 text-base font-semibold text-[#2B2D42] transition-colors hover:bg-[#2B2D42]/10"
           >
             {h.learn[lang]}
           </Link>
@@ -80,11 +80,11 @@ export default function Hero() {
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-10 left-1/2 z-[2] -translate-x-1/2 flex flex-col items-center gap-2 text-[#8D99AE]/50">
+      <div className="absolute bottom-10 left-1/2 z-[2] -translate-x-1/2 flex flex-col items-center gap-2 text-[#FAFAFA]/50">
         <span className="text-xs font-medium tracking-widest uppercase">
           {h.scroll[lang]}
         </span>
-        <div className="h-10 w-px bg-gradient-to-b from-[#8D99AE]/40 to-transparent" />
+        <div className="h-10 w-px bg-gradient-to-b from-[#FAFAFA]/40 to-transparent" />
       </div>
     </section>
   );
