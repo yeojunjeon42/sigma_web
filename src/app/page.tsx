@@ -3,6 +3,7 @@ import Hero from "@/components/Hero";
 import Footer from "@/components/Footer";
 import { T } from "@/components/T";
 
+
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-dark text-white">
