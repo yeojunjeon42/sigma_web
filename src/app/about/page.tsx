@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { T } from "@/components/T";
 import { getActivities } from "@/features/about/api/getActivities";
 import ActivitiesGallery from "@/features/about/components/ActivitiesGallery";
+
+export const metadata: Metadata = {
+  title: "소개",
+  description:
+    "서울대학교 로봇동아리 시그마 인텔리전스 소개. 문제를 구조화하고, 직접 만들고, 실전에서 검증하는 서울대 로봇 동아리입니다.",
+};
 
 const gallery = [
   "/images/about/sigma-img-p1-1.jpg",

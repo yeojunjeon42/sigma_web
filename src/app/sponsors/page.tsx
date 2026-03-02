@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 import { T } from "@/components/T";
+
+export const metadata: Metadata = {
+  title: "후원사",
+  description:
+    "시그마 인텔리전스 후원사. 서울대학교 로봇동아리를 후원하는 기업 및 기관.",
+};
 
 interface Sponsor {
   _id: string;

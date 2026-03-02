@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 import { T } from "@/components/T";
+
+export const metadata: Metadata = {
+  title: "임원진",
+  description:
+    "시그마 인텔리전스 임원진 소개. 서울대학교 로봇동아리를 이끄는 사람들.",
+};
 
 interface Member {
   _id: string;

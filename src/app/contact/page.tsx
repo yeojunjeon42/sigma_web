@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { T } from "@/components/T";
 import { ContactForm } from "@/components/ContactForm";
+
+export const metadata: Metadata = {
+  title: "연락처",
+  description:
+    "시그마 인텔리전스 연락처. 서울대학교 로봇동아리에 문의, 협업, 후원 관련 연락.",
+};
 
 export default function ContactPage() {
   return (
