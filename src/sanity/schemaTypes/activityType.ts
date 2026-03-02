@@ -7,7 +7,7 @@ export const activityType = defineType({
     defineField({
       name: 'description', title: 'Description', type: 'text'}),
     defineField({
-      name: 'image', title: 'Image', type: 'image'}),
+      name: 'image', title: 'Image', type: 'image', options: { hotspot: true } }),
     defineField({
       name: 'link', title: 'Link', type: 'url'}),
   ]})

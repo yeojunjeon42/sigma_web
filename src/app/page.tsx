@@ -2,14 +2,20 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Footer from "@/components/Footer";
 import { T } from "@/components/T";
+import { getHero } from "@/features/hero/api/getHero";
+import { urlFor } from "@/sanity/lib/image";
 
+export default async function Home() {
+  const hero = await getHero();
+  const backgroundImageUrl = hero?.backgroundImage
+    ? urlFor(hero.backgroundImage).width(750).height(750).url()
+    : null;
 
-export default function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-dark text-white">
       <Navbar />
       <main className="flex-grow">
-        <Hero />
+        <Hero backgroundImageUrl={backgroundImageUrl} />
         {/* Placeholder for future sections */}
         <section data-anim="reveal-group" className="py-24 bg-dark">
           <div className="container mx-auto px-6 text-center md:px-10 lg:px-16">

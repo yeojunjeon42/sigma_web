@@ -7,7 +7,11 @@ import { useLanguage } from "@/context/LanguageContext";
 import { dict } from "@/lib/i18n";
 import { initHeroMotion } from "@/lib/motion";
 
-export default function Hero() {
+interface HeroProps {
+  backgroundImageUrl?: string | null;
+}
+
+export default function Hero({ backgroundImageUrl }: HeroProps) {
   const { lang } = useLanguage();
   const h = dict.hero;
 
@@ -21,17 +25,18 @@ export default function Hero() {
       className="relative flex min-h-screen items-center justify-center overflow-hidden"
       style={{ background: "#ffffff" }}
     >
-      {/* Background image — z-0, sits below gradient */}
-      <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-        <Image
-          src="/images/about/sigma_notext.png"
-          alt=""
-          width={750}
-          height={750}
-          priority
-          className="object-contain"
-        />
-      </div>
+      {backgroundImageUrl && (
+        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+          <Image
+            src={backgroundImageUrl}
+            alt=""
+            width={750}
+            height={750}
+            priority
+            className="object-contain"
+          />
+        </div>
+      )}
 
       {/* Gradient overlay — z-[1], visible color gradients above the image */}
       <div className="absolute inset-0 z-[1] pointer-events-none bg-gradient-to-br from-[#2B2D42]/50 to-bright-red/30" />
