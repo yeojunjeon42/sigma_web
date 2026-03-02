@@ -1,5 +1,5 @@
 import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
+import Hero from "@/features/hero/Hero";
 import Footer from "@/components/Footer";
 import { T } from "@/components/T";
 import { getHero } from "@/features/hero/api/getHero";
@@ -8,7 +8,7 @@ import { urlFor } from "@/sanity/lib/image";
 export default async function Home() {
   const hero = await getHero();
   const backgroundImageUrl = hero?.backgroundImage
-    ? urlFor(hero.backgroundImage).width(750).height(750).url()
+    ? urlFor(hero.backgroundImage).url()
     : null;
 
   return (

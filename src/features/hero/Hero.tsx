@@ -30,9 +30,10 @@ export default function Hero({ backgroundImageUrl }: HeroProps) {
           <Image
             src={backgroundImageUrl}
             alt=""
-            width={750}
-            height={750}
+            width={1350}
+            height={900}
             priority
+            unoptimized
             className="object-contain"
           />
         </div>
