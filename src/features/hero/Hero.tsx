@@ -54,10 +54,13 @@ export default function Hero({ backgroundImageUrl }: HeroProps) {
 
         <h1
           data-anim="hero-title"
-          className="mb-6 text-5xl font-bold leading-tight text-[#2B2D42] sm:text-6xl md:text-7xl"
+          className="mb-6 text-5xl font-bold leading-tight text-[#FAFAFA] sm:text-6xl md:text-7xl"
         >
           SIGMA{" "}
           <span className="text-bright-red">Intelligence</span>
+          <span className="sr-only">
+            - 서울대학교 로봇동아리 시그마 인텔리전스
+          </span>
         </h1>
 
         <p

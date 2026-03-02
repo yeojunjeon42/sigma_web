@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Hero from "@/features/hero/Hero";
 import Footer from "@/components/Footer";
 import { T } from "@/components/T";
 import { getHero } from "@/features/hero/api/getHero";
 import { urlFor } from "@/sanity/lib/image";
+
+export const metadata: Metadata = {
+  title: "시그마 | 서울대학교 로봇동아리",
+  description:
+    "서울대학교 로봇동아리 시그마 인텔리전스(Sigma Intelligence) 공식 웹사이트. 1984년 설립된 국내 최초 대학 로봇 동아리.",
+};
 
 export default async function Home() {
   const hero = await getHero();
