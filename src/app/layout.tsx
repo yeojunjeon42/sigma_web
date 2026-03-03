@@ -7,7 +7,7 @@ import "./globals.css";
 
 const notoSansKR = Noto_Sans_KR({
   variable: "--font-noto-sans-kr",
-  subsets: ["latin", "korean"],
+  subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
