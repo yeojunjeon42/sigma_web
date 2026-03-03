@@ -29,7 +29,10 @@ export default function Navbar() {
       <div data-nav="inner" className="container mx-auto flex flex-wrap items-center justify-between px-8 py-4 lg:px-16">
         {/* Logo */}
         <div className="relative z-50 max-w-[250px] pr-4">
-          <Link href="/" className="text-xl font-bold text-dark dark:text-white">
+          <Link
+            href="/"
+            className="text-xl font-bold bg-[linear-gradient(to_right,#2B2D42_37%,#EF233C_37%)] dark:bg-[linear-gradient(to_right,#FAFAFA_37%,#EF233C_37%)] bg-clip-text text-transparent"
+          >
             SIGMA Intelligence
           </Link>
         </div>

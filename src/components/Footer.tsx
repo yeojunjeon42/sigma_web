@@ -50,7 +50,7 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="w-full px-4 sm:w-1/2 lg:w-2/12 xl:w-2/12">
+          <div className="w-full px-4 sm:w-1/2 lg:w-2/12 xl:w-2/12 lg:ml-auto">
             <div className="mb-12 lg:mb-16">
               <h2 className="mb-10 text-xl font-bold text-white">Useful Links</h2>
               <ul>
@@ -62,26 +62,6 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="w-full px-4 sm:w-1/2 lg:w-2/12 xl:w-2/12">
-            <div className="mb-12 lg:mb-16">
-              <h2 className="mb-10 text-xl font-bold text-white">Support</h2>
-              <ul>
-                <li><Link href="/contact" className="mb-4 inline-block text-base text-gray hover:text-bright-red">Contact Us</Link></li>
-                <li><Link href="/faq" className="mb-4 inline-block text-base text-gray hover:text-bright-red">FAQ</Link></li>
-                <li><Link href="/privacy" className="mb-4 inline-block text-base text-gray hover:text-bright-red">Privacy Policy</Link></li>
-                <li><Link href="/terms" className="mb-4 inline-block text-base text-gray hover:text-bright-red">Terms of Service</Link></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="w-full px-4 md:w-1/2 lg:w-4/12 xl:w-3/12">
-            <div className="mb-12 lg:mb-16">
-              <h2 className="mb-10 text-xl font-bold text-white">Contact</h2>
-              <p className="mb-4 text-base text-gray">SNU Robotics Club</p>
-              <p className="mb-4 text-base text-gray">Seoul National University</p>
-              <p className="mb-4 text-base text-gray">record.snusigma@gmail.com</p>
-            </div>
-          </div>
         </div>
       </div>
       
