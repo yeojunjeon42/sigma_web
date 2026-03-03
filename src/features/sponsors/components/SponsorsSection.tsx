@@ -63,8 +63,8 @@ function EmptySponsors() {
       </svg>
       <p data-anim="reveal-item" className="text-base text-neutral-400">
         <T
-          en="No sponsors listed yet. Be the first to sponsor us!"
-          ko="등록된 후원사가 아직 없습니다. 첫 번째 후원사가 되어 주세요!"
+          en="No sponsors listed yet. Be the first to sponsor us! record.snusigma@gmail.com"
+          ko="등록된 후원사가 아직 없습니다. 첫 번째 후원사가 되어 주세요! 이메일: record.snusigma@gmail.com"
         />
       </p>
     </div>
@@ -92,54 +92,39 @@ export function SponsorsSection({ sponsors }: SponsorsSectionProps) {
           </h2>
           <p data-anim="reveal-item" className="mx-auto max-w-xl text-base text-gray">
             <T
-              en="Your support makes Sigma Intelligence possible."
-              ko="여러분의 후원이 Sigma Intelligence를 가능하게 합니다."
+              en="Your support makes Sigma Intelligence possible. Interested in sponsoring us? Email us at record.snusigma@gmail.com"
+              ko="여러분의 후원이 Sigma Intelligence를 가능하게 합니다. 후원에 관심이 있으신가요? 이메일: record.snusigma@gmail.com"
             />
           </p>
         </div>
 
-        {hasSponsors ? (
-          <div className="space-y-12">
-            {TIER_ORDER.map((tier) => {
-              const list = grouped[tier];
-              if (!list?.length) return null;
-              return (
-                <div key={tier} data-anim="reveal-item">
-                  <h3 className="mb-6 text-center text-sm font-semibold uppercase tracking-widest text-gray">
-                    {tier}
-                  </h3>
-                  <div className="flex flex-wrap items-center justify-center gap-10">
-                    {list.map((sponsor) => (
-                      <SponsorLogo key={sponsor._id} sponsor={sponsor} />
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <EmptySponsors />
-        )}
-
         <div
           data-anim="reveal-group"
-          className="mt-16 rounded-2xl border border-white/10 bg-white/5 px-8 py-10 text-center"
+          className="rounded-2xl border border-white/10 bg-white/5 px-8 py-10 text-center"
         >
-          <h3 data-anim="reveal-item" className="mb-3 text-xl font-bold">
-            <T en="Become a Sponsor" ko="후원사가 되세요" />
-          </h3>
-          <p data-anim="reveal-item" className="mx-auto mb-6 max-w-xl text-gray">
-            <T
-              en="Partner with Sigma Intelligence and support the next generation of robotics engineers at Seoul National University."
-              ko="시그마 인텔리전스와 함께 서울대학교 차세대 로봇 엔지니어들을 후원해 주세요."
-            />
-          </p>
-          <a
-            href="mailto:record.snusigma@gmail.com"
-            className="inline-block rounded-full bg-bright-red px-8 py-3 font-semibold text-white transition-colors hover:bg-darker-red"
-          >
-            <T en="Get in Touch" ko="문의하기" />
-          </a>
+
+          {hasSponsors ? (
+            <div className="mb-8 space-y-4">
+              {TIER_ORDER.map((tier) => {
+                const list = grouped[tier];
+                if (!list?.length) return null;
+                return (
+                  <div key={tier} data-anim="reveal-item">
+                    <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-gray">
+                      {tier}
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center gap-10">
+                      {list.map((sponsor) => (
+                        <SponsorLogo key={sponsor._id} sponsor={sponsor} />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <EmptySponsors />
+          )}
         </div>
       </div>
     </section>

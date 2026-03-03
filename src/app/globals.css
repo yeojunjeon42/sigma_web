@@ -20,7 +20,7 @@
   --color-white: var(--white);
   --color-bright-red: var(--bright-red);
   --color-darker-red: var(--darker-red);
-  --font-sans: var(--font-darker-grotesque);
+  --font-sans: var(--font-noto-sans-kr);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -33,7 +33,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-darker-grotesque), sans-serif;
+  font-family: var(--font-noto-sans-kr), sans-serif;
 }
 
 /* ── Motion: initial hidden states ────────────────────────────────────

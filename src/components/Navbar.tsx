@@ -1,27 +1,35 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { LangToggle } from "./LangToggle";
-import { T } from "./T";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
   const navigation = [
-    { nameEn: "About",    nameKo: "소개",      href: "/about" },
-    { nameEn: "Projects", nameKo: "프로젝트",   href: "/projects" },
-    { nameEn: "Sponsors", nameKo: "후원사",     href: "/#sponsors" },
-    { nameEn: "Members",  nameKo: "멤버",       href: "/members" },
-    { nameEn: "Contact",  nameKo: "연락처",     href: "/contact" },
+    { name: "About", href: "/about", scrollToId: null },
+    { name: "Projects", href: "/projects", scrollToId: null },
+    { name: "Sponsors", href: "/#sponsors", scrollToId: "sponsors" },
+    { name: "Members", href: "/members", scrollToId: null },
+    { name: "Contact", href: "/contact", scrollToId: null },
   ];
+
+  function handleNavClick(item: (typeof navigation)[0]) {
+    setIsOpen(false);
+    if (item.scrollToId && pathname === "/") {
+      document.getElementById(item.scrollToId)?.scrollIntoView({ behavior: "smooth" });
+    }
+  }
 
   return (
     <header data-nav="header" className="fixed left-0 top-0 z-50 w-full backdrop-blur-md bg-white/70 dark:bg-dark/70 border-b border-white/20 dark:border-white/10">
       <div data-nav="inner" className="container mx-auto flex flex-wrap items-center justify-between px-8 py-4 lg:px-16">
         {/* Logo */}
         <div className="relative z-50 max-w-[250px] pr-4">
-          <Link href="/" className="text-2xl font-bold text-dark dark:text-white">
+          <Link href="/" className="text-xl font-bold text-dark dark:text-white">
             SIGMA Intelligence
           </Link>
         </div>
@@ -60,13 +68,20 @@ export default function Navbar() {
           <nav>
             <ul className="flex flex-col items-center space-y-6 lg:flex-row lg:space-x-8 lg:space-y-0">
               {navigation.map((item) => (
-                <li key={item.nameEn}>
+                <li key={item.name}>
                   <Link
                     href={item.href}
                     className="font-medium text-dark hover:text-bright-red dark:text-white dark:hover:text-bright-red text-base transition-colors"
-                    onClick={() => setIsOpen(false)}
+                    onClick={(e) => {
+                      if (item.scrollToId && pathname === "/") {
+                        e.preventDefault();
+                        handleNavClick(item);
+                      } else {
+                        setIsOpen(false);
+                      }
+                    }}
                   >
-                    <T en={item.nameEn} ko={item.nameKo} />
+                    {item.name}
                   </Link>
                 </li>
               ))}

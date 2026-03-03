@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { dict } from "@/lib/i18n";
 import { initHeroMotion } from "@/lib/motion";
@@ -14,10 +14,24 @@ interface HeroProps {
 export default function Hero({ backgroundImageUrl }: HeroProps) {
   const { lang } = useLanguage();
   const h = dict.hero;
+  const bgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     initHeroMotion();
   }, []);
+
+  useEffect(() => {
+    if (!backgroundImageUrl) return;
+
+    function onScroll() {
+      if (bgRef.current) {
+        bgRef.current.style.transform = `translateY(${window.scrollY * 0.4}px)`;
+      }
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [backgroundImageUrl]);
 
   return (
     <section
@@ -26,7 +40,10 @@ export default function Hero({ backgroundImageUrl }: HeroProps) {
       style={{ background: "#ffffff" }}
     >
       {backgroundImageUrl && (
-        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+        <div
+          ref={bgRef}
+          className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none will-change-transform"
+        >
           <Image
             src={backgroundImageUrl}
             alt=""
@@ -54,7 +71,7 @@ export default function Hero({ backgroundImageUrl }: HeroProps) {
 
         <h1
           data-anim="hero-title"
-          className="mb-6 text-5xl font-bold leading-tight text-[#FAFAFA] sm:text-6xl md:text-7xl [text-shadow:0_1px_3px_rgba(0,0,0,0.3)]"
+          className="mb-6 text-5xl font-bold leading-tight text-[#FAFAFA] sm:text-6xl md:text-6xl [text-shadow:0_1px_3px_rgba(0,0,0,0.3)]"
         >
           SIGMA{" "}
           <span className="text-bright-red">Intelligence</span>
