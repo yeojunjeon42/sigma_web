@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { Darker_Grotesque } from "next/font/google";
+import { Noto_Sans_KR } from "next/font/google";
 import MotionProvider from "@/components/MotionProvider";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { JsonLd } from "@/components/JsonLd";
 import "./globals.css";
 
-const darkerGrotesque = Darker_Grotesque({
-  variable: "--font-darker-grotesque",
-  subsets: ["latin"],
+const notoSansKR = Noto_Sans_KR({
+  variable: "--font-noto-sans-kr",
+  subsets: ["latin", "korean"],
   weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
@@ -64,7 +64,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`${darkerGrotesque.variable} antialiased`}>
+      <body className={`${notoSansKR.variable} antialiased`}>
         <JsonLd />
         <LanguageProvider>
           <MotionProvider />

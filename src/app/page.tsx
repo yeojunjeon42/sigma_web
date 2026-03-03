@@ -41,6 +41,7 @@ export default async function Home() {
             </p>
           </div>
         </section>
+        <hr className="border-gray/20" />
         <SponsorsSection sponsors={sponsors} />
       </main>
       <Footer />
