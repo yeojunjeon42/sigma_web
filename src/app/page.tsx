@@ -4,6 +4,8 @@ import Hero from "@/features/hero/Hero";
 import Footer from "@/components/Footer";
 import { T } from "@/components/T";
 import { getHero } from "@/features/hero/api/getHero";
+import { getSponsors } from "@/features/sponsors/api/getSponsors";
+import { SponsorsSection } from "@/features/sponsors/components/SponsorsSection";
 import { urlFor } from "@/sanity/lib/image";
 
 export const metadata: Metadata = {
@@ -13,7 +15,10 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const hero = await getHero();
+  const [hero, sponsors] = await Promise.all([
+    getHero(),
+    getSponsors(),
+  ]);
   const backgroundImageUrl = hero?.backgroundImage
     ? urlFor(hero.backgroundImage).url()
     : null;
@@ -23,7 +28,6 @@ export default async function Home() {
       <Navbar />
       <main className="flex-grow">
         <Hero backgroundImageUrl={backgroundImageUrl} />
-        {/* Placeholder for future sections */}
         <section data-anim="reveal-group" className="py-24 bg-dark">
           <div className="container mx-auto px-6 text-center md:px-10 lg:px-16">
             <h2 data-anim="reveal-item" className="mb-6 text-3xl font-bold text-white">
@@ -37,6 +41,7 @@ export default async function Home() {
             </p>
           </div>
         </section>
+        <SponsorsSection sponsors={sponsors} />
       </main>
       <Footer />
     </div>

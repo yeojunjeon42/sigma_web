@@ -33,13 +33,19 @@ export default function ContactPage() {
         <div data-anim="reveal-group" className="grid gap-12 lg:grid-cols-2">
           {/* Contact Info */}
           <section data-anim="reveal-item" className="space-y-8">
-            <div>
+            <div className="flex flex-col gap-2">
               <h2 className="mb-2 text-lg font-semibold"><T en="Email" ko="이메일" /></h2>
               <a
                 href="mailto:record.snusigma@gmail.com"
                 className="text-bright-red hover:text-darker-red transition-colors"
               >
                 record.snusigma@gmail.com
+              </a>
+              <a
+                href="tel:010-8178-6206"
+                className="text-bright-red hover:text-darker-red transition-colors"
+              >
+                +82-10-8178-6206
               </a>
             </div>
             <div>

@@ -11,7 +11,7 @@ export default function Navbar() {
   const navigation = [
     { nameEn: "About",    nameKo: "소개",      href: "/about" },
     { nameEn: "Projects", nameKo: "프로젝트",   href: "/projects" },
-    { nameEn: "Sponsors", nameKo: "후원사",     href: "/sponsors" },
+    { nameEn: "Sponsors", nameKo: "후원사",     href: "/#sponsors" },
     { nameEn: "Members",  nameKo: "멤버",       href: "/members" },
     { nameEn: "Contact",  nameKo: "연락처",     href: "/contact" },
   ];

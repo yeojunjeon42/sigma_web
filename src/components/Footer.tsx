@@ -9,12 +9,29 @@ export default function Footer() {
           <div className="w-full px-4 md:w-1/2 lg:w-4/12 xl:w-5/12">
             <div className="mb-12 max-w-[360px] lg:mb-16">
               <Link href="/" className="mb-8 inline-block text-3xl font-bold">
-                Sigma<span className="text-bright-red">Intelligence</span>
+                Sigma<span className="text-bright-red"> Intelligence</span>
               </Link>
-              <p className="mb-9 text-base leading-relaxed text-gray">
+              <p className="mb-3 text-base leading-relaxed text-gray">
                 Official website for Sigma Intelligence (SNU Robotics Club). 
-                Innovating for tomorrow.
               </p>
+              <div className="flex flex-col gap-2 mb-9">
+                <span className="text-base text-gray">
+                  Email: <a
+                    href="mailto:record.snusigma@gmail.com"
+                    className="text-white hover:underline"
+                  >
+                    record.snusigma@gmail.com
+                  </a>
+                </span>
+                <span className="text-base text-gray">
+                  Phone: <a
+                    href="tel:010-8178-6206"
+                    className="text-white hover:underline"
+                  >
+                    +82-10-8178-6206
+                  </a>
+                </span>
+              </div>
               <div className="flex items-center gap-4">
                 {/* Social Placeholders */}
                 <a href="https://www.facebook.com/sigmaintelligence/" className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-bright-red transition-colors">
@@ -39,7 +56,7 @@ export default function Footer() {
               <ul>
                 <li><Link href="/about" className="mb-4 inline-block text-base text-gray hover:text-bright-red">About</Link></li>
                 <li><Link href="/projects" className="mb-4 inline-block text-base text-gray hover:text-bright-red">Projects</Link></li>
-                <li><Link href="/sponsors" className="mb-4 inline-block text-base text-gray hover:text-bright-red">Sponsors</Link></li>
+                <li><Link href="/#sponsors" className="mb-4 inline-block text-base text-gray hover:text-bright-red">Sponsors</Link></li>
                 <li><Link href="/members" className="mb-4 inline-block text-base text-gray hover:text-bright-red">Members</Link></li>
               </ul>
             </div>
@@ -72,6 +89,9 @@ export default function Footer() {
         <div className="container mx-auto px-4">
           <p className="text-center text-base text-gray">
             © {new Date().getFullYear()} Sigma Intelligence. All rights reserved.
+          </p>
+          <p className="mt-2 text-center text-sm text-gray/80">
+            Powered by Yeojun Jeon.
           </p>
         </div>
       </div>
