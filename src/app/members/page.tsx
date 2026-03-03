@@ -62,7 +62,7 @@ export default async function MembersPage() {
         <section data-anim="reveal-group" className="mb-14 text-center">
           <h1 data-anim="reveal-item" className="mb-4 text-4xl font-bold md:text-5xl"><T en="Members" ko="멤버" /></h1>
           <p data-anim="reveal-item" className="mx-auto max-w-2xl text-lg text-gray">
-            <T en="The people behind Sigma Intelligence." ko="시그마 인텔리전스를 이끄는 사람들." />
+            <T en="The people behind Sigma Intelligence." ko="2026 시그마 인텔리전스를 이끄는 사람들." />
           </p>
         </section>
 
