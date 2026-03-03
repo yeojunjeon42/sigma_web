@@ -33,7 +33,9 @@ export const metadata: Metadata = {
     "대학 로봇",
   ],
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
   },
   metadataBase: new URL(SITE_URL),
   openGraph: {
