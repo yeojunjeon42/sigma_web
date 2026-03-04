@@ -1,4 +1,4 @@
-import { client } from "@/sanity/lib/client";
+import { sanityFetch } from "@/sanity/lib/live";
 import type { Project } from "../types";
 
 const query = `*[_type == "project"] | order(coalesce(updatedAt, _updatedAt) desc) {
@@ -14,5 +14,6 @@ const query = `*[_type == "project"] | order(coalesce(updatedAt, _updatedAt) des
 }`;
 
 export async function getProjects(): Promise<Project[]> {
-  return client.fetch(query);
+  const { data } = await sanityFetch({ query });
+  return data;
 }

@@ -1,4 +1,4 @@
-import { client } from "@/sanity/lib/client";
+import { sanityFetch } from "@/sanity/lib/live";
 import type { Activity } from "../types";
 
 const query = `*[_type == "activity"] | order(_createdAt desc) {
@@ -10,5 +10,6 @@ const query = `*[_type == "activity"] | order(_createdAt desc) {
 }`;
 
 export async function getActivities(): Promise<Activity[]> {
-  return client.fetch(query);
+  const { data } = await sanityFetch({ query });
+  return data;
 }

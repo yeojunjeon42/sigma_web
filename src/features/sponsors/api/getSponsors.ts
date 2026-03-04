@@ -1,4 +1,4 @@
-import { client } from "@/sanity/lib/client";
+import { sanityFetch } from "@/sanity/lib/live";
 
 export interface Sponsor {
   _id: string;
@@ -19,5 +19,6 @@ const query = `*[_type == "sponsor"] | order(order asc, name asc) {
 }`;
 
 export async function getSponsors(): Promise<Sponsor[]> {
-  return client.fetch(query);
+  const { data } = await sanityFetch({ query });
+  return data;
 }

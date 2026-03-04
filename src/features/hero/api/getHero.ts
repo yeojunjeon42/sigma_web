@@ -1,5 +1,5 @@
 import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
-import { client } from "@/sanity/lib/client";
+import { sanityFetch } from "@/sanity/lib/live";
 
 const query = `*[_type == "hero"][0] {
   backgroundImage
@@ -10,5 +10,6 @@ export type Hero = {
 };
 
 export async function getHero(): Promise<Hero | null> {
-  return client.fetch(query);
+  const { data } = await sanityFetch({ query });
+  return data;
 }

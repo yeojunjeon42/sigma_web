@@ -3,6 +3,7 @@ import { Noto_Sans_KR } from "next/font/google";
 import MotionProvider from "@/components/MotionProvider";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { JsonLd } from "@/components/JsonLd";
+import { SanityLive } from "@/sanity/lib/live";
 import "./globals.css";
 
 const notoSansKR = Noto_Sans_KR({
@@ -68,6 +69,7 @@ export default function RootLayout({
     <html lang="ko">
       <body className={`${notoSansKR.variable} antialiased`}>
         <JsonLd />
+        <SanityLive />
         <LanguageProvider>
           <MotionProvider />
           {children}
