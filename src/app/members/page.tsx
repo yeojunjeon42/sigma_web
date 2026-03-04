@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { client } from "@/sanity/lib/client";
+import { sanityFetch } from "@/sanity/lib/live";
 import { urlFor } from "@/sanity/lib/image";
 import { T } from "@/components/T";
 
@@ -22,16 +22,17 @@ interface Member {
 }
 
 async function getMembers(): Promise<Member[]> {
-  return client.fetch(
-    `*[_type == "member"] | order(order asc, name asc) {
+  const { data } = await sanityFetch({
+    query: `*[_type == "member"] | order(order asc, name asc) {
       _id,
       name,
       role,
       team,
       photo,
       order
-    }`
-  );
+    }`,
+  });
+  return data;
 }
 
 function SigmaPlaceholder() {
