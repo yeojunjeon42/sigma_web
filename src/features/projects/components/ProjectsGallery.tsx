@@ -1,12 +1,18 @@
+"use client";
+
+import { useState } from "react";
 import { T } from "@/components/T";
 import type { Project } from "../types";
 import ProjectCard from "./ProjectCard";
+import ProjectDetailModal from "./ProjectDetailModal";
 
 interface ProjectsGalleryProps {
   projects: Project[];
 }
 
 export default function ProjectsGallery({ projects }: ProjectsGalleryProps) {
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+
   if (projects.length === 0) {
     return (
       <section data-anim="reveal-group" className="py-24 text-center text-neutral-400">
@@ -33,13 +39,23 @@ export default function ProjectsGallery({ projects }: ProjectsGalleryProps) {
 
   return (
     <section data-anim="reveal-group">
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
         {projects.map((project) => (
-          <div key={project._id} data-anim="reveal-item">
-            <ProjectCard project={project} />
+          <div key={project._id} data-anim="reveal-item" className="flex">
+            <ProjectCard
+              project={project}
+              onClick={() => setSelectedProject(project)}
+            />
           </div>
         ))}
       </div>
+
+      {selectedProject && (
+        <ProjectDetailModal
+          project={selectedProject}
+          onClose={() => setSelectedProject(null)}
+        />
+      )}
     </section>
   );
 }

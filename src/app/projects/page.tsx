@@ -17,7 +17,7 @@ export default async function ProjectsPage() {
   return (
     <div className="min-h-screen bg-dark text-white">
       <Navbar />
-      <main className="container mx-auto px-6 pt-32 pb-16 md:px-10 lg:px-16">
+      <main className="mx-auto w-full max-w-7xl px-4 pt-32 pb-16 sm:px-6 md:px-10 lg:px-16">
         <section data-anim="reveal-group" className="mb-14">
           <p
             data-anim="reveal-item"
@@ -27,7 +27,7 @@ export default async function ProjectsPage() {
           </p>
           <h1
             data-anim="reveal-item"
-            className="mb-4 text-4xl font-bold md:text-5xl"
+            className="mb-4 text-3xl font-bold sm:text-4xl md:text-5xl"
           >
             <T en="Projects" ko="프로젝트" />
           </h1>
