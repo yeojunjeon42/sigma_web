@@ -39,9 +39,9 @@ export default function ActivitiesGallery({ activities }: ActivitiesGalleryProps
 
   return (
     <section data-anim="reveal-group">
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
         {activities.map((activity) => (
-          <div key={activity._id} data-anim="reveal-item">
+          <div key={activity._id} data-anim="reveal-item" className="flex">
             <ActivityCard activity={activity} />
           </div>
         ))}

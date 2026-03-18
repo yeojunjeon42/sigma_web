@@ -2,8 +2,8 @@ import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
 import type { Activity } from "../types";
 
-const cardClasses =
-  "group overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition-colors hover:border-white/20";
+const CARD_CLASSES =
+  "group flex h-full flex-col overflow-hidden rounded-2xl border border-gray/20 bg-gray/5 transition-colors hover:border-gray/40 dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20";
 
 export default function ActivityCard({ activity }: { activity: Activity }) {
   const imageUrl = activity.image
@@ -12,19 +12,19 @@ export default function ActivityCard({ activity }: { activity: Activity }) {
 
   const cardContent = (
     <>
-      <div className="relative aspect-video w-full overflow-hidden bg-neutral-800">
+      <div className="relative aspect-video w-full overflow-hidden bg-gray/10 dark:bg-neutral-800">
         {imageUrl ? (
           <Image
             src={imageUrl}
             alt={activity.title}
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-neutral-600">
+          <div className="flex h-full items-center justify-center text-gray/60 dark:text-neutral-600">
             <svg
-              className="h-12 w-12"
+              className="h-10 w-10 sm:h-12 sm:w-12"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -40,12 +40,12 @@ export default function ActivityCard({ activity }: { activity: Activity }) {
         )}
       </div>
 
-      <div className="p-5">
-        <h3 className="mb-2 text-lg font-bold leading-tight text-white">
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
+        <h3 className="mb-1.5 text-base font-bold leading-tight text-dark sm:mb-2 sm:text-lg dark:text-white">
           {activity.title}
         </h3>
         {activity.description && (
-          <p className="line-clamp-2 text-sm leading-relaxed text-neutral-400">
+          <p className="line-clamp-3 text-sm leading-relaxed text-gray dark:text-neutral-400">
             {activity.description}
           </p>
         )}
@@ -60,7 +60,7 @@ export default function ActivityCard({ activity }: { activity: Activity }) {
     return (
       <a
         href={activity.link}
-        className={cardClasses}
+        className={CARD_CLASSES}
         {...(isExternal && {
           target: "_blank",
           rel: "noopener noreferrer",
@@ -71,5 +71,5 @@ export default function ActivityCard({ activity }: { activity: Activity }) {
     );
   }
 
-  return <article className={cardClasses}>{cardContent}</article>;
+  return <article className={CARD_CLASSES}>{cardContent}</article>;
 }
