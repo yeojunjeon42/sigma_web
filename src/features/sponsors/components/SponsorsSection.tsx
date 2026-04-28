@@ -3,35 +3,21 @@ import { T } from "@/components/T";
 import { urlFor } from "@/sanity/lib/image";
 import type { Sponsor } from "../api/getSponsors";
 
-const TIER_ORDER = ["platinum", "gold", "silver", "bronze"] as const;
-
-function groupByTier(sponsors: Sponsor[]): Record<string, Sponsor[]> {
-  return sponsors.reduce(
-    (acc, sponsor) => {
-      const tier = sponsor.tier ?? "gold";
-      if (!acc[tier]) acc[tier] = [];
-      acc[tier].push(sponsor);
-      return acc;
-    },
-    {} as Record<string, Sponsor[]>
-  );
-}
-
 function SponsorLogo({ sponsor }: { sponsor: Sponsor }) {
   const imageUrl = sponsor.logo
-    ? urlFor(sponsor.logo).width(300).height(120).url()
+    ? urlFor(sponsor.logo).width(600).fit("max").url()
     : null;
 
   const inner = imageUrl ? (
     <Image
       src={imageUrl}
       alt={sponsor.name}
-      width={240}
-      height={96}
-      className="h-16 w-auto object-contain brightness-0 invert"
+      width={300}
+      height={120}
+      className="h-20 w-auto max-w-[200px] object-contain"
     />
   ) : (
-    <span className="text-xl font-bold text-white">{sponsor.name}</span>
+    <span className="text-xl font-bold text-dark">{sponsor.name}</span>
   );
 
   return sponsor.website ? (
@@ -39,12 +25,12 @@ function SponsorLogo({ sponsor }: { sponsor: Sponsor }) {
       href={sponsor.website}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity"
+      className="flex items-center justify-center opacity-90 hover:opacity-100 transition-opacity"
     >
       {inner}
     </a>
   ) : (
-    <div className="flex items-center justify-center opacity-80">{inner}</div>
+    <div className="flex items-center justify-center opacity-90">{inner}</div>
   );
 }
 
@@ -53,7 +39,7 @@ function EmptySponsors() {
     <div data-anim="reveal-group" className="py-12 text-center">
       <svg
         data-anim="reveal-item"
-        className="mx-auto mb-4 h-12 w-12 opacity-25 text-neutral-400"
+        className="mx-auto mb-4 h-12 w-12 opacity-25 text-gray"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -61,7 +47,7 @@ function EmptySponsors() {
       >
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
-      <p data-anim="reveal-item" className="text-base text-neutral-400">
+      <p data-anim="reveal-item" className="text-base text-gray">
         <T
           en="No sponsors listed yet. Be the first to sponsor us! record.snusigma@gmail.com"
           ko="등록된 후원사가 아직 없습니다. 첫 번째 후원사가 되어 주세요! 이메일: record.snusigma@gmail.com"
@@ -76,7 +62,6 @@ interface SponsorsSectionProps {
 }
 
 export function SponsorsSection({ sponsors }: SponsorsSectionProps) {
-  const grouped = groupByTier(sponsors);
   const hasSponsors = sponsors.length > 0;
 
   return (
@@ -100,27 +85,16 @@ export function SponsorsSection({ sponsors }: SponsorsSectionProps) {
 
         <div
           data-anim="reveal-group"
-          className="rounded-2xl border border-white/10 bg-white/5 px-8 py-10 text-center"
+          className="rounded-2xl border border-white/10 bg-white/90 px-8 py-12 text-center"
         >
-
           {hasSponsors ? (
-            <div className="mb-8 space-y-4">
-              {TIER_ORDER.map((tier) => {
-                const list = grouped[tier];
-                if (!list?.length) return null;
-                return (
-                  <div key={tier} data-anim="reveal-item">
-                    <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-gray">
-                      {tier}
-                    </p>
-                    <div className="flex flex-wrap items-center justify-center gap-10">
-                      {list.map((sponsor) => (
-                        <SponsorLogo key={sponsor._id} sponsor={sponsor} />
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
+            <div
+              data-anim="reveal-item"
+              className="flex flex-wrap items-center justify-center gap-x-12 gap-y-10"
+            >
+              {sponsors.map((sponsor) => (
+                <SponsorLogo key={sponsor._id} sponsor={sponsor} />
+              ))}
             </div>
           ) : (
             <EmptySponsors />
