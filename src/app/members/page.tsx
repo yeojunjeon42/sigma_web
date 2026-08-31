@@ -35,50 +35,40 @@ async function getMembers(): Promise<Member[]> {
   return data;
 }
 
-function SigmaPlaceholder() {
-  return (
-    <svg
-      viewBox="0 0 200 200"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-24 h-24 opacity-60"
-    >
-      <rect x="40" y="20" width="120" height="10" stroke="white" strokeWidth="2" fill="none" />
-      <rect x="40" y="170" width="120" height="10" stroke="white" strokeWidth="2" fill="none" />
-      <line x1="40" y1="20" x2="100" y2="100" stroke="white" strokeWidth="2" />
-      <line x1="40" y1="180" x2="100" y2="100" stroke="white" strokeWidth="2" />
-      <line x1="100" y1="100" x2="160" y2="20" stroke="white" strokeWidth="2" />
-      <line x1="100" y1="100" x2="160" y2="180" stroke="white" strokeWidth="2" />
-    </svg>
-  );
-}
-
 export default async function MembersPage() {
   const members = await getMembers();
 
   return (
-    <div className="min-h-screen bg-white text-dark dark:bg-dark dark:text-white">
+    <div>
       <Navbar />
-      <main className="container mx-auto px-6 pt-32 pb-16 md:px-10 lg:px-16">
-        <section data-anim="reveal-group" className="mb-14 text-center">
-          <h1 data-anim="reveal-item" className="mb-4 text-4xl font-bold md:text-5xl"><T en="Members" ko="멤버" /></h1>
-          <p data-anim="reveal-item" className="mx-auto max-w-2xl text-lg text-gray">
-            <T en="The people behind Sigma Intelligence." ko="2026 시그마 인텔리전스를 이끄는 사람들." />
+      <main>
+        <section>
+          <h1>
+            <T en="Members" ko="멤버" />
+          </h1>
+          <p>
+            <T
+              en="The people behind Sigma Intelligence."
+              ko="2026 시그마 인텔리전스를 이끄는 사람들."
+            />
           </p>
         </section>
 
         {members.length === 0 ? (
-          <div className="py-24 text-center text-gray">
-            <p className="text-lg"><T en="Members will be listed here soon." ko="멤버 정보가 곧 업데이트됩니다." /></p>
-          </div>
+          <p>
+            <T
+              en="Members will be listed here soon."
+              ko="멤버 정보가 곧 업데이트됩니다."
+            />
+          </p>
         ) : (
-          <section data-anim="reveal-group">
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {members.map((member) => (
-                <MemberCard key={member._id} member={member} />
-              ))}
-            </div>
-          </section>
+          <ul>
+            {members.map((member) => (
+              <li key={member._id}>
+                <MemberCard member={member} />
+              </li>
+            ))}
+          </ul>
         )}
       </main>
       <Footer />
@@ -92,26 +82,12 @@ function MemberCard({ member }: { member: Member }) {
     : null;
 
   return (
-    <div data-anim="card" className="overflow-hidden rounded-xl border border-gray/20 bg-white dark:border-white/10 dark:bg-white/5" tabIndex={0}>
-      <div className="relative flex aspect-square w-full items-center justify-center bg-dark/10 dark:bg-dark/50">
-        {imageUrl ? (
-          <Image
-            src={imageUrl}
-            alt={member.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
-        ) : (
-          <SigmaPlaceholder />
-        )}
-      </div>
-      <div className="p-4">
-        <p className="font-semibold text-dark dark:text-white">{member.name}</p>
-        {member.role && (
-          <p className="mt-0.5 text-sm text-gray">{member.role}</p>
-        )}
-      </div>
-    </div>
+    <article>
+      {imageUrl && (
+        <Image src={imageUrl} alt={member.name} width={400} height={400} />
+      )}
+      <p>{member.name}</p>
+      {member.role && <p>{member.role}</p>}
+    </article>
   );
 }
