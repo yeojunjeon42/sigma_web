@@ -42,3 +42,14 @@ next-env.d.ts
 
 /awesome-cursorrules
 .vercel
+
+# AI agent / LLM instruction files (repo is public — keep these local)
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+.claude/
+.cursor/
+.cursorrules
+.windsurfrules
+.aider*
+.github/copilot-instructions.md
