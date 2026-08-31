@@ -15,20 +15,14 @@ export default async function ProjectsPage() {
   const projects = await getProjects();
 
   return (
-    <div className="min-h-screen bg-dark text-white">
+    <div>
       <Navbar />
-      <main className="container mx-auto px-6 pt-32 pb-16 md:px-10 lg:px-16">
-        <section data-anim="reveal-group" className="mb-14">
-          <p
-            data-anim="reveal-item"
-            className="mb-3 inline-block rounded-full bg-bright-red/10 px-4 py-2 text-sm font-semibold text-bright-red"
-          >
+      <main>
+        <section>
+          <p>
             <T en="What We Build" ko="우리가 만드는 것" />
           </p>
-          <h1
-            data-anim="reveal-item"
-            className="mb-4 text-4xl font-bold md:text-5xl"
-          >
+          <h1>
             <T en="Projects" ko="프로젝트" />
           </h1>
         </section>
