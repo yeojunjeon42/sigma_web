@@ -1,0 +1,433 @@
+{
+  "alpha-d": {
+    "file": "21.jpg",
+    "w": 1200,
+    "h": 833,
+    "anchor": []
+  },
+  "angelswing": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 583,
+    "anchor": [
+      "bottom"
+    ]
+  },
+  "art-for-blind": {
+    "file": "02.jpg",
+    "w": 1200,
+    "h": 942,
+    "anchor": [
+      "right"
+    ]
+  },
+  "artisma": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 944,
+    "anchor": [
+      "top",
+      "left"
+    ]
+  },
+  "atlas": {
+    "file": "01.jpg",
+    "w": 913,
+    "h": 1200,
+    "anchor": [
+      "bottom",
+      "left",
+      "right"
+    ]
+  },
+  "atlas-2016": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 882,
+    "anchor": []
+  },
+  "ballboy": {
+    "file": "03.jpg",
+    "w": 1200,
+    "h": 1131,
+    "anchor": []
+  },
+  "board-game-bot": {
+    "file": "04.jpg",
+    "w": 1200,
+    "h": 915,
+    "anchor": []
+  },
+  "book-cart": {
+    "file": "02.jpg",
+    "w": 714,
+    "h": 1200,
+    "anchor": []
+  },
+  "braille-block": {
+    "file": "03.jpg",
+    "w": 1200,
+    "h": 495,
+    "anchor": [
+      "right"
+    ]
+  },
+  "cobra": {
+    "file": "02.jpg",
+    "w": 1200,
+    "h": 786,
+    "anchor": [
+      "left"
+    ]
+  },
+  "copy-me": {
+    "file": "03.jpg",
+    "w": 1200,
+    "h": 890,
+    "anchor": []
+  },
+  "crystal": {
+    "file": "01.jpg",
+    "w": 1057,
+    "h": 1200,
+    "anchor": []
+  },
+  "desertree": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 850,
+    "anchor": []
+  },
+  "dramatic": {
+    "file": "03.jpg",
+    "w": 1200,
+    "h": 1026,
+    "anchor": []
+  },
+  "handybot": {
+    "file": "22.jpg",
+    "w": 1200,
+    "h": 1076,
+    "anchor": []
+  },
+  "hexapod": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 996,
+    "anchor": []
+  },
+  "hexapod-2": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 906,
+    "anchor": []
+  },
+  "iden": {
+    "file": "01.jpg",
+    "w": 1116,
+    "h": 1200,
+    "anchor": []
+  },
+  "ikung": {
+    "file": "01.jpg",
+    "w": 1019,
+    "h": 1200,
+    "anchor": []
+  },
+  "isac": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 796,
+    "anchor": [
+      "bottom",
+      "left"
+    ]
+  },
+  "isim": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 1040,
+    "anchor": []
+  },
+  "leam": {
+    "file": "01.jpg",
+    "w": 709,
+    "h": 1200,
+    "anchor": [
+      "top",
+      "bottom"
+    ]
+  },
+  "locked-charger": {
+    "file": "02.jpg",
+    "w": 1200,
+    "h": 790,
+    "anchor": []
+  },
+  "mapangi": {
+    "file": "02.jpg",
+    "w": 276,
+    "h": 1200,
+    "anchor": []
+  },
+  "medicine-management": {
+    "file": "03.jpg",
+    "w": 1200,
+    "h": 1179,
+    "anchor": []
+  },
+  "microplastic-robot": {
+    "file": "04.jpg",
+    "w": 1200,
+    "h": 1055,
+    "anchor": [
+      "top"
+    ]
+  },
+  "neptunus": {
+    "file": "01.jpg",
+    "w": 1073,
+    "h": 1200,
+    "anchor": []
+  },
+  "open-noise-control": {
+    "file": "02.jpg",
+    "w": 1050,
+    "h": 1200,
+    "anchor": [
+      "bottom",
+      "left",
+      "right"
+    ]
+  },
+  "pet-robot": {
+    "file": "02.jpg",
+    "w": 1200,
+    "h": 952,
+    "anchor": []
+  },
+  "poclainger": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 867,
+    "anchor": []
+  },
+  "pov-display": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 1000,
+    "anchor": [
+      "top",
+      "bottom"
+    ]
+  },
+  "pygmalion": {
+    "file": "02.jpg",
+    "w": 1046,
+    "h": 1200,
+    "anchor": []
+  },
+  "quri": {
+    "file": "02.jpg",
+    "w": 1200,
+    "h": 1107,
+    "anchor": []
+  },
+  "rammus": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 945,
+    "anchor": []
+  },
+  "rc-submarine": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 307,
+    "anchor": []
+  },
+  "robot-arm": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 1046,
+    "anchor": [
+      "left"
+    ]
+  },
+  "rovision": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 940,
+    "anchor": []
+  },
+  "school-zone": {
+    "file": "07.jpg",
+    "w": 1200,
+    "h": 434,
+    "anchor": []
+  },
+  "scout": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 951,
+    "anchor": []
+  },
+  "screw-robot": {
+    "file": "02.jpg",
+    "w": 1200,
+    "h": 373,
+    "anchor": []
+  },
+  "self-driving-car": {
+    "file": "01.jpg",
+    "w": 1082,
+    "h": 1200,
+    "anchor": []
+  },
+  "smart-car-2009": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 958,
+    "anchor": []
+  },
+  "smart-car-2013": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 963,
+    "anchor": [
+      "bottom",
+      "left",
+      "right"
+    ]
+  },
+  "snuewheel": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 772,
+    "anchor": []
+  },
+  "speech-bot": {
+    "file": "06.jpg",
+    "w": 1175,
+    "h": 1200,
+    "anchor": [
+      "top"
+    ]
+  },
+  "swarm-tracking": {
+    "file": "02.jpg",
+    "w": 1200,
+    "h": 836,
+    "anchor": [
+      "top"
+    ]
+  },
+  "syncope-device": {
+    "file": "03.jpg",
+    "w": 1200,
+    "h": 939,
+    "anchor": []
+  },
+  "tachikoma": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 928,
+    "anchor": [
+      "top"
+    ]
+  },
+  "tangerine-toy": {
+    "file": "01.jpg",
+    "w": 1180,
+    "h": 1200,
+    "anchor": []
+  },
+  "techwin-2011": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 679,
+    "anchor": []
+  },
+  "tic-mask": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 523,
+    "anchor": []
+  },
+  "turtlebot": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 1107,
+    "anchor": []
+  },
+  "two-wheeled": {
+    "file": "01.jpg",
+    "w": 1011,
+    "h": 1200,
+    "anchor": []
+  },
+  "unicycle": {
+    "file": "09.jpg",
+    "w": 760,
+    "h": 1200,
+    "anchor": []
+  },
+  "universal-fridge": {
+    "file": "01.jpg",
+    "w": 986,
+    "h": 1200,
+    "anchor": []
+  },
+  "untitled": {
+    "file": "01.jpg",
+    "w": 780,
+    "h": 1200,
+    "anchor": []
+  },
+  "useless-but-cute": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 920,
+    "anchor": []
+  },
+  "vibrating-shoes": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 1002,
+    "anchor": [
+      "top"
+    ]
+  },
+  "vr-drone": {
+    "file": "03.jpg",
+    "w": 923,
+    "h": 1200,
+    "anchor": [
+      "bottom"
+    ]
+  },
+  "vr-rider": {
+    "file": "01.jpg",
+    "w": 845,
+    "h": 1200,
+    "anchor": [
+      "bottom",
+      "left"
+    ]
+  },
+  "walk": {
+    "file": "01.jpg",
+    "w": 644,
+    "h": 1200,
+    "anchor": []
+  },
+  "walknine": {
+    "file": "01.jpg",
+    "w": 1200,
+    "h": 1019,
+    "anchor": [
+      "bottom",
+      "left",
+      "right"
+    ]
+  }
+}

@@ -1,0 +1,106 @@
+import type { YearNode } from "../types";
+
+export const TIMELINE: YearNode[] = [
+  {
+    year: 2026,
+    events: [
+      { id: "2026-edu", date: "2026 H1", title: { en: "Arduino education · Line-tracer mission", ko: "1학기 신입부원 아두이노 기초 교육 및 라인트레이서 미션" } },
+      { id: "2026-lectures", date: "2026 H1", title: { en: "Special lectures · AI, CAD", ko: "필수 교육 외 특강 — 인공지능 · CAD" } },
+      { id: "2026-mt", date: "2026-05", title: { en: "Club MT", ko: "중간고사 후 동아리 MT" } },
+      { id: "2026-homecoming", date: "2026 Summer", title: { en: "Homecoming", ko: "홈커밍데이 — 40년 역사를 함께한 OB 선배 초청" } },
+      { id: "2026-cdf", date: "2026 Summer", title: { en: "15th Creative Design Festival entries", ko: "제15회 공과대학 창의설계축전 출품작 준비 — 9월 9~10일 개최" } },
+      { id: "2026-ot", date: "2026-09-03", title: { en: "Second-semester orientation · Five new executives", ko: "2학기 신입부원 OT · 임원진 5명 합류" } },
+      { id: "2026-ros2", date: "2026 H2", title: { en: "ROS2 education · Promotion mission", ko: "2학기 신입부원 ROS2 교육 — 3주차 과정 및 승급 미션" } },
+      { id: "2026-h2", date: "2026 H2", title: { en: "Making teams · Member-led seminars", ko: "메이킹 활동, 자율세미나 시범 운영" } },
+    ],
+  },
+  {
+    year: 2025,
+    events: [
+      { id: "2025-ot", date: "2025-02-19", title: { en: "Freshman orientation", ko: "신입생 OT" } },
+      { id: "2025-edu", date: "2025 H1", title: { en: "Arduino, AI and Fusion 360 education", ko: "아두이노 · AI · Fusion360 교육" } },
+      { id: "2025-mt1", date: "2025-05-17", title: { en: "Paju MT", ko: "파주 MT" } },
+      { id: "2025-mt2", date: "2025-07-12", title: { en: "Second MT", ko: "빠지 MT" } },
+      { id: "2025-portal", date: "2025 H2", title: { en: "Portal301 collaboration", ko: "Portal301 협업" } },
+      { id: "2025-exh", date: "2025 H2", title: { en: "Exhibition · Six making teams", ko: "전시회 · 2학기 메이킹 6팀" } },
+      { id: "2025-irex", date: "2025-12-02~07", title: { en: "iREX Tokyo market research", ko: "iREX 도쿄 시장조사 — 지원 선정, 도쿄대 교수·학생 인터뷰, 결과보고서 제출" } },
+      { id: "2025-showcase", date: "2026-01-24", title: { en: "Year-end showcase · Presidential handover", ko: "성과공유회 및 차기 회장 인수인계" } },
+    ],
+  },
+  {
+    year: 2020,
+    events: [
+      { id: "2020-hc", date: "2020-02", title: { en: "Homecoming cancelled · COVID-19", ko: "홈커밍 취소 — 코로나 확진자 하루 500명 돌파" } },
+      { id: "2020-intake", date: "2020-03", title: { en: "Freshman intake · 87 applicants", ko: "신입 87명 지원, 정회원 예정 53명" } },
+      { id: "2020-edu", date: "2020-04", title: { en: "Recorded education · Arduino, SolidWorks, AutoCAD", ko: "전 교육 녹화 강의 전환 — 아두이노 · 솔리드웍스 · 오토캐드, 영어 자막 제작" } },
+      { id: "2020-line", date: "2020-05", title: { en: "Line-tracer, submitted by video", ko: "라인트레이서 비대면 영상 제출" } },
+      { id: "2020-seminars", date: "2020-08", title: { en: "Member seminars · PlatformIO, 3D printing, Android, Raspberry Pi, AWS", ko: "부원 세미나 — PlatformIO · 3D프린팅 · Android Studio · 라즈베리파이 · AWS" } },
+      { id: "2020-reports", date: "2020", title: { en: "Creative Design Festival reports · 14 teams", ko: "신입생 14팀 창의설계축전 정식 보고서 제출" } },
+    ],
+  },
+  {
+    year: 2017,
+    events: [
+      { id: "2017-exchange", date: "2017-05", title: { en: "Samsung Software Artist club exchange", ko: "삼성 소프트웨어 아티스트 동아리 교류" } },
+      { id: "2017-cdf", date: "2017", title: { en: "Creative Design Festival · 11 teams", ko: "창의설계축전 11팀 참가" } },
+      { id: "2017-exh", date: "2017", title: { en: "Exhibition · 59-page catalogue", ko: "전시회 및 59쪽 작품집 발간" } },
+    ],
+  },
+  {
+    year: 2016,
+    events: [
+      { id: "2016-hc", date: "2016-01", title: { en: "Homecoming", ko: "홈커밍데이" } },
+      { id: "2016-mt", date: "2016-02", title: { en: "Winter MT", ko: "겨울 MT" } },
+      { id: "2016-ot", date: "2016-03", title: { en: "Freshman orientation · 68 applicants", ko: "신입생 OT 및 교육 시작 — 68명 지원" } },
+      { id: "2016-hack", date: "2016-03", title: { en: "Intel & SKT hackathon · Grand Prize", ko: "인텔 & SKT 해커톤 대상" } },
+      { id: "2016-urp", date: "2016-05", title: { en: "SNU URP · Four teams", ko: "서울대 URP 4팀 선정" } },
+      { id: "2016-kofac", date: "2016-06", title: { en: "KOFAC URP · One team", ko: "창의재단 URP 1팀 선정 · 교육 종료" } },
+      { id: "2016-ie", date: "2016-07", title: { en: "IE Competition · Encouragement, Bronze", ko: "IE 경진대회 장려상 · 동상" } },
+      { id: "2016-exh", date: "2016-09-05~06", title: { en: "Exhibition, building 301", ko: "전시회 — 301동 118호 앞" } },
+    ],
+  },
+  {
+    year: 2015,
+    events: [
+      { id: "2015-hc", date: "2015-01-30", title: { en: "Homecoming", ko: "홈커밍데이" } },
+      { id: "2015-ece-ot", date: "2015-02-10", title: { en: "Department orientation", ko: "전기과 OT" } },
+      { id: "2015-ot", date: "2015-03-05", title: { en: "Freshman orientation", ko: "신입생 OT" } },
+      { id: "2015-mecha", date: "2015-03-12", title: { en: "Samsung Electronics Mecha Club", ko: "삼성전자 가전사업부 메카클럽 지원 동아리 선정" } },
+      { id: "2015-edu", date: "2015-03-16", title: { en: "Education · Arduino, Blender", ko: "신입생 교육 시작 — 공대생 아두이노, 미대생 블렌더 3D" } },
+      { id: "2015-arduino2", date: "2015-03-23", title: { en: "Second Arduino session", ko: "아두이노 2차 교육" } },
+      { id: "2015-mecha-mentor", date: "2015-04-20", title: { en: "Mecha Club mentor meeting", ko: "메카클럽 첫 멘토 모임" } },
+      { id: "2015-nasa", date: "2015-04-27", title: { en: "NASA internship · One member", ko: "부원 NASA 인턴 합격" } },
+      { id: "2015-urp", date: "2015-05-01", title: { en: "SNU URP · ISIM, SNUEWheel", ko: "서울대 URP 2팀 선정 — ISIM · SNUEWheel" } },
+      { id: "2015-techwin", date: "2015-05-11", title: { en: "Hanwha Techwin Robot Membership · Three teams", ko: "한화 테크윈 로봇 멤버십 3팀 선정" } },
+      { id: "2015-blender", date: "2015-05-11", title: { en: "Second Blender session", ko: "블렌더 2차 교육" } },
+      { id: "2015-solidworks", date: "2015-05-15", title: { en: "SolidWorks session", ko: "솔리드웍스 교육" } },
+      { id: "2015-welcome", date: "2015-05-18", title: { en: "Freshman welcome dinner", ko: "신입생 환영 회식" } },
+      { id: "2015-kofac", date: "2015-05-20", title: { en: "KOFAC URP · AngelSwing", ko: "창의재단 URP 1팀 선정 — AngelSwing" } },
+      { id: "2015-line", date: "2015-06-01", title: { en: "Line-tracer build sprint", ko: "교육 수료 및 라인트레이서 집중 제작기간" } },
+      { id: "2015-cleanup", date: "2015-06-22", title: { en: "Club room clean-up", ko: "302동 215-2호 대청소" } },
+      { id: "2015-mmca", date: "2015-07-14", title: { en: "Robot Essay exhibition, MMCA", ko: "국립현대미술관 로봇에세이 전시전 단체 관람" } },
+      { id: "2015-mt", date: "2015-07-18", title: { en: "Summer MT, Eulwangni", ko: "여름 MT — 을왕리" } },
+      { id: "2015-interim", date: "2015-07-20", title: { en: "Robot Membership interim review", ko: "로봇 멤버십 중간 발표" } },
+      { id: "2015-alliance", date: "2015-08-04", title: { en: "Club alliance · KAIST, POSTECH", ko: "서울대 · 카이스트 · 포스텍 로봇동아리 연합 교류 체결" } },
+      { id: "2015-nepal", date: "2015-08-03~10", title: { en: "AngelSwing survey · Nepal", ko: "AngelSwing 네팔 지진 피해지역 측량" } },
+      { id: "2015-poster", date: "2015-08-31", title: { en: "Exhibition poster", ko: "전시회 포스터 제작" } },
+      { id: "2015-catalog", date: "2015-09-09", title: { en: "Catalogue to print", ko: "작품집 확정 및 발주" } },
+      { id: "2015-exh", date: "2015-09-14~15", title: { en: "Anniversary exhibition · “We Will Find A Way”", ko: "기념 작품 전시회 — “We Will Find A Way”" } },
+      { id: "2015-term2", date: "2015-09-21", title: { en: "Second-semester opening party", ko: "2학기 개강 파티" } },
+      { id: "2015-techwin-final", date: "2015-09-23", title: { en: "Hanwha Techwin final presentations", ko: "한화 테크윈 최종 발표" } },
+    ],
+  },
+  {
+    year: 1984,
+    events: [
+      {
+        id: "1984-founded",
+        date: "1984",
+        title: {
+          en: "Founded at Seoul National University",
+          ko: "서울대학교에서 시그마 인텔리전스 창립",
+        },
+      },
+    ],
+  },
+];

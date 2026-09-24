@@ -1,0 +1,346 @@
+{
+  "air": {
+    "slot": "std",
+    "why": "an app: its own title screen, kept small",
+    "lift": false,
+    "liftWhy": "a screenshot; nothing to lift"
+  },
+  "alpha-d": {
+    "slot": "big",
+    "why": "the quadcopter side-on, the index's first hero",
+    "lift": "21.jpg"
+  },
+  "angelswing": {
+    "slot": "land",
+    "focus": "80% 90%",
+    "why": "the plane sits low right against sky",
+    "lift": "01.jpg"
+  },
+  "art-for-blind": {
+    "file": "03.jpg",
+    "slot": "land",
+    "why": "the glove on the tablet, not the slide",
+    "feature": "2020's clearest picture of a build in use",
+    "lift": "02.jpg"
+  },
+  "artisma": {
+    "slot": "std",
+    "lift": "01.jpg"
+  },
+  "atlas": {
+    "slot": "port",
+    "focus": "50% 40%",
+    "why": "a portrait of the tracked robot opens the archive tall",
+    "feature": "the largest build of its era, and a Gold",
+    "lift": "01.jpg"
+  },
+  "atlas-2016": {
+    "file": "02.jpg",
+    "slot": "std",
+    "why": "the close three-quarter render, not the small one in a white field",
+    "lift": "01.jpg"
+  },
+  "ballboy": {
+    "file": "03.jpg",
+    "slot": "sq",
+    "why": "the robot on the floor, not held up under a caption",
+    "lift": "03.jpg"
+  },
+  "board-game-bot": {
+    "file": "04.jpg",
+    "slot": "std",
+    "why": "the arm alone on white, not among the drills",
+    "lift": "04.jpg"
+  },
+  "book-cart": {
+    "slot": "tall",
+    "why": "the cart among the white towers, upright",
+    "lift": "02.jpg"
+  },
+  "braille-block": {
+    "file": "03.jpg",
+    "slot": "wide",
+    "why": "two blocks side by side",
+    "lift": "03.jpg"
+  },
+  "cobra": {
+    "file": "02.jpg",
+    "slot": "wide",
+    "focus": "50% 45%",
+    "why": "a snake wants a long frame",
+    "lift": "02.jpg"
+  },
+  "copy-me": {
+    "file": "03.jpg",
+    "slot": "land",
+    "why": "the arm as a drawing; the photographs are all bins",
+    "lift": "03.jpg"
+  },
+  "crystal": {
+    "slot": "std",
+    "lift": "01.jpg",
+    "liftWhy": "the whole photograph lifts the laptop; cropped to the LED cubes first",
+    "liftCrop": [
+      0.02,
+      0.15,
+      0.47,
+      0.95
+    ]
+  },
+  "desertree": {
+    "slot": "land",
+    "lift": "01.jpg"
+  },
+  "dramatic": {
+    "slot": "sq",
+    "focus": "50% 70%",
+    "why": "the project's own title card — there is no photograph; square, so the browser bar at its top is cropped off",
+    "lift": "03.jpg"
+  },
+  "handybot": {
+    "file": "21.jpg",
+    "slot": "std",
+    "focus": "50% 35%",
+    "why": "the car in daylight, sitting high in the frame",
+    "lift": "22.jpg"
+  },
+  "hexapod": {
+    "slot": "std",
+    "lift": "01.jpg"
+  },
+  "hexapod-2": {
+    "slot": "big",
+    "why": "the studio hexapod, a hero",
+    "feature": "2016's studio photograph",
+    "lift": "01.jpg"
+  },
+  "iden": {
+    "slot": "std",
+    "lift": "01.jpg"
+  },
+  "ikung": {
+    "slot": "sq",
+    "why": "a ball",
+    "lift": "01.jpg"
+  },
+  "interactive-architecture": {
+    "slot": "tall",
+    "why": "a wall of panels, read upright",
+    "lift": false,
+    "liftWhy": "no subject found in the one photograph"
+  },
+  "isac": {
+    "slot": "land",
+    "lift": "01.jpg"
+  },
+  "isim": {
+    "slot": "wide",
+    "why": "a row of wheels",
+    "lift": "01.jpg"
+  },
+  "leam": {
+    "file": "08.jpg",
+    "slot": "std",
+    "why": "the chain itself",
+    "lift": "01.jpg"
+  },
+  "locked-charger": {
+    "file": "02.jpg",
+    "slot": "land",
+    "lift": "02.jpg"
+  },
+  "mapangi": {
+    "file": "07.jpg",
+    "slot": "tall",
+    "why": "the wand, upright",
+    "lift": "02.jpg"
+  },
+  "medicine-management": {
+    "file": "03.jpg",
+    "slot": "sq",
+    "why": "the box, uncaptioned",
+    "focus": "80% 50%",
+    "lift": "03.jpg"
+  },
+  "microplastic-robot": {
+    "file": "04.jpg",
+    "slot": "sq",
+    "why": "the robot, not the water",
+    "lift": "04.jpg"
+  },
+  "neptunus": {
+    "slot": "wide",
+    "why": "a long low render",
+    "lift": "01.jpg"
+  },
+  "open-noise-control": {
+    "slot": "tall",
+    "lift": "02.jpg"
+  },
+  "pet-robot": {
+    "slot": "std",
+    "lift": "02.jpg"
+  },
+  "poclainger": {
+    "slot": "std",
+    "focus": "0% 50%",
+    "why": "a three-panel strip; the first panel alone, so no label is cut",
+    "lift": "01.jpg"
+  },
+  "pov-display": {
+    "slot": "land",
+    "lift": "01.jpg"
+  },
+  "pygmalion": {
+    "file": "02.jpg",
+    "slot": "tall",
+    "lift": "02.jpg"
+  },
+  "quri": {
+    "file": "02.jpg",
+    "slot": "sq",
+    "why": "a dome",
+    "lift": "02.jpg"
+  },
+  "rammus": {
+    "slot": "land",
+    "lift": "01.jpg"
+  },
+  "rc-submarine": {
+    "file": "08.jpg",
+    "slot": "land",
+    "why": "in the sea — the one frame that says submarine",
+    "feature": "2025 opens under water — the one build photographed where it works",
+    "lift": "01.jpg"
+  },
+  "robot-arm": {
+    "slot": "std",
+    "lift": "01.jpg"
+  },
+  "rovision": {
+    "slot": "std",
+    "why": "the rover centred; three landscapes in a row was flat",
+    "lift": "01.jpg"
+  },
+  "school-zone": {
+    "file": "04.jpg",
+    "slot": "tall",
+    "why": "the road model, looking down it",
+    "lift": "07.jpg"
+  },
+  "scout": {
+    "slot": "std",
+    "lift": "01.jpg"
+  },
+  "screw-robot": {
+    "slot": "land",
+    "lift": "02.jpg"
+  },
+  "self-driving-car": {
+    "slot": "land",
+    "lift": "01.jpg"
+  },
+  "smart-car-2009": {
+    "slot": "std",
+    "lift": "01.jpg"
+  },
+  "smart-car-2013": {
+    "slot": "sq",
+    "why": "square, so the two Smart Cars stop reading as one entry twice",
+    "lift": "01.jpg"
+  },
+  "snuewheel": {
+    "slot": "land",
+    "why": "a bicycle is long",
+    "feature": "2015's Grand Prize",
+    "lift": "01.jpg"
+  },
+  "speech-bot": {
+    "slot": "port",
+    "focus": "50% 35%",
+    "why": "the robot and its screen, tall",
+    "lift": "06.jpg"
+  },
+  "swarm-tracking": {
+    "file": "07.jpg",
+    "slot": "std",
+    "why": "the maze with the robots in it",
+    "lift": "02.jpg"
+  },
+  "syncope-device": {
+    "file": "03.jpg",
+    "slot": "std",
+    "why": "the device, not the laptop",
+    "lift": "03.jpg"
+  },
+  "tachikoma": {
+    "slot": "std",
+    "lift": "01.jpg"
+  },
+  "tangerine-toy": {
+    "slot": "sq",
+    "why": "a glowing disc",
+    "feature": "the one lit object in 2024",
+    "lift": "01.jpg"
+  },
+  "techwin-2011": {
+    "slot": "std",
+    "lift": "01.jpg"
+  },
+  "tic-mask": {
+    "slot": "strip",
+    "focus": "50% 32%",
+    "why": "the sensor and the earpieces; only a 3:1 strip crops off both the black bar above and the caption below",
+    "lift": "01.jpg"
+  },
+  "turtlebot": {
+    "slot": "sq",
+    "lift": "01.jpg"
+  },
+  "two-wheeled": {
+    "slot": "std",
+    "lift": "01.jpg"
+  },
+  "unicycle": {
+    "slot": "tall",
+    "why": "the wheel, upright",
+    "lift": "09.jpg"
+  },
+  "universal-fridge": {
+    "slot": "sq",
+    "lift": "01.jpg"
+  },
+  "untitled": {
+    "slot": "tall",
+    "lift": "01.jpg"
+  },
+  "useless-but-cute": {
+    "slot": "land",
+    "feature": "2017's most characterful face",
+    "lift": "01.jpg"
+  },
+  "vibrating-shoes": {
+    "slot": "std",
+    "lift": "01.jpg"
+  },
+  "vr-drone": {
+    "slot": "std",
+    "lift": "03.jpg"
+  },
+  "vr-rider": {
+    "slot": "tall",
+    "why": "the rig, upright, no rider",
+    "lift": "01.jpg"
+  },
+  "walk": {
+    "slot": "tall",
+    "focus": "50% 12%",
+    "why": "a phone screenshot; the player card is at the top",
+    "lift": "01.jpg"
+  },
+  "walknine": {
+    "slot": "sq",
+    "why": "square, so its row isn't four of the same",
+    "lift": "01.jpg"
+  }
+}

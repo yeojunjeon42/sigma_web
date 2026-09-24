@@ -1,18 +1,17 @@
+import { SOCIAL } from "@/features/site/data/social";
 const SITE_URL = "https://sigmaintelligence.org";
 
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "시그마 인텔리전스 (Sigma Intelligence)",
+  "@id": `${SITE_URL}/#organization`,
+  name: "Sigma Intelligence",
   url: SITE_URL,
+  alternateName: "시그마 인텔리전스",
   description:
-    "서울대학교 로봇동아리 시그마 인텔리전스. 1984년 설립된 국내 최초 대학 로봇 동아리.",
+    "Korea's first university robotics club, founded in 1984 at Seoul National University.",
   foundingDate: "1984",
-  sameAs: [
-    "https://www.instagram.com/sigma_intelligence_/",
-    "https://www.linkedin.com/company/sigma-intelligence/",
-    "https://www.facebook.com/sigmaintelligence/",
-  ],
+  sameAs: SOCIAL.map((s) => s.href),
   contactPoint: {
     "@type": "ContactPoint",
     email: "record.snusigma@gmail.com",
@@ -29,7 +28,8 @@ const organizationSchema = {
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "시그마 | 서울대학교 로봇동아리",
+  name: "Sigma Intelligence — SNU Robotics Club",
+  alternateName: "시그마 | 서울대학교 로봇동아리",
   url: SITE_URL,
 };
 

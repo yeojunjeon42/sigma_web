@@ -1,93 +1,88 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { sanityFetch } from "@/sanity/lib/live";
-import { urlFor } from "@/sanity/lib/image";
 import { T } from "@/components/T";
+import Footer from "@/components/Footer";
+import { Container, GridField } from "@/components/ui";
+import { generationLabel } from "@/features/alumni/api/getCohorts";
+import { ALUMNI, alumnusGeneration } from "@/features/alumni/data/people";
+import { getTeam } from "@/features/members/api/getMembers";
+import AlumniPlates, { type Alumnus } from "@/features/members/components/AlumniPlates";
+import MemberCrew, { type CrewMember } from "@/features/members/components/MemberCrew";
+import { INCOMING, generationOf } from "@/features/members/data/roster";
+
+const META = "text-caption tracking-normal";
 
 export const metadata: Metadata = {
-  title: "임원진",
-  description:
-    "시그마 인텔리전스 임원진 소개. 서울대학교 로봇동아리를 이끄는 사람들.",
+  title: "Members",
+  description: "The students of Sigma Intelligence today.",
 };
 
-interface Member {
-  _id: string;
-  name: string;
-  role?: string;
-  team?: string;
-  photo?: { asset: { _ref: string } };
-  order?: number;
-}
-
-async function getMembers(): Promise<Member[]> {
-  const { data } = await sanityFetch({
-    query: `*[_type == "member"] | order(order asc, name asc) {
-      _id,
-      name,
-      role,
-      team,
-      photo,
-      order
-    }`,
-  });
-  return data;
-}
-
 export default async function MembersPage() {
-  const members = await getMembers();
+  const team = await getTeam();
+
+  // The roster's order stands: the executive team first, then those elected to follow them.
+  const ranked = team.filter((m) => m.role || m.incoming);
+  const rest = team
+    .filter((m) => !m.role && !m.incoming)
+    .sort((a, b) => a.name.localeCompare(b.name, "ko"));
+  const members: CrewMember[] = [...ranked, ...rest].map((m) => ({
+    id: m.id,
+    name: m.name,
+    nameEn: m.nameEn,
+    post: m.role ?? (m.duty ? undefined : INCOMING),
+    duty: m.duty,
+    department: m.department,
+    gen: generationLabel(generationOf(m)),
+    portrait: m.portrait,
+    links: m.links,
+  }));
+
+  const alumni: Alumnus[] = [...ALUMNI]
+    .sort((a, b) => a.entryYear - b.entryYear)
+    .map((a) => ({
+      id: a.id,
+      name: a.name,
+      field: a.field,
+      gen: generationLabel(alumnusGeneration(a)),
+      year: a.entryYear,
+      portrait: null,
+    }));
 
   return (
-    <div>
+    <>
       <Navbar />
-      <main>
-        <section>
-          <h1>
-            <T en="Members" ko="멤버" />
-          </h1>
-          <p>
-            <T
-              en="The people behind Sigma Intelligence."
-              ko="2026 시그마 인텔리전스를 이끄는 사람들."
-            />
-          </p>
-        </section>
 
-        {members.length === 0 ? (
-          <p>
-            <T
-              en="Members will be listed here soon."
-              ko="멤버 정보가 곧 업데이트됩니다."
-            />
-          </p>
-        ) : (
-          <ul>
-            {members.map((member) => (
-              <li key={member._id}>
-                <MemberCard member={member} />
-              </li>
-            ))}
-          </ul>
-        )}
-      </main>
-      <Footer />
-    </div>
-  );
-}
+      <div className="relative z-10 bg-canvas">
+        <main id="main">
+          <GridField>
+            <Container className="pb-section pt-[calc(var(--masthead)+var(--spacing-xl))] lg:pt-[calc(var(--masthead)+var(--spacing-xxxl))]">
+              <h1 className={`u-scroll-in ${META} mb-lg text-ink`}>
+                <T en="Members" ko="구성원" />
+              </h1>
+              {members.length > 0 && <MemberCrew members={members} />}
+            </Container>
 
-function MemberCard({ member }: { member: Member }) {
-  const imageUrl = member.photo
-    ? urlFor(member.photo).width(400).height(400).url()
-    : null;
+            <Container className="pb-section">
+              <section aria-labelledby="alumni">
+                <h2 id="alumni" className={`u-scroll-in ${META} mb-lg text-ink`}>
+                  <T en="Alumni" ko="동문" />
+                </h2>
+                {alumni.length > 0 ? (
+                  <AlumniPlates alumni={alumni} />
+                ) : (
+                  <ul aria-hidden="true" className="grid grid-cols-2 gap-lg md:grid-cols-4">
+                    {[0, 1, 2, 3].map((i) => (
+                      <li key={i} className={`aspect-square bg-surface-sunken ${i > 1 ? "max-md:hidden" : ""}`} />
+                    ))}
+                  </ul>
+                )}
+              </section>
+            </Container>
+          </GridField>
+        </main>
 
-  return (
-    <article>
-      {imageUrl && (
-        <Image src={imageUrl} alt={member.name} width={400} height={400} />
-      )}
-      <p>{member.name}</p>
-      {member.role && <p>{member.role}</p>}
-    </article>
+        <Footer />
+      </div>
+    </>
   );
 }
