@@ -1,4 +1,3 @@
-import Link from "next/link";
 const SITE = "https://sigmaintelligence.org";
 
 export const MACHINE_NAV = [
@@ -14,9 +13,8 @@ export const MACHINE_NAV = [
 export const LINK =
   "underline underline-offset-4 transition-colors hover:text-machine-bright";
 
-const TAP = "inline-flex min-h-11 items-center lg:min-h-0";
 
-export type Bi = { en: string; ko?: string };
+type Bi = { en: string; ko?: string };
 
 export function Bil({ v }: { v: Bi }) {
   return (
@@ -166,16 +164,6 @@ export function Ext({ href, children }: { href: string; children?: React.ReactNo
     <a href={href} className={`${LINK} ${HIT}`}>
       {children ?? href}
     </a>
-  );
-}
-
-export function More({ href, label }: { href: string; label: string }) {
-  return (
-    <p>
-      <Link href={href} className={`${LINK} ${TAP}`}>
-        → {label}
-      </Link>
-    </p>
   );
 }
 

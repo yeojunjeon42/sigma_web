@@ -1,5 +1,3 @@
-// One source for every machine surface: the /ai pages, their .md twins, /llms.txt and /llms-full.txt.
-
 import fs from "node:fs";
 import path from "node:path";
 import { ARCHIVE } from "@/features/archive/data/projects";
@@ -46,7 +44,7 @@ export const PAGES = [
   { key: "contact", title: "Contact", ai: "/ai/contact", md: "/ai/contact.md", human: "/contact", note: "Email, club room address, maps and channels" },
 ] as const;
 
-export type PageKey = (typeof PAGES)[number]["key"];
+type PageKey = (typeof PAGES)[number]["key"];
 
 const PERIOD: Record<string, string> = {
   H1: "first half",
@@ -57,7 +55,7 @@ const PERIOD: Record<string, string> = {
   Winter: "winter",
 };
 
-export function isoDate(raw: string, year: number): { iso: string; period?: string; exact: boolean } {
+function isoDate(raw: string, year: number): { iso: string; period?: string; exact: boolean } {
   const s = raw.trim();
   let m = /^(\d{4})-(\d{2})-(\d{2})~(\d{2})$/.exec(s);
   if (m) return { iso: `${m[1]}-${m[2]}-${m[3]}/${m[1]}-${m[2]}-${m[4]}`, exact: true };
@@ -117,7 +115,7 @@ export function getBuilds(): Build[] {
         id: p.id,
         title: { en: t.en, ko },
         year: p.year,
-        era: ERAS.find((e) => e.key === p.era)?.label.en ?? p.era,
+        era: ERAS.find((e) => e.key === p.era)?.label ?? p.era,
         award: p.award,
         tags: tagsOf(list(doc?.data.tags)),
         team: list(doc?.data.team).map((m) => m.replace(/\s*\([^)]*\)\s*$/, "").trim()),
@@ -215,8 +213,6 @@ export async function getMembers() {
 
 export { getCohorts, AWARDS, CURRICULUM, EQUIPMENT, FACTS, PARTNERS, VOICE, MAPS, SOCIAL };
 
-/* ---------- Markdown ---------- */
-
 const bi = (b: Bi) => (b.ko && b.ko !== b.en ? `${b.en} (${b.ko})` : b.en);
 const abs = (p: string) => (p.startsWith("http") ? p : `${SITE}${p}`);
 const cell = (s: string) => s.replace(/\|/g, "\\|").replace(/\n+/g, " ");
@@ -240,7 +236,7 @@ function heading(title: string, key: PageKey): string {
   ].join("\n");
 }
 
-export function mdIdentity(): string {
+function mdIdentity(): string {
   return table(
     ["Field", "Value"],
     [
@@ -257,7 +253,7 @@ export function mdIdentity(): string {
   );
 }
 
-export async function mdIndex(): Promise<string> {
+async function mdIndex(): Promise<string> {
   const [history, cohorts] = await Promise.all([getHistory(), getCohorts()]);
   const entries = history.reduce((n, y) => n + y.entries.reduce((m, e) => m + e.count, 0), 0);
   return [
@@ -289,7 +285,7 @@ export async function mdIndex(): Promise<string> {
   ].join("\n");
 }
 
-export function mdAbout(): string {
+function mdAbout(): string {
   return [
     heading("About Sigma Intelligence", "about"),
     "",
@@ -321,7 +317,7 @@ export function mdAbout(): string {
   ].join("\n");
 }
 
-export function mdArchive(full = false): string {
+function mdArchive(full = false): string {
   const builds = getBuilds();
   const out = [
     heading("Archive — builds 2007–2025", "archive"),
@@ -361,7 +357,7 @@ export function mdArchive(full = false): string {
   return out.join("\n");
 }
 
-export async function mdHistory(): Promise<string> {
+async function mdHistory(): Promise<string> {
   const [history, cohorts] = await Promise.all([getHistory(), getCohorts()]);
   const out = [
     heading("History — 1984 to 2026", "history"),
@@ -400,7 +396,7 @@ export async function mdHistory(): Promise<string> {
   return out.join("\n");
 }
 
-export async function mdMembers(): Promise<string> {
+async function mdMembers(): Promise<string> {
   const members = await getMembers();
   return [
     heading("Members — executive team", "members"),
@@ -423,7 +419,7 @@ export async function mdMembers(): Promise<string> {
   ].join("\n");
 }
 
-export function mdBlog(full = false): string {
+function mdBlog(full = false): string {
   const posts = getPosts();
   const out = [
     heading("Blog — published posts", "blog"),
@@ -451,7 +447,7 @@ export function mdBlog(full = false): string {
   return out.join("\n");
 }
 
-export function mdContact(): string {
+function mdContact(): string {
   return [
     heading("Contact", "contact"),
     "",

@@ -1,8 +1,5 @@
 "use client";
 
-// The 404 and error arcade: the big word is printed in the name's face and its letters are the
-// maze's walls; pellets run round and through them, the ghosts chase, the mark eats.
-
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useMedia } from "@/lib/media";
 import { createFace, createPrinter, readInk } from "./sprites";
@@ -127,7 +124,6 @@ export default function Arcade({ word, label, extra }: { word: string; label: st
       if (!g) return;
       g.setTransform(dpr, 0, 0, dpr, 0, 0);
       g.clearRect(0, 0, W, H);
-      // The stretch goes in the shorthand: setting `font` resets `fontStretch`.
       g.font = `expanded 700 100px ${family}`;
       g.textBaseline = "alphabetic";
       const m = g.measureText(word);
@@ -144,7 +140,6 @@ export default function Arcade({ word, label, extra }: { word: string; label: st
       g.fillStyle = tones.ink;
       g.fillText(word, tx, ty);
 
-      // A cell is wall where the letters cover most of it.
       const data = g.getImageData(0, 0, base.width, base.height).data;
       wall = new Uint8Array(cols * rows);
       for (let rr = 0; rr < rows; rr++)
@@ -160,7 +155,6 @@ export default function Arcade({ word, label, extra }: { word: string; label: st
             }
           if (on / all > 0.34) wall[idx(c, rr)] = 1;
         }
-      // The frame, and a few rules in the open paper either side, so it reads as a maze.
       const rules: [number, number, number, number][] = [];
       const bar = (c0: number, r0: number, c1: number, r1: number) => {
         for (let c = c0; c <= c1; c++) for (let rr = r0; rr <= r1; rr++) if (c >= 0 && rr >= 0 && c < cols && rr < rows) wall[idx(c, rr)] = 1;
@@ -322,7 +316,6 @@ export default function Arcade({ word, label, extra }: { word: string; label: st
       }
     };
 
-    // Grid movement: an actor turns only at a cell's centre, and stops at a wall.
     const step = (a: Actor, v: number, choose: (c: number, r: number) => Dir) => {
       let budget = v;
       for (let guard = 0; guard < 4 && budget > 0; guard++) {

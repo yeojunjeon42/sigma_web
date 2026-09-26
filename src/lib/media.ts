@@ -23,5 +23,4 @@ export function useMedia(query: string, serverValue: boolean) {
   );
 }
 
-// Tailwind's lg and up: the reel needs a wide screen, and it is the only caller
 export const useWide = () => useMedia("(min-width: 64rem)", true);

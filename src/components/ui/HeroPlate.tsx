@@ -2,13 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useSyncExternalStore } from "react";
-import { T } from "@/components/T";
 import { DOT, GROUND, GROUND_INK, SCREEN, groundPatch } from "@/lib/halftone";
 
 export type HeroBuild = {
   id: string;
   src: string;
-  name: { en: string; ko: string };
+  name: string;
   year: number | null;
 };
 
@@ -62,7 +61,7 @@ export function HeroCaption({ builds, className = "" }: { builds: HeroBuild[]; c
         href={`/archive?view=reel&at=${b.id}`}
         className="inline-flex min-h-11 items-center gap-x-xs leading-none text-ink transition-opacity hover:opacity-60 lg:min-h-0"
       >
-        <T en={b.name.en} ko={b.name.ko} />
+        {b.name}
         {b.year ? <span className="tabular-nums text-ink-muted">{b.year}</span> : null}
         <span aria-hidden="true">↗</span>
       </Link>
@@ -71,7 +70,7 @@ export function HeroCaption({ builds, className = "" }: { builds: HeroBuild[]; c
         onClick={() => advance?.()}
         className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-end leading-none text-ink-muted uppercase transition-colors hover:text-ink lg:min-h-0 lg:min-w-0"
       >
-        <T en="Next" ko="다음" />
+        Next
       </button>
     </p>
   );

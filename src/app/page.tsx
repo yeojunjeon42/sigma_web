@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import HeroField from "@/components/ui/HeroField";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { T } from "@/components/T";
 import { Container, GridField, Reveal } from "@/components/ui";
 import { getSponsors } from "@/features/sponsors/api/getSponsors";
 import { getArchiveWithMedia } from "@/features/archive/api/getArchive";
@@ -37,13 +36,13 @@ export default async function Home() {
   const plates = HERO_BUILDS.flatMap((id) => {
     const p = builds.find((x) => x.id === id);
     return p
-      ? [{ id, src: `/archive-looks/${id}/cutout.webp`, name: splitTitle(p.title), year: p.year }]
+      ? [{ id, src: `/archive-looks/${id}/cutout.webp`, name: splitTitle(p.title).en, year: p.year }]
       : [];
   });
 
   const line = [...builds].reverse().map((p) => ({
     id: p.id,
-    name: splitTitle(p.title),
+    name: splitTitle(p.title).en,
     year: p.year,
     src: p.id in looks ? `/archive-looks/${p.id}/cutout.webp` : null,
   }));
@@ -55,24 +54,22 @@ export default async function Home() {
     if (row) row.got.push(a.result);
     else merged.set(key, { year: a.year, contest: a.contest, got: [a.result] });
   }
-  const tally = (got: { en: string; ko: string }[], lang: "en" | "ko") => {
+  const tally = (got: { en: string }[]) => {
     const n = new Map<string, number>();
-    for (const r of got) n.set(r[lang], (n.get(r[lang]) ?? 0) + 1);
+    for (const r of got) n.set(r.en, (n.get(r.en) ?? 0) + 1);
     return [...n].map(([k, c]) => (c > 1 ? `${k} ×${c}` : k)).join(", ");
   };
   const results = [...merged].map(([key, r]) => ({
     key,
     year: r.year,
-    contest: r.contest,
-    result: { en: tally(r.got, "en"), ko: tally(r.got, "ko") },
+    contest: r.contest.en,
+    result: tally(r.got),
   }));
 
   return (
     <>
       <Navbar />
 
-      {/* The room takes the first viewport; the masthead composition is the first
-          block to slide up over it. */}
       <div className="relative z-10 bg-canvas">
         <HeroField sponsors={sponsors} builds={plates} />
 
@@ -84,13 +81,13 @@ export default async function Home() {
           <Container className="grid gap-y-xl py-xxl md:grid-cols-12 md:items-end md:py-section">
             <p className="md:col-span-8">
               <span className="text-body text-ink-muted">
-                <T en="Founded" ko="창립" />
+                Founded
               </span>
               <span className={`${FIGURE} u-drift mt-sm [--drift-from:32px] [--drift-to:-32px]`}><CountUp from={new Date().getFullYear()} to={FOUNDED} /></span>
             </p>
             <p className="text-right md:col-span-4">
               <span className="text-body text-ink-muted">
-                <T en="Years" ko="년" />
+                Years
               </span>
               <span className={`${FIGURE} u-drift mt-sm [--drift-from:32px] [--drift-to:-32px]`}><CountUp to={years} /></span>
             </p>
@@ -112,7 +109,7 @@ export default async function Home() {
               stagger={70}
             >
               <h2 className="text-title text-ink md:col-span-3 md:row-start-1">
-                <T en="Stacks" ko="스택" />
+                Stacks
               </h2>
               <ul className={`${LIST} md:col-span-3 md:col-start-4 md:row-start-1`}>
                 {CURRICULUM.map((c) => (
@@ -122,37 +119,37 @@ export default async function Home() {
                         href={c.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="relative transition-opacity before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 hover:opacity-60 lg:before:hidden"
+                        className="u-swipe relative before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 lg:before:hidden"
                       >
-                        <T en={c.en} ko={c.ko} />
+                        {c.en}
                       </a>
                     ) : (
-                      <T en={c.en} ko={c.ko} />
+                      c.en
                     )}
                   </li>
                 ))}
               </ul>
 
               <h2 className="text-title text-ink md:col-span-3 md:col-start-7 md:row-start-2">
-                <T en="Equipments" ko="장비" />
+                Equipments
               </h2>
               <ul className={`${LIST} md:col-span-3 md:col-start-10 md:row-start-2`}>
                 {EQUIPMENT.map((e) => (
                   <li key={e.en} className="u-scroll-in">
-                    <T en={e.en} ko={e.ko} />
+                    {e.en}
                   </li>
                 ))}
               </ul>
 
               <h2 className="text-title text-ink md:col-span-3 md:col-start-3 md:row-start-3">
-                <T en="Intake" ko="모집" />
+                Intake
               </h2>
               <ul className={`${LIST} md:col-span-3 md:col-start-6 md:row-start-3`}>
                 <li>
-                  <T en="March" ko="3월" />
+                  March
                 </li>
                 <li>
-                  <T en="September" ko="9월" />
+                  September
                 </li>
               </ul>
             </Reveal>

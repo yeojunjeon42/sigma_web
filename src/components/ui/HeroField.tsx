@@ -1,7 +1,6 @@
 import Image from "next/image";
 import HeroPlate, { HeroCaption, type HeroBuild } from "./HeroPlate";
 import type { Sponsor } from "@/features/sponsors/api/getSponsors";
-import { T } from "@/components/T";
 
 const FRAME = {
   "--S": "min(calc((100vw - 2 * var(--gutter)) / 9.8), 4rem)",
@@ -42,10 +41,7 @@ export default function HeroField({
   return (
     <section style={FRAME} className="relative isolate touch-pan-y overflow-hidden bg-canvas">
       <h1 className="sr-only">
-        <T
-          en="Sigma Intelligence — the robotics club of Seoul National University"
-          ko="시그마 인텔리전스 — 서울대학교 로봇 동아리"
-        />
+        Sigma Intelligence — the robotics club of Seoul National University
       </h1>
 
       <HeroPlate builds={builds} />
@@ -61,7 +57,7 @@ export default function HeroField({
           <p
             className={`${META} u-knock leading-none text-ink-muted md:col-span-3 md:col-start-10 md:row-start-1 md:self-start md:justify-self-end`}
           >
-            <T en="Est. 1984" ko="1984년 창립" />
+            Est. 1984
           </p>
         </div>
 
@@ -82,46 +78,43 @@ export default function HeroField({
             depth={22}
             className="col-start-1 row-start-1 self-start md:col-span-3 md:col-start-7 md:row-start-1"
           >
-            <T en="Seoul National University" ko="서울대학교" />
+            Seoul National University
           </Stmt>
           <Stmt
             depth={34}
             className="col-start-2 row-start-2 self-center md:col-span-3 md:col-start-10 md:row-start-2 md:self-end"
           >
-            <T en="Room 215-2, Mabang" ko="215-2호, 마방" />
+            Room 215-2, Mabang
           </Stmt>
           <Stmt
             depth={16}
             className="col-start-1 row-start-3 self-center md:col-span-3 md:col-start-1 md:row-start-3 md:self-end"
           >
-            <T en="Undergraduate research community" ko="학부생 연구 공동체" />
+            Undergraduate research community
           </Stmt>
           <Stmt
             depth={28}
             className="col-start-2 row-start-4 self-center md:col-span-3 md:col-start-4 md:row-start-5 md:self-start"
           >
-            <T en="Media and kinetic art" ko="미디어와 키네틱 아트" />
+            Media and kinetic art
           </Stmt>
           <Stmt
             depth={20}
             className="col-start-1 row-start-5 self-end md:col-span-3 md:col-start-10 md:row-start-4 md:self-center"
           >
-            <T en="Korea's first university robotics club" ko="국내 최초 설립 대학 로봇동아리" />
+            Korea’s first university robotics club
           </Stmt>
         </div>
 
         <div data-sponsors className="mt-xl flex flex-col items-end gap-y-md text-right md:items-start md:text-left md:col-span-4 md:col-start-1 md:row-start-6 md:mt-0 md:self-end md:pb-0">
           <p className="u-knock max-w-[34ch] text-caption text-ink-muted max-md:hidden">
-            <T
-              en="We are the robotics club of Seoul National University."
-              ko="우리는 서울대학교 로봇 동아리다."
-            />
+            We are the robotics club of Seoul National University.
           </p>
 
           {sponsors.length > 0 && (
             <div>
               <p className={`${META} u-knock leading-none text-ink-muted`}>
-                <T en="Sponsors" ko="후원" />
+                Sponsors
               </p>
               <ul className="mt-md flex flex-wrap items-center justify-end gap-x-xl gap-y-md md:justify-start">
                 {sponsors.map((s) => {

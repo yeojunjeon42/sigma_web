@@ -1,7 +1,5 @@
 "use client";
 
-// A figure that counts once (up or down) to its value, the first time it comes into view. Renders the final value.
-
 import { useEffect, useRef } from "react";
 
 export function CountUp({ to, from = 0, duration = 1400 }: { to: number; from?: number; duration?: number }) {

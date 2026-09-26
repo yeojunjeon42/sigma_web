@@ -1,6 +1,3 @@
-// The club's mark as Pac-Man and the ghosts of our own drawing, printed as dots on the paper.
-// Shared by /contact's rule-track game and the 404 / error arcade.
-
 const CX = 119.69;
 const CY = 137;
 const R_OUT = 137;
@@ -21,7 +18,7 @@ const MARK =
   "M231.98 181.85C231.49 183.06 230.99 184.26 230.47 185.45L241.56 190.31C242.14 189 242.7 187.68 243.23 186.36ZM236.35 168.83C236 170.09 235.65 171.34 235.27 172.58L246.83 176.13C247.25 174.77 247.66 173.39 248.04 172.01ZM240.5 141.71C240.45 143.01 240.37 144.31 240.28 145.6L252.35 146.45C252.45 145.03 252.54 143.6 252.59 142.16ZM240.48 131.86L252.56 131.35C252.5 129.92 252.43 128.5 252.32 127.07L240.26 127.97C240.35 129.26 240.42 130.55 240.48 131.86M236.23 104.76L247.91 101.54C247.53 100.16 247.13 98.79 246.7 97.42L235.13 101.03C235.52 102.26 235.88 103.51 236.23 104.76M231.83 91.76L243.06 87.22C242.53 85.89 241.96 84.58 241.39 83.27L230.31 88.17C230.83 89.36 231.34 90.55 231.83 91.76M236.82 200.05L220.97 191.51C220.09 193.13 219.17 194.74 218.2 196.33L233.61 205.63C234.73 203.79 235.8 201.93 236.82 200.05M220.88 82.31L236.71 73.73C235.69 71.85 234.6 70 233.49 68.17L218.09 77.49C219.06 79.08 220 80.69 220.88 82.31M232.45 114.35C232.82 116.17 233.14 117.99 233.41 119.83L251.21 117.16C250.9 115.04 250.52 112.93 250.11 110.82ZM233.44 153.94C233.17 155.78 232.86 157.61 232.5 159.43L250.16 162.92C250.58 160.82 250.94 158.7 251.25 156.58Z";
 const WEDGE = "M142.36 137L211.46 88.62L119.69 121.54Z";
 
-export type Ink = { paper: string; ink: string; muted: string; accent: string };
+type Ink = { paper: string; ink: string; muted: string; accent: string };
 
 export function readInk(): Ink {
   const css = (n: string, f: string) =>
@@ -34,8 +31,7 @@ export function readInk(): Ink {
   };
 }
 
-/** The face's small life: chewing while it moves, a blink now and then, a twitching red wedge. */
-export type Face = { open: number; lid: number; tongue: number };
+type Face = { open: number; lid: number; tongue: number };
 
 export function createFace() {
   let chew = 0;
@@ -68,10 +64,6 @@ export function createFace() {
   };
 }
 
-/**
- * Prints sprites as dots: each shape is drawn in flat key colours into an offscreen canvas at
- * four samples per dot, then every dot is sized by coverage and toned by `tone`.
- */
 export function createPrinter(ink: Ink) {
   const off = document.createElement("canvas");
   const og = off.getContext("2d", { willReadFrequently: true });
@@ -155,7 +147,6 @@ export function createPrinter(ink: Ink) {
     g.fill();
   };
 
-  /** The mark, facing (dx, dy), centred at (x, y) and `d` across. */
   const pac = (
     ctx: CanvasRenderingContext2D,
     x: number,
@@ -194,7 +185,6 @@ export function createPrinter(ink: Ink) {
     }, markTone, knock);
   };
 
-  /** A ghost looking along (dx, dy); `fright` prints it in the accent, eyes dimmed. */
   const ghost = (
     ctx: CanvasRenderingContext2D,
     x: number,
