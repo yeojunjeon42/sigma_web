@@ -1,8 +1,5 @@
 "use client";
 
-// Club life beside the ledger (from lg): prints down the whole column in a zig-zag, each held
-// by something different, the first of each event with a note in the hand. Cards tape on once.
-
 import Image from "next/image";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useMedia } from "@/lib/media";
@@ -101,7 +98,7 @@ function Piece({ card, k, slot, side, lone, shown, still }: { card: Card; k: num
     );
   }, [shown, still, rest, r]);
 
-  const name = card.event.name.en;
+  const name = card.event.name;
   const extras: ReactNode[] = [];
   if (card.nth === 1) extras.push(<Stamp key="stamp" text={card.event.when} turn={-side * 9} className={side < 0 ? "-right-6 -bottom-6" : "-left-6 -bottom-6"} />);
   if (card.nth === 3 && lone) extras.push(<TornNote key="note" text={name} turn={side * 4} className={side < 0 ? "left-[calc(100%+1rem)] top-[30%]" : "right-[calc(100%+1rem)] top-[30%]"} />);

@@ -1,16 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { T } from "@/components/T";
 import type { Bilingual } from "@/features/site/data/about";
 import { Print, useInView } from "./MemberCrew";
 
-/** Alumni as a strip of portrait plates, one per person, ordered by 기수 (after pentagram.com/about). */
 export interface Alumnus {
   id: string;
   name: string;
   field: Bilingual;
-  gen: Bilingual;
+  gen: string;
   year: number;
   portrait: string | null;
 }
@@ -90,13 +88,13 @@ export default function AlumniPlates({ alumni }: { alumni: Alumnus[] }) {
               <figcaption className="border-t border-ink pt-sm">
                 <div className="flex items-baseline justify-between gap-md text-caption text-ink-muted">
                   <span>
-                    <T en={a.gen.en} ko={a.gen.ko} />
+                    {a.gen}
                   </span>
                   <span className="tabular-nums">{a.year}</span>
                 </div>
                 <p className="mt-md text-display-lg text-ink">{a.name}</p>
                 <p className="mt-sm text-body text-ink-muted">
-                  <T en={a.field.en} ko={a.field.ko} />
+                  {a.field.en}
                 </p>
               </figcaption>
             </figure>
@@ -113,7 +111,7 @@ export default function AlumniPlates({ alumni }: { alumni: Alumnus[] }) {
             aria-label={`${a.name}, ${a.year}`}
             onClick={() => go(i)}
             className={`relative flex min-h-11 flex-1 cursor-pointer items-end pt-sm text-left font-mono text-[12px] tabular-nums transition-colors duration-200 before:absolute before:inset-x-0 before:-top-px before:h-0.5 before:transition-colors motion-reduce:transition-none focus:outline-none ${
-              at === i ? "text-ink before:bg-ink" : "text-ink-subtle before:bg-transparent hover:text-ink"
+              at === i ? "text-ink before:bg-ink" : "text-ink-muted before:bg-transparent hover:text-ink"
             }`}
           >
             {a.year}

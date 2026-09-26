@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
-import { T } from "@/components/T";
 import Footer from "@/components/Footer";
 import { Container, GridField } from "@/components/ui";
 import { generationLabel } from "@/features/alumni/api/getCohorts";
@@ -20,7 +19,6 @@ export const metadata: Metadata = {
 export default async function MembersPage() {
   const team = await getTeam();
 
-  // The roster's order stands: the executive team first, then those elected to follow them.
   const ranked = team.filter((m) => m.role || m.incoming);
   const rest = team
     .filter((m) => !m.role && !m.incoming)
@@ -55,17 +53,20 @@ export default async function MembersPage() {
       <div className="relative z-10 bg-canvas">
         <main id="main">
           <GridField>
-            <Container className="pb-section pt-[calc(var(--masthead)+var(--spacing-xl))] lg:pt-[calc(var(--masthead)+var(--spacing-xxxl))]">
-              <h1 className={`u-scroll-in ${META} mb-lg text-ink`}>
-                <T en="Members" ko="구성원" />
-              </h1>
+            <Container className="page-opening pb-section">
+              <div className="u-scroll-in flex items-baseline pt-xl pb-sm text-body md:pt-xxl xl:text-title">
+                <h1 className="flex items-baseline gap-x-sm text-ink">
+                  Members
+                  <span className="tabular-nums text-ink-muted">{new Date().getFullYear()}</span>
+                </h1>
+              </div>
               {members.length > 0 && <MemberCrew members={members} />}
             </Container>
 
             <Container className="pb-section">
               <section aria-labelledby="alumni">
                 <h2 id="alumni" className={`u-scroll-in ${META} mb-lg text-ink`}>
-                  <T en="Alumni" ko="동문" />
+                  Alumni
                 </h2>
                 {alumni.length > 0 ? (
                   <AlumniPlates alumni={alumni} />

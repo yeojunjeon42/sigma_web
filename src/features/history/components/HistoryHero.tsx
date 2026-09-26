@@ -1,20 +1,13 @@
 import Image from "next/image";
-import { T } from "@/components/T";
-import type { Bilingual, HistoryEvent } from "../types";
+import type { HistoryEvent } from "../types";
 import type { ClubEvent } from "../data/photos";
 import { when } from "./Chronology";
 import RollingDate from "./RollingDate";
 
-// The opening on a diagonal: 1984 reads up from the top left, the latest year down to the bottom
-// right, the photograph between them; Now hangs top right, the figures stand bottom left.
-// Below lg the same pieces on three columns: 1984 beside Now, the photo, the figures beside the year.
-
 const BIG =
   "font-[family-name:var(--f-display)] [font-stretch:125%] font-bold tabular-nums tracking-[-0.02em] leading-[0.699] text-ink [writing-mode:vertical-rl] text-[length:var(--Y)]";
 const CAP = "text-caption text-ink-muted";
-// Drops a caption onto the baseline of the lead/title line beside it.
-const LIFT = "pt-[0.3rem] lg:pt-2";
-const ROW = "grid gap-x-md border-t border-rule py-sm first:border-ink";
+const FIGURE = "text-[clamp(2.75rem,1.6rem+2.6vw,4.5rem)] leading-[0.85] tracking-[-0.04em] tabular-nums text-ink";
 
 const MOTION = `
 @media (prefers-reduced-motion: no-preference) {
@@ -33,7 +26,7 @@ export default function HistoryHero({
   event,
 }: {
   now: HistoryEvent[];
-  facts: { label: Bilingual; value: Bilingual }[];
+  facts: { label: string; value: string }[];
   latest: number;
   photo: { src: string; w: number; h: number };
   event: ClubEvent;
@@ -43,7 +36,7 @@ export default function HistoryHero({
       <style>{MOTION}</style>
       <h1 className="contents">
         <span className="sr-only">
-          <T en="History" ko="연혁" />, 1984 to {latest}
+          History, 1984 to {latest}
         </span>
         <span
           aria-hidden="true"
@@ -56,16 +49,16 @@ export default function HistoryHero({
       </h1>
 
       <section aria-label="Now" className="col-span-2 col-start-2 row-start-1 lg:col-span-4 lg:col-start-9">
-        <ul className="border-b border-rule">
+        <ul className="flex flex-col gap-y-lg">
           {now.slice(0, 2).map((e) => {
             const w = when(e.date);
             return (
-              <li key={e.id} className={`${ROW} grid-cols-[5.5rem_minmax(0,1fr)] lg:grid-cols-[7.5rem_minmax(0,1fr)]`}>
-                <span className={`${CAP} ${LIFT}`}>
-                  {w ? <T en={`${w.label.en} ${latest}`} ko={`${latest} ${w.label.ko}`} /> : e.award ? <T en="Award" ko="수상" /> : latest}
+              <li key={e.id} className="flex flex-col gap-y-xs">
+                <span className={CAP}>
+                  {w ? `${w} ${latest}` : e.award ? "Award" : latest}
                 </span>
                 <span className="text-balance text-lead text-ink lg:text-title">
-                  <T en={e.title.en.replaceAll("-", "\u2011")} ko={e.title.ko} />
+                  {e.title.en.replaceAll("-", "\u2011")}
                 </span>
               </li>
             );
@@ -78,31 +71,29 @@ export default function HistoryHero({
           <Image src={photo.src} alt="" fill priority sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
         </div>
         <figcaption className={`flex justify-between gap-x-md ${CAP}`}>
-          <T en={event.name.en.replace(/, \d{4}$/, "")} ko={event.name.ko.replace(/, \d{4}$/, "")} />
+          {event.name.replace(/, \d{4}$/, "")}
           <span>{event.when}</span>
         </figcaption>
       </figure>
 
-      <dl className="col-span-2 row-start-3 self-end border-b border-rule lg:col-span-4 lg:col-start-1">
-        {facts.map((f) => (
-          <div key={f.label.en} className={`${ROW} grid-cols-[minmax(0,1fr)_auto]`}>
-            <dt className={`${CAP} ${LIFT}`}>
-              <T en={f.label.en} ko={f.label.ko} />
-            </dt>
-            <dd className="font-mono text-lead tabular-nums tracking-[-0.03em] text-ink lg:text-title">
-              <T en={f.value.en} ko={f.value.ko} />
-            </dd>
-          </div>
-        ))}
-        <div className={`${ROW} grid-cols-[minmax(0,1fr)_auto]`}>
-          <dt className={`${CAP} lg:pt-[0.3rem]`}>
-            <T en="Running for" ko="활동 기간" />
-          </dt>
-          <dd className="text-lead text-ink lg:text-title">
+      <div className="col-span-2 row-start-3 flex flex-col gap-y-lg self-end lg:col-span-4 lg:col-start-1">
+        <dl className="grid grid-cols-2 gap-x-lg">
+          {facts.map((f) => (
+            <div key={f.label} className="flex flex-col-reverse gap-y-xs">
+              <dt className={CAP}>
+                {f.label}
+              </dt>
+              <dd className={FIGURE}>{f.value}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className={CAP}>
+          Running for
+          <span className="ml-sm text-lead text-ink [&>span]:inline">
             <RollingDate />
-          </dd>
-        </div>
-      </dl>
+          </span>
+        </p>
+      </div>
 
       <span
         aria-hidden="true"

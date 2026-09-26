@@ -1,5 +1,3 @@
-// Things that hold prints to the page: tape, a pin, clips, a stamp, a torn note, a sticker.
-
 import type { CSSProperties } from "react";
 
 const EDGE =

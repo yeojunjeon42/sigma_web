@@ -4,7 +4,7 @@ import { ROSTER, type RosterMember } from "../data/roster";
 
 const PHOTO_ROOT = path.join(process.cwd(), "public", "members");
 
-export function getLocalPortrait(id: string): string | null {
+function getLocalPortrait(id: string): string | null {
   if (!/^[a-z0-9-]+$/.test(id) || !fs.existsSync(PHOTO_ROOT)) return null;
   const hit = fs
     .readdirSync(PHOTO_ROOT)
@@ -12,7 +12,7 @@ export function getLocalPortrait(id: string): string | null {
   return hit ? `/members/${hit}` : null;
 }
 
-export interface TeamMember extends RosterMember {
+interface TeamMember extends RosterMember {
   portrait: string | null;
 }
 

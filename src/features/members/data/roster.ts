@@ -1,8 +1,6 @@
 import type { Bilingual } from "@/features/site/data/about";
 
-/** Full URLs to a member's own profiles. Add only what the member has given. */
 export interface MemberLinks {
-  /** A bare address; the icon links to it as `mailto:`. */
   email?: string;
   instagram?: string;
   github?: string;
@@ -13,30 +11,20 @@ export interface MemberLinks {
 export interface RosterMember {
   id: string;
   name: string;
-  /** The name as they write it in English, for the drawer's greeting. */
   nameEn?: string;
   role?: Bilingual;
-  /** The club work they carry, beside any titled post. */
   duty?: Bilingual;
-  /** 학번 — the two-digit year of matriculation (25 for 25학번). */
   cohort: number;
-  /** 기수, when it differs from what the 학번 gives (see `generationOf`). */
   generation?: number;
   department: Bilingual;
   incoming?: boolean;
   links?: MemberLinks;
 }
 
-/**
- * A member's 기수. The club counts one cohort a year from 1984 (1기), so a 25학번 member is
- * 42기 unless their entry says otherwise — someone who joined a year after matriculating
- * carries `generation`.
- */
 export function generationOf(m: RosterMember): number {
   return m.generation ?? 2000 + m.cohort - 1983;
 }
 
-/** Shown for an executive who holds no titled post. */
 export const INCOMING: Bilingual = { en: "Executive", ko: "임원" };
 
 const ECE: Bilingual = {
