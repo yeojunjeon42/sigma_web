@@ -86,7 +86,6 @@ export async function getSlugs(collection: Collection): Promise<Set<string>> {
   return new Set(slugs(collection));
 }
 
-// Posts may carry TeX between $…$ / $$…$$; archive entries go through plain marked.
 const withMath = new Marked(markedKatex({ throwOnError: false, nonStandard: false }));
 
 export async function getDoc(
@@ -100,14 +99,11 @@ export async function getDoc(
 
   const { data, body } = parseFrontmatter(fs.readFileSync(file, "utf8"));
   const md = collection === "posts" ? withMath : marked;
-  // Long display equations scroll sideways inside themselves, as a code block does.
   const html = (await md.parse(body, { async: true }))
     .replaceAll('class="katex-display"', 'class="katex-display u-scroll-x"');
   return { ...toMeta(collection, slug, data), html: collection === "posts" ? glue(html) : html };
 }
 
-// Punctuation straight after inline maths stays on its line: the formula and the mark are held
-// together, the formula found by walking its own span nesting.
 function glue(html: string): string {
   const open = '<span class="katex">';
   let out = "";
@@ -152,7 +148,6 @@ export async function getIndex(collection: Collection): Promise<DocMeta[]> {
   );
 }
 
-// A bracketed or plain comma list on one line: "[a, b]" or "a, b".
 function list(value: string | undefined): string[] {
   return (value ?? "")
     .replace(/^\[|\]$/g, "")
