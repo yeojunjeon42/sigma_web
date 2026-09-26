@@ -1,7 +1,5 @@
 "use client";
 
-// Each code block in an article sits on a panel with a copy button at its top right.
-
 import { useEffect } from "react";
 
 const ICON =

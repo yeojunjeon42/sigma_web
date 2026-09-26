@@ -1,88 +1,69 @@
-"use client";
-
 import Image from "next/image";
-import { useEffect, useId, useRef, useState } from "react";
-import { GROUND, SCREEN, coverInto, halftone } from "@/lib/halftone";
 
-/**
- * A post's picture. With a photograph it prints through the site's screen and resolves when
- * its `group/post` is pointed at; on touch it is the photograph. Without one it is a grey
- * placeholder of the same shape.
- */
+const STRONG = ["#ed2024", "#ee7f6a", "#8e1316"];
+const SOFT = ["#f3c1b5", "#f0d8d1"];
+const COOL = ["#b9c0b3", "#dfe1dc"];
+const BASE = ["#f3c1b5", "#ee7f6a", "#f0d8d1"];
+
+function hash(s: string) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+  return h >>> 0;
+}
+
+function field(seed: string) {
+  let n = hash(seed);
+  const next = () => {
+    n = (Math.imul(n, 1664525) + 1013904223) >>> 0;
+    return n / 4294967296;
+  };
+  const of = (list: string[]) => list[Math.floor(next() * list.length)];
+  const base = of(BASE);
+  const blobs = [of(STRONG), of(STRONG), of(SOFT), of(COOL)].map((c) => {
+    const x = Math.round(next() * 100);
+    const y = Math.round(next() * 100);
+    const r = Math.round(40 + next() * 40);
+    return `radial-gradient(circle at ${x}% ${y}%, ${c} 0%, transparent ${r}%)`;
+  });
+  return { backgroundColor: base, backgroundImage: blobs.join(",") };
+}
+
 export default function PostImage({
   src,
+  seed,
   ratio = "4 / 3",
   sizes,
   eager = false,
   className = "",
 }: {
   src?: string;
+  seed?: string;
   ratio?: string;
   sizes: string;
   eager?: boolean;
   className?: string;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const dots = useId();
-  const [printed, setPrinted] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    const canvas = el?.querySelector("canvas");
-    const img = el?.querySelector("img");
-    if (!src || !el || !canvas || !img) return;
-    let alive = true;
-    const draw = async () => {
-      if (!img.complete || !img.naturalWidth) {
-        await new Promise((r) => img.addEventListener("load", r, { once: true }));
-      }
-      if (!alive || !canvas.clientWidth) return;
-      if (halftone(canvas, (g, w, h) => coverInto(g, img, w, h), SCREEN, [0, 0], GROUND)) {
-        setPrinted(true);
-      }
-    };
-    draw();
-    return () => {
-      alive = false;
-    };
-  }, [src]);
-
-  // Generated cover art is already printed in dots; it shows as it is.
-  if (src?.startsWith("/blog-covers/")) {
+  if (src) {
     return (
-      <div style={{ aspectRatio: ratio }} className={`relative overflow-hidden ${className}`}>
-        <Image src={src} alt="" fill sizes={sizes} priority={eager} unoptimized className="object-cover" />
+      <div style={{ aspectRatio: ratio }} className={`relative overflow-hidden bg-ink/5 ${className}`}>
+        <Image src={src} alt="" fill sizes={sizes} priority={eager} className="object-cover" />
       </div>
     );
   }
-
-    if (!src) {
-    return (
-      <svg
-        aria-hidden="true"
-        style={{ aspectRatio: ratio }}
-        className={`block h-auto overflow-hidden text-ink ${className}`}
-      >
-        <defs>
-          <pattern id={dots} width="6" height="6" patternUnits="userSpaceOnUse">
-            <rect x="2" y="2" width="2" height="2" fill="currentColor" fillOpacity="0.22" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="currentColor" fillOpacity="0.05" />
-        <rect width="100%" height="100%" fill={`url(#${dots})`} />
-      </svg>
-    );
-  }
-
   return (
-    <div ref={ref} style={{ aspectRatio: ratio }} className={`relative overflow-hidden bg-canvas ${className}`}>
-      <Image src={src} alt="" fill sizes={sizes} loading={eager ? "eager" : undefined} className="object-cover" />
-      <canvas
-        aria-hidden="true"
-        className={`pointer-events-none absolute inset-0 size-full transition-opacity duration-300 ease-out motion-reduce:transition-none [@media(hover:none)]:hidden ${
-          printed ? "group-hover/post:opacity-0 group-focus-visible/post:opacity-0" : "opacity-0"
-        }`}
-      />
+    <div aria-hidden="true" style={{ aspectRatio: ratio }} className={`relative overflow-hidden bg-ink/5 ${className}`}>
+      {seed ? (
+        <>
+          <div className="absolute -inset-[15%] blur-2xl" style={field(seed)} />
+          <svg className="absolute inset-0 size-full opacity-[0.14] mix-blend-multiply">
+            <filter id={`grain-${hash(seed)}`}>
+              <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" />
+              <feColorMatrix type="saturate" values="0" />
+            </filter>
+            <rect width="100%" height="100%" filter={`url(#grain-${hash(seed)})`} />
+          </svg>
+        </>
+      ) : null}
     </div>
   );
 }

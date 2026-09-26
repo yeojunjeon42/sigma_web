@@ -42,7 +42,7 @@ export default async function PostPage({
         <GridField>
           <Article
             doc={doc}
-            back={{ href: "/blog", label: { en: "Blog", ko: "블로그" } }}
+            back={{ href: "/blog", label: "Blog" }}
             others={near}
             newer={at > 0 ? all[at - 1] : undefined}
             older={at >= 0 && at < all.length - 1 ? all[at + 1] : undefined}

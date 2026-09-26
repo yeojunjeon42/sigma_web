@@ -10,7 +10,7 @@ const EN: Record<string, string> = {
   국제대회: "International competition",
   공모전: "Competition",
   해커톤: "Hackathon",
-  해외탐방: "Field trip abroad",
+  해외탐방: "Trip",
   iREX: "iREX",
   수상: "Award",
   기업협력: "Industry partnership",
