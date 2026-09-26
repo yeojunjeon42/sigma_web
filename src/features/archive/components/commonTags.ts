@@ -1,9 +1,5 @@
 import type { ArchiveProject } from "../types";
 
-/**
- * Tags on more than half of a run describe the run, not the build — "Creative Design
- * Festival" on every 2020 entry — so captions leave them out and keep what sets a build apart.
- */
 export function commonTags(projects: ArchiveProject[], tags: Map<string, string[]>) {
   if (projects.length <= 2) return new Set<string>();
   const count = new Map<string, number>();

@@ -29,14 +29,6 @@ export function getLocalPhotos(id: string): Photo[] {
 
 const firstPhoto = new Map<string, Photo | null>();
 
-/**
- * The index only ever needs each entry's cover photograph — the one named in
- * `COVERS`, else the first on disk. Going through getLocalPhotos here read the
- * header of all 464 files to keep 67 of them, on every request — /archive is a
- * dynamic route, so that cost is per visit, not per build. Memoised because
- * public/ does not change while the server runs; left uncached in development
- * so a newly dropped photo still shows up.
- */
 function getFirstLocalPhoto(id: string): Photo | null {
   const hit = firstPhoto.get(id);
   if (hit !== undefined && process.env.NODE_ENV === "production") return hit;
@@ -52,7 +44,7 @@ export function getLocalVideos(id: string): string[] {
   return listMedia(VIDEO_ROOT, "/archive-video", id, /\.(mp4|webm)$/i);
 }
 
-export async function getArchive(): Promise<ArchiveProject[]> {
+async function getArchive(): Promise<ArchiveProject[]> {
   return ARCHIVE;
 }
 

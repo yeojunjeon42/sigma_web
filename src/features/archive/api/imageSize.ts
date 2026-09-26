@@ -4,14 +4,9 @@ type Size = { width: number; height: number };
 
 const cache = new Map<string, Size | null>();
 
-/**
- * EXIF orientation from an APP1 segment, or 1. Phones store a portrait frame on its side
- * and set this; browsers and the image optimiser turn it upright, so the size we report
- * has to be the upright one or every rotated photo gets the wrong frame.
- */
 function exifOrientation(b: Buffer, start: number, length: number): number {
   if (b.toString("ascii", start, start + 6) !== "Exif\0\0") return 1;
-  const t = start + 6; // TIFF header
+  const t = start + 6;
   if (t + 8 > start + length) return 1;
   const le = b.toString("ascii", t, t + 2) === "II";
   const u16 = (o: number) => (le ? b.readUInt16LE(o) : b.readUInt16BE(o));

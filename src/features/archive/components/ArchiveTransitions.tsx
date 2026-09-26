@@ -1,9 +1,5 @@
 "use client";
 
-// Every move within /archive — a sort, an era, a view, a plate into the reel, Escape out of it —
-// runs as one view transition. Names are handed out per move and only to what is on screen:
-// between reel and field just the one build is shared, so its plate morphs and nothing doubles.
-
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -39,7 +35,6 @@ function clear() {
   document.querySelectorAll<HTMLElement>(SHARED).forEach((el) => (el.style.viewTransitionName = ""));
 }
 
-/** `all`: every visible item keeps its identity (sorts, eras). `id`: only that build is shared. */
 function name(mode: "all" | string | null) {
   clear();
   if (!mode) return;
@@ -53,7 +48,6 @@ function name(mode: "all" | string | null) {
 
 let run: ((href: string) => boolean) | null = null;
 
-/** Moves within the archive through the shared transition; false when it cannot (the caller navigates). */
 export function archiveGo(href: string) {
   return run ? run(href) : false;
 }
@@ -77,15 +71,12 @@ export default function ArchiveTransitions() {
           () =>
             new Promise<void>((resolve) => {
               router.push(url.pathname + url.search, { scroll: false });
-              // Rendering is paused inside the transition, so the new page is polled for, not
-              // waited on by frame: the address first, then the build's plate on the new side.
               const t0 = performance.now();
               let movedAt = 0;
               const poll = window.setInterval(() => {
                 const now = performance.now();
                 const moved = window.location.search === url.search;
                 if (moved && !movedAt) movedAt = now;
-                // The plate gets a short grace to mount; past it the page crossfades without one.
                 const late = now - t0 > 2500 || (movedAt > 0 && now - movedAt > 250);
                 if (!moved && !late) return;
                 if (hero && hero !== "all" && !late) {
@@ -107,8 +98,6 @@ export default function ArchiveTransitions() {
             }),
         );
       vt.finished.finally(clear);
-      // The page is frozen while the transition waits. A slow server is not worth that: past
-      // SLOW the change simply lands without the animation.
       window.setTimeout(() => {
         if (window.location.search !== url.search) vt.skipTransition?.();
       }, SLOW);
@@ -124,9 +113,6 @@ export default function ArchiveTransitions() {
       e.stopPropagation();
     };
 
-    // The page is dynamic, so nothing is prefetched by default: fetch a control's target as soon
-    // as it is pointed at, and a plate's the moment it is pressed, so the swap waits on nothing.
-    // A plate is fetched only after the pointer rests on it, not on every pass over the field.
     const fetched = new Set<string>();
     let dwell = 0;
     const fetchOf = (a: HTMLAnchorElement) => {

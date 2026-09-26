@@ -1,10 +1,7 @@
-
-
 export interface Photo {
   src: string;
   width: number;
   height: number;
-  /** CSS object-position for a cover crop, when the centre isn't right. */
   focus?: string;
 }
 
@@ -37,12 +34,12 @@ export interface ArchiveProject {
   imageFocus?: string;
 }
 
-export const ERAS: { key: Era; label: Bilingual }[] = [
-  { key: "2007-2014", label: { en: "2007–2014", ko: "2007–2014" } },
-  { key: "2015", label: { en: "2015", ko: "2015" } },
-  { key: "2016", label: { en: "2016", ko: "2016" } },
-  { key: "2017", label: { en: "2017", ko: "2017" } },
-  { key: "2020", label: { en: "2020", ko: "2020" } },
-  { key: "2024", label: { en: "2024", ko: "2024" } },
-  { key: "2025", label: { en: "2025", ko: "2025" } },
+export const ERAS: { key: Era; label: string }[] = [
+  { key: "2007-2014", label: "2007–2014" },
+  { key: "2015", label: "2015" },
+  { key: "2016", label: "2016" },
+  { key: "2017", label: "2017" },
+  { key: "2020", label: "2020" },
+  { key: "2024", label: "2024" },
+  { key: "2025", label: "2025" },
 ];

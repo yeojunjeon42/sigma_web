@@ -5,7 +5,6 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Container, GridField } from "@/components/ui";
-import { T } from "@/components/T";
 import {
   getArchiveWithMedia,
   parseEra,
@@ -27,7 +26,7 @@ import ArchiveCatalogue from "@/features/archive/components/ArchiveCatalogue";
 import { DEFAULT_LOOK, parseLook, type Look } from "@/features/archive/data/covers";
 import { tileFor } from "@/features/archive/data/field";
 import { displayTags } from "@/features/content/data/tags";
-import { ERAS, type ArchiveProject, type Bilingual, type Era } from "@/features/archive/types";
+import { ERAS, type ArchiveProject, type Era } from "@/features/archive/types";
 import { getEntries } from "@/features/archive/api/getEntries";
 import { getIndex } from "@/features/content/api/getContent";
 import YearRuler, { type Mark } from "@/features/history/components/YearRuler";
@@ -39,14 +38,12 @@ export const metadata: Metadata = {
 };
 
 const ON = "text-ink";
-const OFF = "text-ink-subtle transition-colors hover:text-ink";
+const OFF = "text-ink-muted transition-colors hover:text-ink";
 
-/** Newest first: the page opens on the builds that were photographed best. */
 const NEWEST = [...ERAS].reverse();
 
 type View = "depth" | "reel" | "list";
 
-/** The address without the view — era, sort and look — as a query string. */
 function base(era: Era | null, sort: Sort, look: Look) {
   const q = new URLSearchParams();
   if (era) q.set("era", era);
@@ -63,16 +60,16 @@ function href(era: Era | null, view: View, sort: Sort, look: Look, at?: string) 
   return s ? `/archive?${s}` : "/archive";
 }
 
-const SORTS: { key: Sort; label: Bilingual }[] = [
-  { key: "year", label: { en: "Year", ko: "연도순" } },
-  { key: "team", label: { en: "Team size", ko: "팀 규모순" } },
-  { key: "name", label: { en: "Name", ko: "이름순" } },
+const SORTS: { key: Sort; label: string }[] = [
+  { key: "year", label: "Year" },
+  { key: "team", label: "Team size" },
+  { key: "name", label: "Name" },
 ];
 
-const VIEWS: { key: View; label: Bilingual }[] = [
-  { key: "depth", label: { en: "Field", ko: "펼쳐 보기" } },
-  { key: "reel", label: { en: "Reel", ko: "하나씩 보기" } },
-  { key: "list", label: { en: "List", ko: "목록으로 보기" } },
+const VIEWS: { key: View; label: string }[] = [
+  { key: "depth", label: "Field" },
+  { key: "reel", label: "Reel" },
+  { key: "list", label: "List" },
 ];
 
 export default async function ArchivePage({
@@ -93,7 +90,6 @@ export default async function ArchivePage({
     look: lookParam,
     at,
   } = await searchParams;
-  // `?look=` switches the builds' treatment (cutout, drawing, pen, duotone, photo).
   const look = parseLook(lookParam);
   const era = parseEra(eraParam);
   const view: View = viewParam === "list" || viewParam === "reel" ? viewParam : "depth";
@@ -111,9 +107,7 @@ export default async function ArchivePage({
   const filtered = era ? all.filter((p) => p.era === era) : all;
   const sorted = sortArchive(filtered, sort, teamSize);
 
-  // By year the index is told in eras, newest first, each led by its year; by team size or
-  // name it is one run. Within an era the hand order of projects.ts stands.
-  const groups: { era: Bilingual | null; projects: ArchiveProject[] }[] =
+  const groups: { era: string | null; projects: ArchiveProject[] }[] =
     sort === "year"
       ? NEWEST.map((e) => ({
           era: e.label,
@@ -121,13 +115,12 @@ export default async function ArchivePage({
         })).filter((g) => g.projects.length > 0)
       : [{ era: null, projects: sorted }];
 
-  // The reel carries every build it can show, in the order shown, with what its detail needs.
   const reelBuilds: ReelBuild[] = [];
   const reelGroups: ReelGroup[] = [];
   for (const g of groups) {
     const common = commonTags(g.projects, tags);
     reelGroups.push({
-      label: g.era?.en ?? null,
+      label: g.era,
       from: reelBuilds.length,
       to: reelBuilds.length + g.projects.length,
     });
@@ -137,11 +130,11 @@ export default async function ArchivePage({
       const entry = entries.get(p.id);
       reelBuilds.push({
         id: p.id,
-        name: splitTitle(p.title),
+        name: splitTitle(p.title).en,
         year,
         era: eraLabel === year ? null : eraLabel,
-        award: p.award,
-        tags: displayTags((tags.get(p.id) ?? []).filter((t) => !common.has(t)), 3),
+        award: p.award?.en,
+        tags: displayTags((tags.get(p.id) ?? []).filter((t) => !common.has(t)), 3).map((t) => t.en),
         body: entry?.html,
         team: entry?.team,
         photos: entry?.photos,
@@ -165,7 +158,6 @@ export default async function ArchivePage({
     };
   });
 
-  // a phone UA gets the phone tree only; otherwise both trees ship and CSS picks
   const ua = await headers();
   const phone =
     ua.get("sec-ch-ua-mobile") === "?1" || /Mobi/i.test(ua.get("user-agent") ?? "");
@@ -211,10 +203,7 @@ export default async function ArchivePage({
     />
   );
 
-  // On the field and in the catalogue a year is a place on the page, not a filter: pressing it
-  // walks the record to that era instead of cutting the rest of it away.
   const walk = (view === "depth" || view === "list") && era === null && sort === "year";
-  // field and feed are separate trees with separate era ids
   const split = view !== "list";
   const feedWalk = era === null && sort === "year";
 
@@ -239,7 +228,7 @@ export default async function ArchivePage({
             <Container as="header" className={`page-opening ${entryOpen ? "page-cover--flush" : ""}`}>
               {entryOpen ? (
                 <h1 className="sr-only lg:hidden">
-                  <T en="Archive" ko="아카이브" />
+                  Archive
                 </h1>
               ) : null}
               <div
@@ -247,9 +236,9 @@ export default async function ArchivePage({
                   entryOpen ? "max-lg:hidden" : ""
                 }`}
               >
-                <h1 className="flex min-h-11 shrink-0 items-baseline gap-x-sm text-ink lg:min-h-0">
-                  <T en="Archive" ko="아카이브" />
-                  <span className="tabular-nums text-ink-subtle">{span}</span>
+                <h1 className="flex shrink-0 items-baseline gap-x-sm text-ink">
+                  Archive
+                  <span className="tabular-nums text-ink-muted">{span}</span>
                 </h1>
 
                 <nav
@@ -262,15 +251,15 @@ export default async function ArchivePage({
                         href={href(null, view, sort, look)}
                         data-vt
                         aria-current={era === null ? "page" : undefined}
-                        className={`flex min-h-11 min-w-[1.5rem] items-baseline lg:min-h-0 lg:min-w-0 ${era === null ? ON : OFF}`}
+                        className={`relative before:absolute before:inset-x-[-0.25rem] before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] lg:before:hidden flex min-w-[1.5rem] items-baseline lg:min-w-0 ${era === null ? ON : OFF}`}
                       >
-                        <T en="All" ko="전체" />
+                        All
                       </Link>
                     </li>
                     {NEWEST.map((e) => {
                       const walkTo = (id: string, show: string) => (
-                        <a href={`#${id}`} className={`min-h-11 items-baseline tabular-nums lg:min-h-0 ${show} ${OFF}`}>
-                          {e.label.en}
+                        <a href={`#${id}`} className={`relative before:absolute before:inset-x-[-0.25rem] before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] lg:before:hidden items-baseline tabular-nums ${show} ${OFF}`}>
+                          {e.label}
                         </a>
                       );
                       const filter = (show: string) => (
@@ -278,9 +267,9 @@ export default async function ArchivePage({
                           href={href(e.key, view, sort, look)}
                           data-vt
                           aria-current={era === e.key ? "page" : undefined}
-                          className={`min-h-11 items-baseline tabular-nums lg:min-h-0 ${show} ${era === e.key ? ON : OFF}`}
+                          className={`relative before:absolute before:inset-x-[-0.25rem] before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] lg:before:hidden items-baseline tabular-nums ${show} ${era === e.key ? ON : OFF}`}
                         >
-                          {e.label.en}
+                          {e.label}
                         </Link>
                       );
                       return (
@@ -316,7 +305,7 @@ export default async function ArchivePage({
                         aria-current={sort === s.key ? "page" : undefined}
                         className={sort === s.key ? ON : OFF}
                       >
-                        <T en={s.label.en} ko={s.label.ko} />
+                        {s.label}
                       </Link>
                     ))}
                   </nav>
@@ -330,23 +319,23 @@ export default async function ArchivePage({
                           href={href(era, v.key, sort, look)}
                           data-vt
                           aria-current={on ? "page" : undefined}
-                          className={`min-h-11 items-baseline lg:min-h-0 ${
+                          className={`relative before:absolute before:inset-x-[-0.25rem] before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] lg:before:hidden items-baseline ${
                             v.key === "reel" ? "hidden lg:flex" : "flex"
-                          } ${touchOn ? "text-ink" : "text-ink-subtle"} ${
-                            on ? "lg:text-ink" : "transition-colors lg:text-ink-subtle lg:hover:text-ink"
+                          } ${touchOn ? "text-ink" : "text-ink-muted"} ${
+                            on ? "lg:text-ink" : "transition-colors lg:text-ink-muted lg:hover:text-ink"
                           }`}
                         >
                           {v.key === "depth" ? (
                             <>
                               <span className="lg:hidden">
-                                <T en="Grid" ko="그리드" />
+                                Grid
                               </span>
                               <span className="max-lg:hidden">
-                                <T en={v.label.en} ko={v.label.ko} />
+                                {v.label}
                               </span>
                             </>
                           ) : (
-                            <T en={v.label.en} ko={v.label.ko} />
+                            v.label
                           )}
                         </Link>
                       );

@@ -3,19 +3,10 @@
 import { useEffect, useRef } from "react";
 import { FIELD_POINTER } from "./fieldPointer";
 
-/** How far, in px, the pointer tilts the nearest layer. */
 const TILT = 18;
-/** Plates within this many px of the pointer lean toward it, by up to `LEAN` px. */
 const REACH = 280;
 const LEAN = 11;
 
-/**
- * Moves the depth field. Each `[data-sp]` element is shifted against the page by its speed:
- * at the middle of the viewport every layer is where the server placed it, and away from the
- * middle the near layers run ahead and the far ones lag. The pointer tilts the layers a little.
- * Everything moves through `translate`, so a plate's hit box moves with it. Under reduced
- * motion nothing moves; the chips still follow the pointer.
- */
 export default function DepthStage() {
   const ref = useRef<HTMLSpanElement>(null);
 
@@ -92,8 +83,6 @@ export default function DepthStage() {
         if (Math.abs(gx - lx[i]) > 0.05 || Math.abs(gy - ly[i]) > 0.05) settled = false;
         el.style.translate = `${(dx + lx[i]).toFixed(1)}px ${(dy + tilt + ly[i]).toFixed(1)}px`;
       });
-      // The screen is printed here, after the transforms are written, so the dots are never a
-      // frame behind the plates they belong to.
       host.dispatchEvent(new Event("field:moved"));
       if (!settled && visible) raf = requestAnimationFrame(frame);
     };
@@ -105,8 +94,6 @@ export default function DepthStage() {
       if (px > -1e4) place(px, py);
       kick();
     };
-    // The chip is `fixed`, but an ancestor still carrying the arrival's `filter` is its
-    // containing block; the probe (a fixed box at 0,0) says where that block starts.
     const place = (x: number, y: number) => {
       const o = probe.getBoundingClientRect();
       host.style.setProperty("--mx", `${x - o.left}px`);
@@ -121,11 +108,6 @@ export default function DepthStage() {
       ty = e.clientY / window.innerHeight;
       kick();
     };
-    // A keyboard focus puts the chip under its plate. Only a keyboard one: pressing a plate
-    // focuses it too, and moving the chip on a click threw it down to the plate's foot for the
-    // frame between the press and the next pointer move. `:focus-visible` is the obvious test
-    // and is not dependable here, so the modality is tracked outright — `pointerdown` runs
-    // before `focusin`, and a Tab's `keydown` runs before the focus it causes.
     let pressing = false;
     const onDown = () => (pressing = true);
     const onKey = () => (pressing = false);
