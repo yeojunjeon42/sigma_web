@@ -3,21 +3,12 @@
 import { useEffect } from "react";
 
 const FLY = 460;
-/** The build is held for this share of the flight, then let go. */
 const HOLD = 0.76;
-/** Where the plate heads while the reel is still coming up: the middle of the screen. */
 const GUESS = 0.34;
 
-/**
- * The plate you press on the field flies to the place the reel gives it. A copy of the
- * photograph is lifted onto a layer of its own before the page changes, so it outlives the
- * field being taken down, and it chases the reel's own plate — which is still settling while
- * the flight is on — until it lands there and lets go.
- */
 export default function PlateHandoff() {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    // Where the browser has view transitions, ArchiveTransitions morphs the plate instead.
     if ((document as { startViewTransition?: unknown }).startViewTransition) return;
 
     const onClick = (e: MouseEvent) => {
@@ -29,8 +20,6 @@ export default function PlateHandoff() {
       if (id) fly(art, id);
     };
 
-    // Capture: Next's own click handler calls `preventDefault` before a bubbling listener
-    // would see it, and a prevented click is not one to follow.
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
   }, []);

@@ -1,18 +1,11 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import { T } from "@/components/T";
 import PlateArt from "./PlateArt";
 import type { ReelBuild, ReelGroup } from "./ArchiveReel";
 
 const MARGIN = { scrollMarginTop: "calc(var(--masthead) + 1rem)" };
-/** Every cell the same square, so the grid reads as an index and not as a scatter. */
 const CELL: CSSProperties = { aspectRatio: "1 / 1" };
 
-/**
- * The archive without a pointer (below `lg`): every build in one grid, era by era, each cell
- * the same size. Nothing here depends on hover — the photograph is on the tile and a tap opens
- * the entry.
- */
 export default function ArchiveGrid({
   builds,
   groups,
@@ -50,9 +43,9 @@ export default function ArchiveGrid({
                     eager={g.from + i < 4}
                     style={CELL}
                   />
-                  <h3 className="mt-sm text-body-sm text-balance text-ink transition-colors group-hover:text-ink-subtle">
-                    <T en={b.name.en} ko={b.name.ko} />
-                    <span aria-hidden="true" className="text-ink-subtle">
+                  <h3 className="mt-sm text-body-sm text-balance text-ink transition-colors group-hover:text-ink-muted">
+                    {b.name}
+                    <span aria-hidden="true" className="text-ink-muted">
                       {" ↗"}
                     </span>
                   </h3>
@@ -67,18 +60,16 @@ export default function ArchiveGrid({
   );
 }
 
-// The era heading already says the year, so the caption carries what it does not: a result,
-// else the size of the team, else the first tag.
 function Caption({ b }: { b: ReelBuild }) {
   const size = b.team?.length ?? 0;
   const line = b.award ? (
     <span className="text-accent-deep">
-      <T en={b.award.en} ko={b.award.ko} />
+      {b.award}
     </span>
   ) : size > 1 ? (
-    <T en={`${size} members`} ko={`${size}명`} />
+    `${size} members`
   ) : b.tags[0] ? (
-    <T en={b.tags[0].en} ko={b.tags[0].ko} />
+    b.tags[0]
   ) : null;
   if (!line) return null;
   return <p className="mt-xxs truncate text-caption text-ink-muted">{line}</p>;

@@ -1,7 +1,5 @@
 "use client";
 
-// The ledger's preview: printed through the screen, then the dots shrink away as the photograph comes up.
-
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { SCREEN } from "@/lib/halftone";

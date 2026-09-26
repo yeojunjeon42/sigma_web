@@ -7,20 +7,8 @@ import { PLATE, type Tile } from "../data/field";
 
 const HATCH =
   "bg-[repeating-linear-gradient(135deg,var(--color-rule-strong)_0_1px,transparent_1px_9px)]";
-/** The members page's crossfade, so a build resolves the way a portrait does. */
 const FADE = "transition-opacity duration-300 ease-out motion-reduce:transition-none";
 
-/**
- * A build on its plate, in the plate's own shape. With `screen`, the plate is printed through
- * the site's halftone — the same screen, at the same pitch, that the members page prints
- * portraits with — and pointing at it resolves the photograph.
- *
- * The screen belongs to the plate. It was briefly drawn for the whole field by one canvas
- * pinned to the viewport, which gave a single lattice but could not work: the plates move by
- * parallax on `DepthStage`'s own frame loop, so the dots arrived a frame late and slid out from
- * under the photographs, and every scroll frame re-printed the field. A canvas inside the plate
- * moves with the plate for free and is drawn once.
- */
 export default function PlateArt({
   tile,
   sizes,
@@ -31,7 +19,6 @@ export default function PlateArt({
 }: {
   tile: Tile;
   sizes: string;
-  /** Print it through the screen, and resolve on hover. */
   hover?: boolean;
   eager?: boolean;
   className?: string;
@@ -67,7 +54,6 @@ export default function PlateArt({
       const done = halftone(
         canvas,
         (g, cw, ch) => {
-          // The photograph as the plate shows it: covering the plate, or contained in its box.
           const s = cover
             ? Math.max(cw / img.naturalWidth, ch / img.naturalHeight)
             : Math.min((w * cw) / img.naturalWidth, (h * ch) / img.naturalHeight);
@@ -101,7 +87,6 @@ export default function PlateArt({
       },
       { rootMargin: "300px" },
     );
-    // The field is fluid, so a plate that has been resized is re-screened once it settles.
     const ro = new ResizeObserver(() => {
       if (!width || Math.abs(el.clientWidth - width) < 8) return;
       window.clearTimeout(timer);
@@ -157,11 +142,6 @@ export default function PlateArt({
   );
 }
 
-/**
- * Where the plate sits on the field, so its screen can be shifted onto the page's grid. The
- * plate is measured against the field it is laid on, not the viewport: the field does not move
- * under it, so the phase holds while the page scrolls.
- */
 function phase(el: HTMLElement): [number, number] {
   const sheet = el.closest<HTMLElement>("[data-depth]");
   if (!sheet) return [0, 0];
@@ -170,7 +150,6 @@ function phase(el: HTMLElement): [number, number] {
   return [a.left - b.left, a.top - b.top];
 }
 
-/** `object-position` as two fractions. */
 function focus(value = "50% 50%"): [number, number] {
   const parts = value.trim().split(/\s+/);
   const one = (raw: string | undefined, fallback: number) => {
