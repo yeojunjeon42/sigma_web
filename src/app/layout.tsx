@@ -5,6 +5,7 @@ import { MachineToggle } from "@/components/MachineToggle";
 import { JsonLd } from "@/components/JsonLd";
 import { ScrollRail } from "@/components/ScrollRail";
 import SmoothScroll from "@/components/SmoothScroll";
+import PageTurn from "@/components/PageTurn";
 import "lenis/dist/lenis.css";
 import "./globals.css";
 
@@ -123,6 +124,7 @@ export default function RootLayout({
         {children}
         <ScrollRail />
         <SmoothScroll />
+        <PageTurn />
         <MachineToggle />
       </body>
     </html>

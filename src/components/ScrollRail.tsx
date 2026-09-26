@@ -2,12 +2,6 @@
 
 import { useEffect, useRef } from "react";
 
-/**
- * The document scrollbar is an overlay owned by the site. Native window scrollbars are hidden,
- * so appearing or disappearing never changes the page's measure. Scrolling itself remains the
- * browser's: wheel, touch, keyboard and assistive input are untouched; this is only its visible
- * rail and a draggable thumb.
- */
 export function ScrollRail() {
   const railRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);

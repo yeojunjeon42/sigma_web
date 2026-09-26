@@ -10,22 +10,19 @@
   --color-surface: #d7d9d3;
   --color-surface-sunken: #cfd2cb;
   --color-ink: #0f110d;
-  --color-ink-muted: #4d514a;
-  --color-ink-subtle: #5c6058;
+  --color-ink-muted: #5c6058;
   --color-rule: #c7cac2;
   --color-rule-strong: #abafa6;
   --color-rule-field: #76767a;
 
   --color-band: #f0d8d1;
-  --color-coral: #ee7f6a;
   --color-coral-soft: #f3c1b5;
 
   --color-overlay-ink: #ffffff;
 
   --color-canvas-inverse: #0a0907;
   --color-ink-inverse: #edeae3;
-  --color-ink-inverse-muted: #b8b2a7;
-  --color-ink-inverse-subtle: #8b857c;
+  --color-ink-inverse-muted: #8b857c;
   --color-rule-inverse: #34302b;
 
   --color-accent: #ed2024;
@@ -35,11 +32,6 @@
   --color-machine-dim: #c0575a;
   --color-machine-base: #ff4448;
   --color-machine-bright: #ffb0b2;
-
-  --text-display-xl: clamp(2.5rem, 1.2rem + 5.5vw, 5.5rem);
-  --text-display-xl--line-height: 1;
-  --text-display-xl--letter-spacing: -0.02em;
-  --text-display-xl--font-weight: 400;
 
   --text-display-lg: clamp(2rem, 1.3rem + 3.4vw, 3.25rem);
   --text-display-lg--line-height: 1;
@@ -109,19 +101,9 @@
   --container-wide: 100%;
 }
 
-/* The cap height of a row's main type, carried to the row's smaller pieces as a length.
-   Registered, so `1cap` resolves where it is declared (in the main type's font), not in each
-   child. See `.u-line-cap`. */
 @property --line-cap {
   syntax: "<length>";
   inherits: true;
-  initial-value: 0px;
-}
-
-/* The side of one square in a plate's dot mask. Registered so it can be transitioned. */
-@property --dot {
-  syntax: "<length>";
-  inherits: false;
   initial-value: 0px;
 }
 
@@ -137,14 +119,11 @@
 }
 
 @layer base {
-  /* The era filter on /archive walks the field rather than filtering it, so the jump has to read
-     as travel. Anything that asks for less motion gets the jump. */
   @media (prefers-reduced-motion: no-preference) {
     html {
       scroll-behavior: smooth;
     }
   }
-  /* Lenis writes the scroll every frame; a CSS smooth behaviour would ease each write again. */
   html.lenis {
     scroll-behavior: auto;
   }
@@ -175,7 +154,6 @@
     color: var(--color-ink);
   }
 
-  /* A faint paper grain over the whole page. */
   body::after {
     content: "";
     position: fixed;
@@ -187,10 +165,6 @@
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   }
 
-  /* Photographs take a soft corner; the History prints stay square like real prints. */
-  /* The corner belongs to the outermost frame only: an image inside a rounded frame is clipped by
-     it, and rounding the image again draws a second, different curve (the image is often larger
-     than its frame, cropped by position) that lets the frame's ground show in the corners. */
   main img:not(.u-corner img),
   .u-corner {
     border-radius: var(--radius-photo);
@@ -201,9 +175,6 @@
     border-radius: 0;
     corner-shape: round;
   }
-  /* Continuous corners, as Apple draws them: the curve eases out of the straight edge instead of
-     meeting it at a tangent point. A squircle reads smaller than a circular arc of the same
-     radius, so it takes a larger one; browsers without corner-shape keep the plain radius. */
   @supports (corner-shape: squircle) {
     main img:not(.u-corner img),
     .u-corner {
@@ -215,9 +186,6 @@
     border-radius: 0;
   }
 
-  /* The site's own scrollbar: a hairline rail down the edge of the paper with a square thumb,
-     no radius and no shading — the same two weights of rule the pages are drawn with. Firefox
-     takes the two-colour form; WebKit is drawn. `.u-scroll-x` still opts out entirely. */
   * {
     scrollbar-width: thin;
     scrollbar-color: var(--color-rule-field) transparent;
@@ -244,19 +212,17 @@
     box-shadow: inset 0 1px 0 var(--color-rule);
   }
   ::-webkit-scrollbar-thumb {
-    /* The border is the plate margin: it leaves a 3px bar, not a 11px slab. */
     background: var(--color-rule-strong);
     border: 4px solid transparent;
     background-clip: content-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-ink-subtle);
+    background: var(--color-ink-muted);
     background-clip: content-box;
   }
   ::-webkit-scrollbar-corner {
     background: transparent;
   }
-  /* On the sealed black pages and any inverse region, the rail inverts with the ground. */
   [data-machine] *,
   .bg-canvas-inverse * {
     scrollbar-color: var(--color-rule-inverse) transparent;
@@ -294,7 +260,7 @@
     right: 2px;
     width: 3px;
     min-height: 32px;
-    background: var(--color-ink-subtle);
+    background: var(--color-ink-muted);
     will-change: transform, height;
     transition: width 150ms ease, background-color 150ms ease;
   }
@@ -330,7 +296,6 @@
     padding-inline: var(--gutter);
   }
 
-
   .u-clear-masthead {
     padding-top: calc(var(--masthead) + 3.5rem);
   }
@@ -339,19 +304,11 @@
     text-box: trim-both cap alphabetic;
   }
 
-  /* Type standing on a printed screen. The paper is cleared *around the letters*, not behind a
-     box: a rectangle of `bg-canvas` cuts the dot rows it crosses into halves and reads as a
-     patch stuck over the field. The clearance is a stroke painted behind the glyph, so the
-     lattice runs on unbroken a couple of millimetres from the ink — how a caption sits in
-     cleared paper in print. */
   .u-knock {
     paint-order: stroke fill;
     -webkit-text-stroke: 5px var(--color-canvas);
   }
 
-  /* The phone history control borrows the directness of iOS 27's timer dial, translated onto
-     the site's paper: the record moves, its year does not. JS adds local emphasis to each
-     sharp tick; the only blur is one mirrored zone at each outside edge. */
   .year-ruler {
     --ruler-paper: color-mix(in srgb, var(--color-canvas) 96%, white);
     --ruler-station: 96px;
@@ -405,8 +362,6 @@
     position: absolute;
     inset: 0;
     overflow: hidden;
-    /* This is a real hole in the strip, not merely paper painted over it: no tick is composited
-       below the counter, even while a backdrop-filter or a transformed layer is active. */
     -webkit-mask-image: linear-gradient(
       to right,
       #000 0 calc(50% - var(--ruler-station) / 2),
@@ -548,12 +503,6 @@
     }
   }
 
-  /* Centring mixed type on one line. A row of different sizes aligns by baseline
-     (`items-baseline`), which leaves smaller type sitting low: its capitals are shorter.
-     `u-line-cap` goes on the row, set in the row's main type; `u-cap-centre` lifts a smaller
-     piece by half the difference, so the centres of the capitals line up. `u-cap-mark` does
-     the same for a drawn marker with no text of its own — its bottom sits on the baseline —
-     given its height in `--mark`. Measure the ink afterwards, not the boxes. */
   .u-line-cap {
     --line-cap: 1cap;
   }
@@ -561,13 +510,8 @@
     translate: 0 calc((1cap - var(--line-cap)) / 2);
   }
 
-  /* A plate's hover art comes in through the site's own screen — the square halftone lattice
-     the members page prints portraits with — laid over the whole rectangle, so the rectangle
-     is what changes and not the build inside it. The dots grow from their centres to full
-     coverage; `--dot` is registered, so it transitions. */
 }
 
-/* Route changes bring each block of the next sheet into register in sequence. */
 [data-reveal] > * {
   transition:
     opacity var(--duration-reveal) ease-out,
@@ -600,10 +544,6 @@
   }
 }
 
-/* Arriving on a page: the sheet comes into register. Each block of the page is printed out of
-   focus and sharpens, one after the next — the blocks are the children of `GridField`, so every
-   paper page gets it without saying so. A route change replaces the page's DOM, which is what
-   starts the animation again. */
 @keyframes arrive {
   from {
     opacity: 0;
@@ -629,7 +569,6 @@
   animation-delay: 150ms;
 }
 
-/* The phone menu drops from under the masthead and its rows come into focus behind it. */
 @keyframes sheet-in {
   from {
     opacity: 0;
@@ -673,8 +612,6 @@
   font-size: var(--text-body);
 }
 
-/* Articles use the same text face as the rest of the sheet, but at a book-like measure and
-   size. Their media can leave this column; the reading itself never does. */
 .article-prose {
   --prose-gap: 1.35rem;
   max-width: 40rem;
@@ -730,9 +667,6 @@
   font-size: 1.12rem;
 }
 
-/* One reading system for articles and archive entries. --flow is the body size; every gap and
-   heading derives from it. No bold: the 600 cut and a Korean bold clog at reading sizes and
-   disagree with each other, so headings are carried by size, space and ink. */
 .prose.flow {
   --flow: 1.0625rem;
   font-size: var(--flow);
@@ -808,9 +742,6 @@
   --flow: 0.9375rem;
 }
 
-/* The reel prints an entry in a narrow panel beside the build; the page's measure is too
-   large for a column that width. */
-
 .prose strong,
 .prose b {
   font-weight: 700;
@@ -818,13 +749,6 @@
 
 .prose a {
   color: var(--color-ink);
-  text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, var(--color-ink) 35%, transparent);
-  text-underline-offset: 0.2em;
-}
-.prose a:hover {
-  color: var(--color-ink);
-  text-decoration-color: var(--color-coral);
 }
 
 .prose ul,
@@ -847,7 +771,7 @@
   content: "-";
   position: absolute;
   left: calc(var(--post-list-marker-width) * -1);
-  color: var(--color-ink-subtle);
+  color: var(--color-ink-muted);
 }
 .prose ol > li {
   counter-increment: post-ordered-list;
@@ -857,7 +781,7 @@
   position: absolute;
   left: calc(var(--post-list-marker-width) * -1);
   font-variant-numeric: tabular-nums;
-  color: var(--color-ink-subtle);
+  color: var(--color-ink-muted);
 }
 .prose li > p {
   margin: 0;
@@ -938,12 +862,9 @@
   font-weight: 400;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: var(--color-ink-subtle);
+  color: var(--color-ink-muted);
 }
 
-/* Scroll: a handful of gentle moves, all driven by the scroll itself (no timers, no library).
-   Only where the browser has scroll timelines and motion is welcome; everywhere else the page
-   stands as written. Opacity-only classes are for blocks whose geometry something measures. */
 @keyframes scroll-rise {
   from {
     opacity: 0;
@@ -960,15 +881,15 @@
     scale: 0 1;
   }
 }
+@keyframes scroll-card {
+  from {
+    translate: 0 14svh;
+  }
+}
 @keyframes scroll-settle {
   from {
     opacity: 0.35;
     scale: 0.965;
-  }
-}
-@keyframes scroll-ink {
-  from {
-    color: color-mix(in srgb, var(--color-ink) 22%, var(--color-canvas));
   }
 }
 @keyframes scroll-develop {
@@ -1026,6 +947,11 @@
       animation-timeline: view();
       animation-range: entry 0% cover 30%;
     }
+    .u-card-rise {
+      animation: scroll-card linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
     .u-settle {
       animation: scroll-settle linear both;
       animation-timeline: view();
@@ -1035,32 +961,6 @@
       animation: scroll-develop linear both;
       animation-timeline: view();
       animation-range: entry 0% entry 85%;
-    }
-    .u-rule-under {
-      position: relative;
-      border-bottom-color: transparent;
-    }
-    .u-rule-under::after {
-      content: "";
-      position: absolute;
-      bottom: -1px;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: var(--color-rule-strong);
-      transform-origin: 0 50%;
-      transition: background-color 300ms;
-      animation: scroll-draw linear both;
-      animation-timeline: view();
-      animation-range: entry 10% cover 40%;
-    }
-    .u-rule-under:has(a:hover)::after {
-      background: var(--color-ink);
-    }
-    .u-ink-in {
-      animation: scroll-ink linear both;
-      animation-timeline: view();
-      animation-range: entry 30% cover 45%;
     }
     .u-drift {
       animation: scroll-drift linear both;
@@ -1075,7 +975,6 @@
   }
 }
 
-/* KaTeX inside article prose: display maths on the flow rhythm, scrolling sideways when long. */
 .prose .katex {
   font-size: 1.06em;
 }
@@ -1089,12 +988,6 @@
   text-align: center;
 }
 
-/* The article reads as openai.com/index/introducing-gpt-live-1-in-the-api does (measured live at
-   1440, 820 and 393): one 676px column; body 17/28 at -0.01em with 24px between paragraphs;
-   h2 30/39.6 (24/31.8 on phones) with 64px above and 24px below; links underlined 1px at a 4px
-   offset in the text colour; code on a quiet panel with 6px corners, 20px padding, 14/23 mono
-   (13/21 on phones) and a copy icon 20px from its top right; captions 14/23. Their headings are
-   medium weight; ours stay regular (no bold on this site). */
 .prose.flow:is(.article-prose, .flow-panel) {
   --flow: 1.0625rem;
   --prose-gap: 1.5rem;
@@ -1136,14 +1029,6 @@
 }
 .prose.flow:is(.article-prose, .flow-panel) a {
   color: inherit;
-  text-decoration-line: underline;
-  text-decoration-thickness: 1px;
-  text-decoration-color: currentColor;
-  text-underline-offset: 4px;
-  transition: text-decoration-color 0.2s;
-}
-.prose.flow:is(.article-prose, .flow-panel) a:hover {
-  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
 }
 .prose.flow:is(.article-prose, .flow-panel) blockquote {
   margin: 2.5rem 0;
@@ -1221,7 +1106,6 @@
   }
 }
 
-/* The reel's entry follows the article's rules at the panel's narrower size. */
 .prose.flow.flow-panel {
   --flow: 0.9375rem;
   --prose-gap: 1.25rem;
@@ -1246,4 +1130,62 @@
 }
 .prose.flow.flow-panel blockquote {
   font-size: 1rem;
+}
+
+.pill-above {
+  transition: bottom 480ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (max-width: 1023.98px) {
+  body:has(.year-ruler) .pill-above {
+    bottom: calc(max(var(--gutter), env(safe-area-inset-bottom)) + 76px + var(--spacing-sm));
+  }
+  body:has(.year-ruler[data-on=""]) .pill-above {
+    bottom: max(var(--gutter), env(safe-area-inset-bottom));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pill-above {
+    transition: none;
+  }
+}
+
+.u-swipe,
+.u-swipe-rest,
+.prose a {
+  padding-bottom: 0.1em;
+  text-decoration: none;
+  background-repeat: no-repeat;
+  transition: background-size 350ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.u-swipe {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 100% 100%;
+  background-size: 0% 1px;
+}
+.u-swipe:hover,
+.u-swipe:focus-visible {
+  background-position: 0% 100%;
+  background-size: 100% 1px;
+}
+.u-swipe-rest,
+.prose a {
+  background-image:
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(color-mix(in srgb, currentColor 35%, transparent), color-mix(in srgb, currentColor 35%, transparent));
+  background-position: 100% 100%, 0% 100%;
+  background-size: 0% 1px, 100% 1px;
+}
+.u-swipe-rest:hover,
+.u-swipe-rest:focus-visible,
+.prose a:hover,
+.prose a:focus-visible {
+  background-position: 0% 100%, 100% 100%;
+  background-size: 100% 1px, 0% 1px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .u-swipe,
+  .u-swipe-rest,
+  .prose a {
+    transition: none;
+  }
 }
