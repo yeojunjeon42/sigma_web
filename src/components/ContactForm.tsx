@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { T } from "@/components/T";
 import { EMAIL } from "@/features/site/data/contact";
 
 const ENDPOINT = "https://api.web3forms.com/submit";
@@ -9,7 +8,6 @@ const KEY = "43dcbf5f-1d3d-45bc-acd1-61606eba946c";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
-// Arriving from the archive's "add your build" pill, the message starts as a short outline.
 const ARCHIVE_DRAFT = `I'd like to add a build to the archive.
 
 Name of the build:
@@ -26,9 +24,27 @@ Who's writing (names and 학번):`;
 
 const DRAFTS: Record<string, string> = { archive: ARCHIVE_DRAFT, blog: BLOG_DRAFT };
 
-const ROW = "group flex flex-col border-b border-ink/30 pt-md";
+const FIELD = "group flex flex-col gap-y-xs";
 const HEAD = "flex items-baseline justify-between text-caption text-ink-muted transition-colors group-focus-within:text-ink";
-const ENTRY = "block min-h-11 w-full bg-transparent pt-xs pb-sm text-title text-ink focus:outline-none";
+const ENTRY = "block h-11 w-full border-b border-ink/30 bg-transparent text-title text-ink transition-colors focus:border-ink focus:outline-none";
+
+function Field({ label, note, className = "", children }: { label: string; note?: string; className?: string; children: React.ReactNode }) {
+  return (
+    <label className={`${FIELD} ${className}`}>
+      <span className={HEAD}>
+        <span className="u-trim">
+          {label}
+        </span>
+        {note ? (
+          <span className="u-trim">
+            {note}
+          </span>
+        ) : null}
+      </span>
+      {children}
+    </label>
+  );
+}
 
 function fit(el: HTMLTextAreaElement | null) {
   if (!el || CSS.supports("field-sizing", "content")) return;
@@ -71,53 +87,40 @@ export function ContactForm() {
         <Receipt stamp={stamp} />
         <div>
           <p className="text-display-md text-ink">
-            <T en="Message sent" ko="전송 완료" />
+            Message sent
           </p>
-          <p className="mt-md text-body text-ink-muted">
-            <T en="We'll come back to you shortly." ko="곧 회신 드리겠습니다." />
+          <p className="mt-md text-body text-ink">
+            We’ll come back to you shortly.
           </p>
-          <button
-            type="button"
-            onClick={() => setStatus("idle")}
-            className="mt-md inline-flex min-h-11 cursor-pointer items-center text-ui text-ink uppercase underline decoration-ink/35 underline-offset-4 transition-opacity hover:opacity-60 lg:min-h-0"
-          >
-            <T en="Send another" ko="새 메시지 작성" />
-          </button>
+          <p className="mt-md">
+            <button
+              type="button"
+              onClick={() => setStatus("idle")}
+              className="u-swipe-rest relative cursor-pointer text-ui text-ink uppercase before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 lg:before:hidden"
+            >
+              Send another
+            </button>
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <form onSubmit={send} className="grid grid-cols-1 gap-x-xl md:grid-cols-2">
-      <label className={ROW}>
-        <span className={HEAD}>
-          <T en="Name" ko="이름" />
-        </span>
+    <form onSubmit={send} className="grid gap-y-lg md:grid-cols-2 md:gap-x-lg lg:grid-cols-7">
+      <Field label={"Name"} className="lg:col-span-4">
         <input name="name" type="text" required autoComplete="name" className={ENTRY} />
-      </label>
+      </Field>
 
-      <label className={ROW}>
-        <span className={HEAD}>
-          <T en="Email" ko="이메일" />
-        </span>
+      <Field label={"Email"} className="lg:col-span-3">
         <input name="email" type="email" required autoComplete="email" className={ENTRY} />
-      </label>
+      </Field>
 
-      <label className={`${ROW} md:col-span-2`}>
-        <span className={HEAD}>
-          <T en="From" ko="소속" />
-          <span className="text-ink-muted">
-            <T en="Optional" ko="선택" />
-          </span>
-        </span>
+      <Field label={"From"} note={"Optional"} className="md:col-span-2 lg:col-span-7">
         <input name="organisation" type="text" autoComplete="organization" className={ENTRY} />
-      </label>
+      </Field>
 
-      <label className={`${ROW} md:col-span-2`}>
-        <span className={HEAD}>
-          <T en="Message" ko="메시지" />
-        </span>
+      <Field label={"Message"} className="md:col-span-2 lg:col-span-7">
         <textarea
           name="message"
           required
@@ -130,13 +133,13 @@ export function ContactForm() {
             fit(el);
           }}
           onInput={(e) => fit(e.currentTarget)}
-          className="block min-h-[calc(3lh+var(--spacing-xs)+var(--spacing-sm))] w-full resize-none bg-transparent pt-xs pb-sm text-lead text-ink [field-sizing:content] focus:outline-none"
+          className="block min-h-[calc(3lh+var(--spacing-sm))] w-full resize-none border-b border-ink/30 bg-transparent py-xs text-title text-ink transition-colors [field-sizing:content] focus:border-ink focus:outline-none"
         />
-      </label>
+      </Field>
 
       <input type="checkbox" name="botcheck" tabIndex={-1} autoComplete="off" className="hidden" />
 
-      <div className="mt-lg flex flex-wrap items-center gap-x-xl gap-y-sm md:col-span-2">
+      <div className="mt-sm flex flex-wrap items-center gap-x-xl gap-y-sm md:col-span-2 lg:col-span-7">
         <button
           type="submit"
           disabled={status === "sending"}
@@ -144,9 +147,9 @@ export function ContactForm() {
         >
           <span className="u-trim block">
             {status === "sending" ? (
-              <T en="Sending" ko="전송 중" />
+              "Sending"
             ) : (
-              <T en="Send message" ko="메시지 보내기" />
+              "Send message"
             )}
             <span
               aria-hidden="true"
@@ -156,15 +159,15 @@ export function ContactForm() {
             </span>
           </span>
         </button>
-        <p aria-live="polite" className="text-body-sm text-ink-muted">
+        <p aria-live="polite" className="text-body-sm text-ink">
           {status === "error" ? (
             <>
-              <T en="It could not be sent. " ko="전송하지 못했습니다. " />
+              {"It could not be sent. "}
               <a
                 href={draft}
-                className="text-ink underline decoration-ink/35 underline-offset-4 transition-opacity hover:opacity-60"
+                className="u-swipe-rest text-ink"
               >
-                <T en="Open it as an email instead" ko="메일로 보내기" />
+                Open it as an email instead
               </a>
             </>
           ) : null}
