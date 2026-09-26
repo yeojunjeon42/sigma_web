@@ -1,10 +1,5 @@
 "use client";
 
-// Wheel scrolling eased the way the reference studios ease it (Lenis, lerp 0.1 — measured on
-// ref.digital, studio-size.com and locomotive.ca). Desk and fine pointers only; touch stays native.
-// Off on /archive, whose field, reel and dial drive the scroll themselves, and on articles,
-// which read on the browser's own scroll.
-
 import Lenis from "lenis";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
@@ -35,7 +30,6 @@ export default function SmoothScroll() {
         lenis = null;
       }
     };
-    // In-page links glide with the same ease and still honour the target's scroll-margin.
     const jump = (e: MouseEvent) => {
       if (!lenis || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const a = (e.target as HTMLElement).closest?.<HTMLAnchorElement>('a[href^="#"]');

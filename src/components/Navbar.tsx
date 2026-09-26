@@ -4,17 +4,16 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { T } from "./T";
 import { EMAIL } from "@/features/site/data/contact";
 import { SOCIAL } from "@/features/site/data/social";
 
 const NAV = [
-  { label: { en: "Home", ko: "홈" }, href: "/" },
-  { label: { en: "Archive", ko: "아카이브" }, href: "/archive" },
-  { label: { en: "History", ko: "연혁" }, href: "/history" },
-  { label: { en: "Members", ko: "구성원" }, href: "/members" },
-  { label: { en: "Blog", ko: "블로그" }, href: "/blog" },
-  { label: { en: "Contact", ko: "연락처" }, href: "/contact" },
+  { label: "Home", href: "/" },
+  { label: "Archive", href: "/archive" },
+  { label: "History", href: "/history" },
+  { label: "Members", href: "/members" },
+  { label: "Blog", href: "/blog" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const BLUR: React.CSSProperties = {
@@ -31,7 +30,6 @@ const SCRIM_STYLE = (onDark: boolean): React.CSSProperties => ({
     : "linear-gradient(to bottom, rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.2) 60%, rgb(255 255 255 / 0))",
 });
 
-// A muted box behind the hovered and the current link, after mouthwash.studio's header.
 const BOX =
   "relative isolate before:absolute before:inset-x-[4px] lg:before:inset-x-[-2px] before:top-1/2 before:-z-10 before:h-[30px] before:-translate-y-1/2 before:rounded-[2px] before:opacity-0 before:transition-opacity before:duration-250 before:ease-[ease] before:content-[''] hover:before:opacity-100 focus-visible:before:opacity-100 aria-[current=page]:before:opacity-100 motion-reduce:before:transition-none";
 
@@ -47,12 +45,12 @@ const TONE = {
   },
   solid: {
     link:
-      "text-ink-subtle hover:text-ink aria-[current=page]:text-ink before:bg-ink/[0.07]",
+      "text-ink-muted hover:text-ink aria-[current=page]:text-ink before:bg-ink/[0.07]",
     mark: "text-ink",
     sheet: "bg-canvas",
     bar: "max-md:bg-canvas",
     rule: "border-rule",
-    sheetLink: "text-ink-subtle aria-[current=page]:text-ink",
+    sheetLink: "text-ink-muted aria-[current=page]:text-ink",
     sheetFoot: "text-ink-muted",
   },
 } as const;
@@ -174,9 +172,9 @@ export default function Navbar({
                 <Link
                   href={item.href}
                   aria-current={isCurrent(item.href) ? "page" : undefined}
-                  className={`${BOX} -mx-xs flex items-center px-xs py-md text-ui transition-colors duration-250 motion-reduce:transition-none ${t.link}`}
+                  className={`${BOX} -mx-xs flex items-center px-xs py-md text-ui uppercase tracking-[0.04em] transition-colors duration-250 motion-reduce:transition-none ${t.link}`}
                 >
-                  <T en={item.label.en} ko={item.label.ko} />
+                  {item.label}
                 </Link>
               </li>
             ))}
@@ -192,9 +190,8 @@ export default function Navbar({
             className={`-mr-2 flex size-11 items-center justify-center ${t.mark}`}
           >
             <span className="sr-only">
-              <T en="Menu" ko="메뉴" />
+              Menu
             </span>
-            {/* Two lines that cross into the dismissal mark. */}
             <span aria-hidden="true" className="relative block h-[7px] w-5">
               <span
                 className={`absolute left-0 top-0 h-px w-5 bg-current transition-transform duration-300 ease-out motion-reduce:transition-none ${
@@ -227,10 +224,9 @@ export default function Navbar({
                   href={item.href}
                   aria-current={isCurrent(item.href) ? "page" : undefined}
                   onClick={() => setOpen(false)}
-                  className={`group flex min-h-16 items-center justify-between text-display-lg ${t.sheetLink}`}
+                  className={`flex min-h-16 items-center text-display-lg ${t.sheetLink}`}
                 >
-                  <T en={item.label.en} ko={item.label.ko} />
-                  <span aria-hidden="true" className="size-2 rounded-full bg-accent opacity-0 group-aria-[current=page]:opacity-100" />
+                  {item.label}
                 </Link>
               </li>
             ))}

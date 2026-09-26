@@ -1,31 +1,32 @@
 import { Fragment } from "react";
 import Link from "next/link";
-import { T } from "./T";
 import { SOCIAL } from "@/features/site/data/social";
 
 const FOUNDED = 1984;
 const EMAIL = "record.snusigma@gmail.com";
 
 const PAGES = [
-  { label: { en: "Archive", ko: "아카이브" }, href: "/archive" },
-  { label: { en: "History", ko: "연혁" }, href: "/history" },
-  { label: { en: "Members", ko: "구성원" }, href: "/members" },
-  { label: { en: "Blog", ko: "블로그" }, href: "/blog" },
-  { label: { en: "Contact", ko: "연락처" }, href: "/contact" },
+  { label: "Archive", href: "/archive" },
+  { label: "History", href: "/history" },
+  { label: "Members", href: "/members" },
+  { label: "Blog", href: "/blog" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const LEGAL = [
-  { label: { en: "Seoul National University", ko: "서울대학교" }, href: "https://www.snu.ac.kr" },
-  { label: { en: "Electrical and Computer Engineering", ko: "전기·정보공학부" }, href: "https://ece.snu.ac.kr" },
+  { label: "Seoul National University", href: "https://www.snu.ac.kr" },
+  { label: "Electrical and Computer Engineering", href: "https://ece.snu.ac.kr" },
 ];
 
-function GhostWordmark() {
+const LABEL = "mb-sm text-caption text-ink-muted";
+const HIT = "relative before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] lg:before:hidden";
+const ITEM = `${HIT} u-swipe`;
+const LINK = "u-swipe-rest whitespace-nowrap";
+
+function Wordmark() {
   return (
-    <div className="overflow-hidden">
-      <p
-        aria-hidden="true"
-        className="u-trim whitespace-nowrap font-[family-name:var(--f-display)] text-[25vw] leading-[0.78] font-bold tracking-[-0.065em] text-ink opacity-[0.07] [font-stretch:125%]"
-      >
+    <div aria-hidden="true" className="u-gutter @container pointer-events-none mx-auto mt-lg w-full max-w-wide">
+      <p className="u-trim -ml-[0.0555em] whitespace-nowrap font-[family-name:var(--f-display)] text-[length:calc(100cqw/4.115)] font-bold leading-none tracking-[-0.02em] text-ink [font-stretch:125%]">
         SIGMA
       </p>
     </div>
@@ -36,36 +37,41 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="flex min-h-svh flex-col bg-band text-ink">
-      <div className="u-gutter mx-auto flex w-full max-w-wide flex-1 flex-col justify-center pt-section pb-xxxl">
-        <div className="grid gap-y-section lg:grid-cols-2 lg:gap-x-xxxl">
-          <div className="lg:pt-lg">
-            <div className="max-w-[38ch]">
-              <p className="u-trim text-title">
-                <T
-                  en="Where Imagination Meets Reality"
-                  ko="Where Imagination Meets Reality"
-                />
-              </p>
+    <footer className="u-card-rise overflow-hidden rounded-t-[2.5rem] bg-band text-ink [corner-shape:squircle]">
+      <div className="u-gutter mx-auto w-full max-w-wide pt-xxl lg:pt-section">
+        <div className="grid grid-cols-2 gap-x-md gap-y-xl text-body lg:grid-cols-12 lg:gap-x-lg">
+          <div className="hidden lg:col-span-4 lg:block">
+            <p>
+              Where Imagination Meets Reality
+            </p>
+            <a href={`mailto:${EMAIL}`} className={`mt-xs inline-block ${LINK}`}>
+              {EMAIL}&nbsp;↗
+            </a>
+          </div>
 
-              <a
-                href={`mailto:${EMAIL}`}
-                className="mt-lg inline-flex min-h-11 items-center gap-xs rounded-pill bg-ink px-lg text-ui text-canvas transition-colors hover:bg-ink-muted"
-              >
-                {EMAIL}
-                <span aria-hidden="true">↗</span>
-              </a>
-            </div>
+          <nav aria-label="Footer" className="lg:col-span-2 lg:col-start-6">
+            <p className={`${LABEL} max-lg:hidden`}>
+              Pages
+            </p>
+            <ul className="flex flex-col gap-y-xxs">
+              {PAGES.map((page) => (
+                <li key={page.href}>
+                  <Link href={page.href} className={ITEM}>
+                    {page.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
-            <ul className="mt-xxl flex flex-wrap gap-lg">
+          <div className="lg:col-span-2">
+            <p className={`${LABEL} max-lg:hidden`}>
+              Follow
+            </p>
+            <ul className="flex flex-col gap-y-xxs">
               {SOCIAL.map((s) => (
                 <li key={s.name}>
-                  <a
-                    href={s.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="-my-sm flex min-h-11 items-center py-sm text-ui text-ink-muted underline decoration-transparent underline-offset-4 transition-colors hover:text-ink hover:decoration-ink"
-                  >
+                  <a href={s.href} target="_blank" rel="noopener noreferrer" className={ITEM}>
                     {s.name}
                   </a>
                 </li>
@@ -73,66 +79,71 @@ export default function Footer() {
             </ul>
           </div>
 
-          <nav aria-label="Footer">
-            <ul className="border-t border-rule-strong">
-              {PAGES.map((page, i) => (
-                <li key={page.href} className="u-rule-under border-b border-rule-strong transition-colors duration-300 has-[a:hover]:border-ink">
-                  <Link
-                    href={page.href}
-                    className="group flex items-center gap-lg py-lg"
-                  >
-                    <span className="u-trim w-10 shrink-0 text-title tabular-nums text-ink-subtle">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span className="u-ink-in u-trim text-display-lg transition-transform duration-300 ease-out group-hover:translate-x-2 motion-reduce:transition-none">
-                      <T en={page.label.en} ko={page.label.ko} />
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <div className="hidden lg:col-span-3 lg:block">
+            <p className={LABEL}>
+              Visit
+            </p>
+            <p>
+              Building 302, Room 215‑2
+              <br />
+              Seoul National University
+              <br />
+              1 Gwanak-ro, Gwanak-gu, Seoul
+            </p>
+          </div>
+
+          <dl className="col-span-2 grid gap-y-sm lg:hidden">
+            <div className="grid grid-cols-[4rem_minmax(0,1fr)] gap-x-sm">
+              <dt className="pt-[0.2rem] text-caption text-ink-muted">
+                Room
+              </dt>
+              <dd>
+                Building 302, Room 215‑2
+                <br />
+                Seoul National University
+              </dd>
+            </div>
+            <div className="grid grid-cols-[4rem_minmax(0,1fr)] gap-x-sm">
+              <dt className="pt-[0.2rem] text-caption text-ink-muted">
+                Email
+              </dt>
+              <dd>
+                <a href={`mailto:${EMAIL}`} className={`${HIT} ${LINK}`}>
+                  {EMAIL}
+                </a>
+              </dd>
+            </div>
+          </dl>
         </div>
 
-        <p className="mt-section text-body-sm text-ink-muted">
-          <T en="This website is crafted by" ko="웹사이트 제작" />{" "}
-          <a href="https://github.com/yeojunjeon42" target="_blank" rel="noopener noreferrer" className="whitespace-nowrap underline underline-offset-4 transition-colors hover:text-ink">
-            Yeojun Jeon
-          </a>
-          {" "}
-          <T en="and" ko="·" />{" "}
-          <a href="https://xlaude2040.com/" target="_blank" rel="noopener noreferrer" className="whitespace-nowrap underline underline-offset-4 transition-colors hover:text-ink">
-            Jin Myung Lee
-          </a>
-        </p>
-
-        <div className="mt-sm flex flex-wrap items-baseline justify-between gap-x-xxl gap-y-sm border-t border-ink/15 pt-sm text-body-sm text-ink-muted">
+        <div className="mt-xxl flex flex-col gap-y-xxs text-caption text-ink-muted lg:mt-section lg:flex-row lg:justify-between lg:gap-x-lg">
           <p>
-            © {year} SIGMA INTELLIGENCE ·{" "}
-            <T en={`EST. ${FOUNDED}`} ko={`${FOUNDED}년 창립`} />
+            © {year} SIGMA INTELLIGENCE · {`EST. ${FOUNDED}`}
           </p>
-
-          <p className="text-ink-subtle">
-            {/* The separators are text in the sentence, not wrappers around each link — a link
-                boxed on its own reads as a standalone target that ought to be finger-sized. */}
+          <p className="max-lg:hidden">
             {LEGAL.map((l, i) => (
               <Fragment key={l.href}>
                 {i > 0 && " · "}
-                <a
-                  href={l.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline underline-offset-4 transition-colors hover:text-ink"
-                >
-                  <T en={l.label.en} ko={l.label.ko} />
+                <a href={l.href} target="_blank" rel="noopener noreferrer" className={LINK}>
+                  {l.label}
                 </a>
               </Fragment>
             ))}
           </p>
+          <p>
+            Made by{" "}
+            <a href="https://github.com/yeojunjeon42" target="_blank" rel="noopener noreferrer" className={LINK}>
+              Yeojun Jeon
+            </a>
+            {" & "}
+            <a href="https://xlaude2040.com/" target="_blank" rel="noopener noreferrer" className={LINK}>
+              Jin Myung Lee
+            </a>
+          </p>
         </div>
       </div>
 
-      <GhostWordmark />
+      <Wordmark />
     </footer>
   );
 }

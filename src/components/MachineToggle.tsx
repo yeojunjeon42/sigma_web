@@ -41,7 +41,7 @@ export function MachineToggle() {
           className={`${base} ${
             machine
               ? "text-accent"
-              : "text-ink-subtle hover:text-ink"
+              : "text-ink-muted hover:text-ink"
           }`}
         >
           Machine
