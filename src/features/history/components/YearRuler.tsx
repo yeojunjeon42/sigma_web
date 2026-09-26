@@ -2,17 +2,11 @@
 
 import { useEffect, useRef } from "react";
 
-/** Travel that turns a press into a scrub. */
 const SLOP = 5;
-/** Pitch of the dial, in px per entry: the ticks are evenly spaced, whatever the record did. */
 const PITCH = 13;
-/** Exponential loss of speed per millisecond once the finger lets go. */
 const DRAG = 0.006;
-/** How long the plate waits, after the reader stops, before coming back. */
 const REST = 280;
-/** How far the page has to run downward before the plate steps aside. */
 const AWAY = 24;
-/** Decorative continuation past the first and last real entry keeps the instrument balanced. */
 const TAIL = 64;
 
 export type Mark = {
@@ -22,18 +16,6 @@ export type Mark = {
   targetId?: string;
 };
 
-/**
- * The record as a dial on a plate floating at the foot of the screen (phones only, after the
- * timer in iOS's control centre). One tick per entry, evenly spaced. The record turns while the
- * year stays fixed in a true break in the strip: ticks disappear at one side and emerge from
- * the other, but are never composited under the numerals.
- * Its four numerals turn independently like counter drums. A horizontal drag coasts and
- * spring-settles on an entry; a tap springs to the place pressed. Vertical intent is left to
- * the page, which always wins.
- *
- * Per-frame work stays out of React. The page position, dial, tick emphasis and figure are all
- * written directly to the DOM, so a scrub does not render the chronology again.
- */
 export default function YearRuler({
   marks,
   ariaLabel = "The record, entry by entry",
@@ -77,7 +59,6 @@ export default function YearRuler({
     let span = 1;
     let done = false;
 
-    // Where each entry sits in the page's scroll, as a share of the record's own stretch.
     const measure = () => {
       const tops = marks.map((m) => {
         const el = document.getElementById(m.targetId ?? `e-${m.id}`);
@@ -97,7 +78,6 @@ export default function YearRuler({
       );
     };
 
-    /** The place on the dial, counted in entries, that a share of the scroll stands at. */
     const dialAt = (f: number) => {
       if (f <= 0) return 0;
       if (f >= 1) return last;
@@ -106,7 +86,6 @@ export default function YearRuler({
       const room = at[k + 1] - at[k];
       return k + (room > 0 ? Math.min(1, (f - at[k]) / room) : 0);
     };
-    /** And back: the share of the scroll that a place on the dial stands at. */
     const scrollAt = (d: number) => {
       if (last === 0) return 0;
       const k = Math.min(last - 1, Math.max(0, Math.floor(d)));
@@ -198,7 +177,6 @@ export default function YearRuler({
       });
     };
 
-    /** Paint at a fractional entry. */
     const paintAt = (d: number) => {
       paintedDial = d;
       const centre = bar.clientWidth / 2;
@@ -214,8 +192,6 @@ export default function YearRuler({
         const fromStation = Math.abs(x) - stationHalf;
         const magnet = Math.max(0, Math.min(1, 1 - fromStation / (PITCH * 2)));
         const wantedPull = -Math.sign(x) * magnet * 5;
-        // The magnetic tick approaches the counter but never enters its cut-out. Its last few
-        // pixels fade before the hard mask, so the station does not appear to shear the rule.
         const pulledX = x + wantedPull;
         const safeX =
           fromStation >= 0
@@ -296,7 +272,6 @@ export default function YearRuler({
       commandedAt = -Infinity;
     };
 
-    /** Retarget one page spring instead of starting a new smooth-scroll animation per tick. */
     const movePage = (target: number) => {
       const limit = Math.max(
         0,
@@ -337,8 +312,6 @@ export default function YearRuler({
       pageFrame = requestAnimationFrame(run);
     };
 
-    /** The strip remains continuous under the finger, while the page spring is quantized to the
-     * entry carried by the nearest tick. */
     const put = (d: number, visual = d) => {
       const detent = Math.round(clamp(d));
       movePage(from + scrollAt(detent) * span);
@@ -354,7 +327,6 @@ export default function YearRuler({
       stopPage();
     };
 
-    /** A damped spring shared by taps, keys, edge returns and the final coast settle. */
     const spring = (to: number, start = paintedDial, velocity = 0) => {
       stopDial();
       const target = clamp(to);
@@ -509,8 +481,6 @@ export default function YearRuler({
       }
     };
 
-    // The reader's own scrolling always wins while it is moving. Once its momentum ends inside
-    // the record, the same spring as the dial draws the page to the nearest real entry.
     let lastY = window.scrollY;
     let rest = 0;
     let nativeRest = 0;
@@ -646,8 +616,6 @@ export default function YearRuler({
         <span className="year-ruler__edge-blur year-ruler__edge-blur--right" />
       </div>
 
-      {/* One instrument, one row: the moving strip has a true break for this fixed counter. The
-          year itself is the index, so there is no second pointer. */}
       <div aria-hidden="true" className="year-ruler__value-slot">
         <p
           ref={valueRef}

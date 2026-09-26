@@ -30,8 +30,8 @@ export default async function ClubLifePage() {
   const latest = nodes[0];
   const now = [...latest.events].reverse().slice(0, 3);
   const facts = [
-    { label: { en: "Cohorts", ko: "기수" }, value: { en: String(COHORTS.length), ko: `${COHORTS.length}기` } },
-    { label: { en: "Members and alumni", ko: "회원 및 졸업생" }, value: { en: String(ALUMNI_TOTAL), ko: `${ALUMNI_TOTAL}명` } },
+    { label: "Cohorts", value: String(COHORTS.length) },
+    { label: "Members and alumni", value: String(ALUMNI_TOTAL) },
   ];
 
   return (
@@ -61,8 +61,6 @@ export default async function ClubLifePage() {
             </Container>
           </GridField>
 
-          {/* Outside the sheet: the arrival animation puts a filter on each block of
-              `GridField`, and a filtered ancestor would hold this to the page, not the screen. */}
           <YearRuler marks={marks} />
         </main>
 

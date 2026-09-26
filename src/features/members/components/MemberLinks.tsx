@@ -3,16 +3,10 @@
 import type { ReactNode } from "react";
 import type { MemberLinks as Links } from "../data/roster";
 
-/**
- * A member's profiles, as small monochrome icons in the page's ink. The GitHub and LinkedIn
- * marks are their published glyphs, drawn only to link to a profile; Instagram and the personal
- * site are drawn here. Every mark fills its 24-unit box, so the first icon's ink sits on the
- * card's edge (the row is pulled left by its hit-area inset).
- */
-const ICONS: { key: keyof Links; label: { en: string; ko: string }; path: ReactNode }[] = [
+const ICONS: { key: keyof Links; label: string; path: ReactNode }[] = [
   {
     key: "email",
-    label: { en: "Email", ko: "이메일" },
+    label: "Email",
     path: (
       <g fill="none" stroke="currentColor" strokeWidth="2">
         <rect x="1" y="3.5" width="22" height="17" />
@@ -22,7 +16,7 @@ const ICONS: { key: keyof Links; label: { en: string; ko: string }; path: ReactN
   },
   {
     key: "instagram",
-    label: { en: "Instagram", ko: "인스타그램" },
+    label: "Instagram",
     path: (
       <>
         <rect x="1" y="1" width="22" height="22" rx="6" fill="none" stroke="currentColor" strokeWidth="2" />
@@ -33,7 +27,7 @@ const ICONS: { key: keyof Links; label: { en: string; ko: string }; path: ReactN
   },
   {
     key: "github",
-    label: { en: "GitHub", ko: "깃허브" },
+    label: "GitHub",
     path: (
       <path
         fill="currentColor"
@@ -44,7 +38,7 @@ const ICONS: { key: keyof Links; label: { en: string; ko: string }; path: ReactN
   },
   {
     key: "linkedin",
-    label: { en: "LinkedIn", ko: "링크드인" },
+    label: "LinkedIn",
     path: (
       <path
         fill="currentColor"
@@ -54,7 +48,7 @@ const ICONS: { key: keyof Links; label: { en: string; ko: string }; path: ReactN
   },
   {
     key: "site",
-    label: { en: "Website", ko: "개인 사이트" },
+    label: "Website",
     path: (
       <g fill="none" stroke="currentColor" strokeWidth="1.8">
         <circle cx="12" cy="12" r="11.1" />
@@ -72,7 +66,6 @@ export default function MemberLinks({
 }: {
   name: string;
   links?: Links;
-  /** Pulls the row out by the icons' hit-area inset, so the ink meets the edge. */
   className?: string;
 }) {
   const present = ICONS.filter((i) => links?.[i.key]);
@@ -86,9 +79,9 @@ export default function MemberLinks({
             href={i.key === "email" ? `mailto:${links![i.key]}` : links![i.key]}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={`${name} on ${i.label.en}`}
-            title={i.label.en}
-            className="relative grid h-11 w-7 place-items-center text-ink-subtle transition-colors before:absolute before:top-1/2 before:left-1/2 before:size-11 before:-translate-1/2 before:content-[''] hover:text-ink focus-visible:text-ink lg:size-8 lg:before:hidden"
+            aria-label={`${name} on ${i.label}`}
+            title={i.label}
+            className="relative grid h-11 w-7 place-items-center text-ink-muted transition-colors before:absolute before:top-1/2 before:left-1/2 before:size-11 before:-translate-1/2 before:content-[''] hover:text-ink focus-visible:text-ink lg:size-8 lg:before:hidden"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4">
               {i.path}

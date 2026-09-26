@@ -2,27 +2,19 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { T } from "@/components/T";
 import type { Bilingual } from "@/features/site/data/about";
 import type { MemberLinks as Links } from "../data/roster";
 import MemberLinks from "./MemberLinks";
 import { DOT, SCREEN } from "@/lib/halftone";
 
-/**
- * The executive team as a ruled table (after locomotive.ca/en/agency). From `lg` the portrait of
- * the row under the pointer prints beside it; below `lg` every row carries its own portrait.
- */
 export interface CrewMember {
   id: string;
   name: string;
   nameEn?: string;
-  /** A titled post, when they hold one. */
   post?: Bilingual;
-  /** The club work they carry. */
   duty?: Bilingual;
   department: Bilingual;
-  /** 기수, as "42nd" / "42기". */
-  gen: Bilingual;
+  gen: string;
   portrait: string | null;
   links?: Links;
 }
@@ -43,7 +35,6 @@ type Sheet = {
   crop: [number, number, number];
 };
 
-// Printed through the screen; while `live`, the photograph fades in over the dots.
 export function Print({
   src,
   className = "",
@@ -71,8 +62,6 @@ export function Print({
       const w = canvas.clientWidth;
       const h = canvas.clientHeight;
       if (!w || !h || !img.complete || !img.currentSrc) return null;
-      // A copy of the chosen source: the <img>'s natural size is corrected for its srcset
-      // density, but drawImage reads the bitmap, so crops taken from the <img> land off-centre.
       const bmp = new window.Image();
       bmp.src = img.currentSrc;
       if (!bmp.complete || !bmp.naturalWidth) {
@@ -186,8 +175,6 @@ export function Print({
     const since = performance.now();
     const step = (now: number) => {
       s.raf = 0;
-      // Until the photograph has loaded and been measured, hold the print: a transition run
-      // against nothing would finish unseen and the picture would only snap in afterwards.
       if (!s.paint() && now - since < 4000) {
         s.last = 0;
         s.raf = requestAnimationFrame(step);
@@ -221,7 +208,6 @@ export function Print({
   );
 }
 
-// Live while at least `share` of the element is on screen: touch has no pointer to point with.
 export function useInView<T extends Element>(share = 0.6) {
   const ref = useRef<T>(null);
   const [seen, setSeen] = useState(false);
@@ -255,7 +241,7 @@ function Drawer({ id, open, m }: { id: string; open: boolean; m: CrewMember }) {
       }`}
     >
       <div className={`min-h-0 overflow-hidden ${SUB}`}>
-        <p className="pt-sm pb-md text-body text-ink-muted lg:col-span-2 lg:col-start-2 lg:pb-lg">
+        <p className="pt-sm pb-md text-body text-ink lg:col-span-2 lg:col-start-2 lg:pb-lg">
           Hello, I am {m.nameEn ?? m.name}, nice to meet you!
         </p>
       </div>
@@ -271,7 +257,7 @@ function Toggle({ m, open, controls, onToggle }: { m: CrewMember; open: boolean;
       aria-controls={controls}
       aria-label={`${m.name}: ${open ? "close" : "more"}`}
       onClick={onToggle}
-      className="relative flex h-11 w-9 shrink-0 cursor-pointer items-center justify-center text-ink-subtle transition-colors before:absolute before:top-1/2 before:left-1/2 before:size-11 before:-translate-1/2 before:content-[''] hover:text-ink focus:outline-none lg:w-11 lg:before:hidden"
+      className="relative flex h-11 w-9 shrink-0 cursor-pointer items-center justify-center text-ink-muted transition-colors before:absolute before:top-1/2 before:left-1/2 before:size-11 before:-translate-1/2 before:content-[''] hover:text-ink focus:outline-none lg:w-11 lg:before:hidden"
     >
       <svg aria-hidden="true" viewBox="0 0 12 12" className={`size-3 transition-transform duration-300 motion-reduce:transition-none ${open ? "rotate-45" : ""}`}>
         <path d="M6 0v12M0 6h12" stroke="currentColor" strokeWidth="1.2" />
@@ -283,11 +269,11 @@ function Toggle({ m, open, controls, onToggle }: { m: CrewMember; open: boolean;
 function Meta({ m, className = "" }: { m: CrewMember; className?: string }) {
   return (
     <span className={className}>
-      {m.post && <T en={m.post.en} ko={m.post.ko} />}
+      {m.post && m.post.en}
       {m.post && m.duty && <span className="text-ink-muted"> · </span>}
       {m.duty && (
-        <span className={m.post ? "text-ink-muted" : undefined}>
-          <T en={m.duty.en} ko={m.duty.ko} />
+        <span>
+          {m.duty.en}
         </span>
       )}
     </span>
@@ -309,7 +295,6 @@ export default function MemberCrew({ members }: { members: CrewMember[] }) {
 
   return (
     <>
-      {/* Touch and narrow: a ruled sheet, portrait beside each name. */}
       <ul className="border-b border-rule-strong lg:hidden">
         {members.map((m) => (
           <li
@@ -322,7 +307,7 @@ export default function MemberCrew({ members }: { members: CrewMember[] }) {
               <span className="u-trim text-display-md text-ink">{m.name}</span>
               <p className="text-body-sm text-ink-muted">
                 <Meta m={m} className="block text-ink" />
-                <T en={m.department.en} ko={m.department.ko} />
+                {m.department.en}
               </p>
               <div className="-mb-xs mt-auto flex flex-wrap items-center md:hidden">
                 <MemberLinks name={m.name} links={m.links} className="-ml-1.5" />
@@ -340,7 +325,6 @@ export default function MemberCrew({ members }: { members: CrewMember[] }) {
         ))}
       </ul>
 
-      {/* Desk: the table, and the portrait of whoever is pointed at. */}
       <div className="hidden grid-cols-12 gap-x-xl lg:grid">
         <div className="sticky top-[calc(var(--masthead)+var(--spacing-lg))] col-span-4 self-start">
           <div className="u-develop relative aspect-square">
@@ -359,9 +343,9 @@ export default function MemberCrew({ members }: { members: CrewMember[] }) {
               <span className="text-ink-muted">
                 {" ("}
                 {pointed.post ? (
-                  <T en={pointed.post.en} ko={pointed.post.ko} />
+                  pointed.post.en
                 ) : pointed.duty ? (
-                  <T en={pointed.duty.en} ko={pointed.duty.ko} />
+                  pointed.duty.en
                 ) : null}
                 {")"}
               </span>
@@ -407,7 +391,7 @@ export default function MemberCrew({ members }: { members: CrewMember[] }) {
                 <span className="u-trim text-display-md text-ink">{m.name}</span>
                 <Meta m={m} className="u-trim text-body text-ink" />
                 <span className="u-trim text-body text-ink-muted">
-                  <T en={m.department.en} ko={m.department.ko} />
+                  {m.department.en}
                 </span>
                 <span className="-mr-xs flex items-center justify-self-end">
                   <MemberLinks name={m.name} links={m.links} />

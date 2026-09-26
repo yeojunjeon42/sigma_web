@@ -1,8 +1,5 @@
 "use client";
 
-// The club's age since 1984.01.01 in Seoul, decoded on arrival, then ticking.
-// Figures scramble and lock left to right; later only a changed figure scrambles.
-
 import { useEffect, useRef } from "react";
 import { useMedia } from "@/lib/media";
 
@@ -90,7 +87,7 @@ export default function RollingDate({ className = "" }: { className?: string }) 
               0
             </span>
           ))}
-          <span className="ml-[0.08em] font-sans text-caption tracking-normal text-ink-subtle lowercase">{UNITS[u]}</span>
+          <span className="ml-[0.08em] font-sans text-caption tracking-normal text-ink-muted lowercase">{UNITS[u]}</span>
         </span>
       ))}
     </span>
