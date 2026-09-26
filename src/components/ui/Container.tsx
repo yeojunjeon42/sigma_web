@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type Width = "content" | "wide" | "full";
+type Width = "content" | "wide" | "full";
 
 type Tag = "div" | "section" | "header" | "footer" | "main" | "nav" | "article" | "aside";
 

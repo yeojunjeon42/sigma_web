@@ -2,12 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { T } from "@/components/T";
 import { PLATE_RELEASE, PLATE_SHOW } from "@/components/ui/HeroPlate";
 
-type Bilingual = { en: string; ko: string };
-export type LineBuild = { id: string; name: Bilingual; year: number | null; src: string | null };
-export type LineResult = { key: string; year: number; contest: Bilingual; result: Bilingual };
+type LineBuild = { id: string; name: string; year: number | null; src: string | null };
+type LineResult = { key: string; year: number; contest: string; result: string };
 
 const DRIFT = -42;
 const CRAWL = -5;
@@ -406,7 +404,7 @@ export default function RecordLines({
             data-id={b.id}
             className="inline-block py-1 text-ink transition-colors duration-200 group-data-[focus]/lines:text-rule-strong data-[on]:!text-ink"
           >
-            <T en={b.name.en} ko={b.name.ko} />
+            {b.name}
             {b.year ? (
               <span className="ml-[0.5em] inline-block -translate-y-[2em] font-mono text-[12px] tracking-normal text-ink-muted tabular-nums">
                 {b.year}
@@ -426,12 +424,12 @@ export default function RecordLines({
     <ul aria-hidden={copy > 0 || undefined} className="inline">
       {results.map((r) => (
         <li key={r.key} className="mr-[2.4em] inline">
-          <span className="mr-[0.9em] font-mono text-[12px] text-ink-subtle tabular-nums">
+          <span className="mr-[0.9em] font-mono text-[12px] text-ink-muted tabular-nums">
             {r.year}
           </span>
-          <T en={r.contest.en} ko={r.contest.ko} />
+          {r.contest}
           <span className="ml-[1em] font-mono text-[12px] text-ink uppercase">
-            <T en={r.result.en} ko={r.result.ko} />
+            {r.result}
           </span>
         </li>
       ))}
@@ -448,10 +446,10 @@ export default function RecordLines({
     >
       <div className="flex items-baseline justify-between gap-x-lg">
         <h2 className={`${META} text-ink`}>
-          <T en="Builds" ko="작품" />
+          Builds
         </h2>
         <Link href="/archive" className={`${META} ${ALL}`}>
-          <T en={`All ${builds.length} ↗`} ko={`전체 ${builds.length} ↗`} />
+          {`All ${builds.length} ↗`}
         </Link>
       </div>
       <div className={`${fade} mt-sm`}>
@@ -466,10 +464,10 @@ export default function RecordLines({
 
       <div className="mt-lg flex items-baseline justify-between gap-x-lg">
         <h2 className={`${META} text-ink`}>
-          <T en="Competition results" ko="수상" />
+          Competition results
         </h2>
         <Link href="/history" className={`${META} ${ALL}`}>
-          <T en={`All ${total} ↗`} ko={`전체 ${total} ↗`} />
+          {`All ${total} ↗`}
         </Link>
       </div>
       <div className={`${fade} mt-sm`}>
@@ -487,13 +485,10 @@ export default function RecordLines({
 
       <div className="mt-lg flex items-baseline justify-between gap-x-lg">
         <h2 className={`${META} text-ink`}>
-          <T en="Members" ko="부원" />
+          Members
         </h2>
         <Link href="/members" className={`${META} ${ALL}`}>
-          <T
-            en={`${cohorts} cohorts · ${people} members and alumni ↗`}
-            ko={`${cohorts}개 기수 · 부원과 졸업생 ${people}명 ↗`}
-          />
+          {`${cohorts} cohorts · ${people} members and alumni ↗`}
         </Link>
       </div>
 

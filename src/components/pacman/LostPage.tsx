@@ -4,7 +4,6 @@ import Footer from "@/components/Footer";
 import { Container } from "@/components/ui";
 import Arcade from "./Arcade";
 
-// The shell the 404 and error pages share: the arcade, filling the first screen.
 export default function LostPage({ word, heading, extra }: { word: string; heading: string; extra?: ReactNode }) {
   return (
     <>

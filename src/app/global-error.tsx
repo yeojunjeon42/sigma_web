@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 
-// The last resort, drawn without the root layout: plain paper, the name's colours, a way back.
-
 export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <html lang="en">

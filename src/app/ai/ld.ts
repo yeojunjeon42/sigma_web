@@ -1,5 +1,3 @@
-// schema.org JSON-LD for the machine pages, built from the same corpus as the Markdown twins.
-
 import { ORG, ORG_ID, SITE, SOCIAL, type Build, type Entry, type Post } from "@/app/ai/corpus";
 
 const ctx = "https://schema.org";
