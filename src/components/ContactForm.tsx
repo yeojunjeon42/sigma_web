@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { EMAIL } from "@/features/site/data/contact";
 
 const ENDPOINT = "https://api.web3forms.com/submit";
-const KEY = "43dcbf5f-1d3d-45bc-acd1-61606eba946c";
+const KEY = "88d928f1-f41f-4ec4-b59b-e3c66d04209c";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
