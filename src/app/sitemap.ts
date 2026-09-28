@@ -13,7 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const docs: MetadataRoute.Sitemap = [
     ...archive.map((d) => ({
-      url: `${SITE_URL}/archive?view=reel&at=${d.slug}`,
+      url: `${SITE_URL}/archive?view=reel&amp;at=${d.slug}`,
       lastModified,
       changeFrequency: "yearly" as const,
       priority: 0.6,
