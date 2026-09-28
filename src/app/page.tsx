@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { share } from "@/app/share";
 import HeroField from "@/components/ui/HeroField";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -18,9 +19,13 @@ const FOUNDED = 1984;
 const FIGURE = "block text-[clamp(8rem,44vw,22rem)] leading-[0.8] tracking-[-0.055em] tabular-nums md:text-[clamp(8rem,24vw,22rem)]";
 const LIST = "text-title text-ink [&>li+li]:mt-xxs";
 
+const DESCRIPTION =
+  "SIGMA INTELLIGENCE is the robotics club of Seoul National University — Korea's first university robotics club, founded 1984. 서울대학교 로봇동아리 시그마 인텔리전스.";
+
 export const metadata: Metadata = {
-  description:
-    "Korea's first university robotics club, founded 1984 at Seoul National University.",
+  title: { absolute: "SIGMA INTELLIGENCE \\ SNU Robotics Club · 서울대학교 로봇동아리" },
+  description: DESCRIPTION,
+  ...share("/", { description: DESCRIPTION }),
 };
 
 export default async function Home() {
@@ -79,17 +84,17 @@ export default async function Home() {
           className="bg-band text-ink"
         >
           <Container className="grid gap-y-xl py-xxl md:grid-cols-12 md:items-end md:py-section">
-            <p className="md:col-span-8">
-              <span className="text-body text-ink-muted">
+            <p className="u-drift [--drift-from:32px] [--drift-to:-32px] md:col-span-8">
+              <span className="text-body text-ink">
                 Founded
               </span>
-              <span className={`${FIGURE} u-drift mt-sm [--drift-from:32px] [--drift-to:-32px]`}><CountUp from={new Date().getFullYear()} to={FOUNDED} /></span>
+              <span className={`${FIGURE} mt-sm`}><CountUp from={new Date().getFullYear()} to={FOUNDED} /></span>
             </p>
-            <p className="text-right md:col-span-4">
-              <span className="text-body text-ink-muted">
+            <p className="u-drift [--drift-from:32px] [--drift-to:-32px] text-right md:col-span-4">
+              <span className="text-body text-ink">
                 Years
               </span>
-              <span className={`${FIGURE} u-drift mt-sm [--drift-from:32px] [--drift-to:-32px]`}><CountUp to={years} /></span>
+              <span className={`${FIGURE} mt-sm`}><CountUp to={years} /></span>
             </p>
           </Container>
         </section>

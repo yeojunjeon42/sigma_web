@@ -61,16 +61,15 @@ export default function EntryBody({
           </Fact>
         ) : null}
         {b.team?.length ? <Fact label="Team">{b.team.join(", ")}</Fact> : null}
-        {b.tags.length ? (
-          <Fact label="Tags">
-            {b.tags.map((t, i) => (
-              <span key={t} className={i > 0 ? "before:mx-1 before:text-ink-muted before:content-['·']" : ""}>
-                {t}
-              </span>
-            ))}
-          </Fact>
-        ) : null}
       </dl>
+
+      {b.tags.length ? (
+        <p className="mt-md flex flex-wrap gap-x-sm gap-y-xxs text-body-sm text-ink-muted">
+          {b.tags.map((t) => (
+            <span key={t}>#{t}</span>
+          ))}
+        </p>
+      ) : null}
 
       {b.body ? <div className={s.body} dangerouslySetInnerHTML={{ __html: b.body }} /> : null}
 
@@ -80,7 +79,7 @@ export default function EntryBody({
             <li key={photo.src}>
               <Image
                 src={photo.src}
-                alt=""
+                alt={b.name}
                 width={photo.width}
                 height={photo.height}
                 sizes={s.sizes}

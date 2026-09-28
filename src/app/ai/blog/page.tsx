@@ -20,7 +20,7 @@ export default function MachineBlog() {
       <Ld data={postsList(posts)} />
       <Head
         title="Blog — published posts"
-        lede={`${posts.length} posts, newest first. Post texts are the club's own Korean documents, quoted verbatim in /ai/blog.md and /llms-full.txt.`}
+        lede={`${posts.length} posts, newest first. Full texts are in /ai/blog.md and /llms-full.txt.`}
         md="/ai/blog.md"
         human="/blog"
       />
@@ -45,7 +45,6 @@ export default function MachineBlog() {
                   ]
                 : []),
               ...(p.team.length ? [{ k: "Team", v: p.team.join(", ") }] : []),
-              ...(p.source ? [{ k: "Source document", v: <span lang="ko">{p.source}</span> }] : []),
               { k: "URL", v: <Ext href={`/blog/${p.slug}`}>{p.url}</Ext> },
             ]}
           />

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { share } from "@/app/share";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CopyEmail from "@/components/CopyEmail";
@@ -9,10 +10,12 @@ import { FACTS } from "@/features/site/data/about";
 import { MAPS } from "@/features/site/data/contact";
 import { SOCIAL } from "@/features/site/data/social";
 
+const DESCRIPTION = "Get in touch with SIGMA INTELLIGENCE at Seoul National University.";
+
 export const metadata: Metadata = {
   title: "Contact",
-  description:
-    "Get in touch with Sigma Intelligence at Seoul National University.",
+  description: DESCRIPTION,
+  ...share("/contact", { title: "Contact", description: DESCRIPTION }),
 };
 
 const LINK =

@@ -361,10 +361,10 @@ export default function ArchiveReel({
     <section
       ref={sectionRef}
       data-reel
-      style={{ height: `calc(${(count - 1) * STEP}px + 100svh)` }}
+      style={{ height: `calc(${(count - 1) * STEP}px + var(--screen))` }}
       className="relative"
     >
-      <div className="sticky top-0 h-svh overflow-hidden pt-[max(1.5rem,calc(var(--masthead)+1.5rem-var(--lift,0px)))] pb-lg">
+      <div className="sticky top-0 h-[var(--screen)] overflow-hidden pt-[max(1.5rem,calc(var(--masthead)+1.5rem-var(--lift,0px)))] pb-lg">
         <div className="u-gutter mx-auto grid h-[calc(100%-var(--lift,0px))] grid-rows-[minmax(0,1fr)_auto] md:grid-cols-[minmax(0,2.25fr)_minmax(0,5.25fr)_minmax(0,4.5fr)] md:grid-rows-1 md:gap-x-[clamp(1.5rem,2.5vw,3rem)]">
           <nav
             aria-label="Builds"
@@ -455,7 +455,7 @@ export default function ArchiveReel({
             <div
               key={b.id}
               aria-live="polite"
-              className="min-h-0 max-h-[38svh] flex-1 overflow-y-auto pt-lg pb-section transition-opacity duration-300 [mask-image:linear-gradient(to_bottom,transparent,#000_var(--spacing-lg),#000_calc(100%-4rem),transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden starting:opacity-0 md:max-h-none"
+              className="min-h-0 max-h-[calc(var(--screen)*0.38)] flex-1 overflow-y-auto pt-lg pb-section transition-opacity duration-300 [mask-image:linear-gradient(to_bottom,transparent,#000_var(--spacing-lg),#000_calc(100%-4rem),transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden starting:opacity-0 md:max-h-none"
             >
               <EntryBody build={b} variant="panel" />
             </div>

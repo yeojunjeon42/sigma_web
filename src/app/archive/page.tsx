@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { share } from "@/app/share";
 import { headers } from "next/headers";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
@@ -32,10 +33,32 @@ import { getIndex } from "@/features/content/api/getContent";
 import YearRuler, { type Mark } from "@/features/history/components/YearRuler";
 import AddBuild from "@/features/archive/components/AddBuild";
 
-export const metadata: Metadata = {
-  title: "Archive",
-  description: "Every machine Sigma Intelligence has on record, 2007–2025.",
-};
+const DESCRIPTION = "Every machine SIGMA INTELLIGENCE has built, 2007–2025.";
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ at?: string }>;
+}): Promise<Metadata> {
+  const { at } = await searchParams;
+  const build = at ? (await getArchiveWithMedia()).find((p) => p.id === at) : undefined;
+  if (!build) {
+    return { title: "Archive", description: DESCRIPTION, ...share("/archive", { title: "Archive", description: DESCRIPTION }) };
+  }
+  const name = splitTitle(build.title).en;
+  const description = [
+    `${name}${build.year ? `, ${build.year}` : ""}.`,
+    build.award ? `${build.award.en}.` : "",
+    "A build by SIGMA INTELLIGENCE, the robotics club of Seoul National University.",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  return {
+    title: name,
+    description,
+    ...share(`/archive?view=reel&at=${build.id}`, { title: name, description, image: `/og/archive/${build.id}` }),
+  };
+}
 
 const ON = "text-ink";
 const OFF = "text-ink-muted transition-colors hover:text-ink";

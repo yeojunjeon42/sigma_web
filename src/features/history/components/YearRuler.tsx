@@ -1,13 +1,27 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 
 const SLOP = 5;
 const PITCH = 13;
-const DRAG = 0.006;
+const TAIL = 28;
+const ROOM = 3;
+const GIVE = 0.42;
 const REST = 280;
 const AWAY = 24;
-const TAIL = 64;
+const LAND = 140;
+const QUIET = 120;
+const LOST = 1600;
+const FLING = 160;
+const EDGE = [1, 2 / 3, 1 / 3, 1 / 12, 0].map((q) => q * ROOM);
+const PANES = ["past", "ahead", "past-pull", "ahead-pull"];
+const KEYS = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"];
+
+type Line = "page" | "dial";
+type Timeline = new (options: {
+  source: Element;
+  axis: "block" | "x";
+}) => AnimationTimeline;
 
 export type Mark = {
   id: string;
@@ -23,43 +37,62 @@ export default function YearRuler({
   marks: Mark[];
   ariaLabel?: string;
 }) {
-  const trackRef = useRef<HTMLDivElement>(null);
   const valueRef = useRef<HTMLParagraphElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
+  const scrollerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const track = trackRef.current;
     const value = valueRef.current;
     const bar = barRef.current;
-    if (!track || !value || !bar || marks.length === 0) return;
+    const scroller = scrollerRef.current;
+    if (!value || !bar || !scroller || marks.length === 0) return;
 
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const ticks = Array.from(
-      track.querySelectorAll<HTMLElement>("[data-ruler-tick]"),
+    const behavior: ScrollBehavior = still ? "instant" : "smooth";
+    const tracks = Array.from(
+      bar.querySelectorAll<HTMLElement>("[data-ruler-track]"),
     );
     const wheels = Array.from(
       value.querySelectorAll<HTMLElement>("[data-year-wheel]"),
     );
+    const Scroll = (window as unknown as { ScrollTimeline?: Timeline })
+      .ScrollTimeline;
     const masthead = () =>
       parseFloat(
         getComputedStyle(document.documentElement).getPropertyValue(
           "--masthead",
         ),
       ) * 16 || 64;
+    const bottom = () =>
+      Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
 
     const last = marks.length - 1;
     const clamp = (d: number) => Math.min(last, Math.max(0, d));
-    const elastic = (d: number) => {
-      if (d < 0) return -Math.sqrt(-d) * 0.42;
-      if (d > last) return last + Math.sqrt(d - last) * 0.42;
+    const bend = (d: number) => {
+      if (d < 0) return -Math.sqrt(-d) * GIVE;
+      if (d > last) return last + Math.sqrt(d - last) * GIVE;
       return d;
     };
     let at = new Float32Array(marks.length);
     let from = 0;
     let span = 1;
+    let limit = 0;
     let done = false;
+    let centre = 0;
+    let tailBottom = Infinity;
+    let footTop = Infinity;
 
     const measure = () => {
+      centre = bar.clientWidth / 2;
+      limit = bottom();
+      const tail = document.getElementById(
+        marks[last].targetId ?? `e-${marks[last].id}`,
+      );
+      tailBottom = tail
+        ? tail.getBoundingClientRect().bottom + window.scrollY
+        : Infinity;
+      const foot = document.querySelector("footer")?.parentElement;
+      footTop = foot ? foot.getBoundingClientRect().top + window.scrollY : Infinity;
       const tops = marks.map((m) => {
         const el = document.getElementById(m.targetId ?? `e-${m.id}`);
         return el ? el.getBoundingClientRect().top + window.scrollY : NaN;
@@ -72,7 +105,7 @@ export default function YearRuler({
       let seen = 0;
       at = Float32Array.from(
         tops.map((n) => {
-          if (!Number.isNaN(n)) seen = (n - head - from) / span;
+          if (!Number.isNaN(n)) seen = Math.max(seen, (n - head - from) / span);
           return seen;
         }),
       );
@@ -92,14 +125,67 @@ export default function YearRuler({
       return at[k] + (d - k) * (at[k + 1] - at[k]);
     };
     const here = () => dialAt((window.scrollY - from) / span);
+    const dialOf = () => scroller.scrollLeft / PITCH - ROOM;
+    const xAt = (d: number) =>
+      `translate3d(${(centre - (d + TAIL + 0.5) * PITCH).toFixed(2)}px,0,0)`;
+
+    const pageFrames = (): Keyframe[] => {
+      if (limit <= 0) return [];
+      const points: [number, number][] = [[0, dialAt(-from / span)]];
+      at.forEach((f, k) => {
+        const y = from + f * span;
+        if (y > 0 && y < limit) points.push([y, k]);
+      });
+      points.push([limit, dialAt((limit - from) / span)]);
+      return points.map(([y, d]) => ({ offset: y / limit, transform: xAt(d) }));
+    };
+    const dialFrames = (): Keyframe[] => {
+      const reach = scroller.scrollWidth - scroller.clientWidth;
+      if (reach <= 0) return [];
+      return [...EDGE.map((u) => -u), ...EDGE.map((u) => last + u).reverse()].map(
+        (d) => ({
+          offset: Math.min(1, ((ROOM + d) * PITCH) / reach),
+          transform: xAt(bend(d)),
+        }),
+      );
+    };
+
+    let line: Line = "page";
+    const pageRuns: Animation[] = [];
+    const dialRuns: Animation[] = [];
+    if (Scroll) {
+      const pageLine = new Scroll({
+        source: document.documentElement,
+        axis: "block",
+      });
+      const dialLine = new Scroll({ source: scroller, axis: "x" });
+      tracks.forEach((track) => {
+        pageRuns.push(track.animate([], { timeline: pageLine, fill: "both" }));
+        dialRuns.push(track.animate([], { timeline: dialLine, fill: "both" }));
+      });
+      dialRuns.forEach((run) => run.cancel());
+    }
+    const set = (runs: Animation[], frames: Keyframe[]) =>
+      runs.forEach((run) => (run.effect as KeyframeEffect).setKeyframes(frames));
 
     let frame = 0;
-    let motion = 0;
+    const paint = () => {
+      frame = 0;
+      const x = xAt(line === "page" ? here() : bend(dialOf()));
+      tracks.forEach((track) => (track.style.transform = x));
+    };
+    const kick = () => {
+      if (!pageRuns.length && !frame) frame = requestAnimationFrame(paint);
+    };
+    const drive = (next: Line) => {
+      line = next;
+      if (next === "dial") set(dialRuns, dialFrames());
+      dialRuns.forEach((run) => (next === "dial" ? run.play() : run.cancel()));
+      kick();
+    };
+
     let shown = true;
     let entry = -1;
-    let paintedDial = 0;
-    let commandedY = window.scrollY;
-    let commandedAt = 0;
     let displayedYear = String(marks[0].year);
     let yearGeneration = 0;
 
@@ -177,339 +263,253 @@ export default function YearRuler({
       });
     };
 
-    const paintAt = (d: number) => {
-      paintedDial = d;
-      const centre = bar.clientWidth / 2;
-      const stationHalf = value.parentElement?.clientWidth
-        ? value.parentElement.clientWidth / 2
-        : 46;
-      track.style.transform = `translate3d(${centre - d * PITCH}px,0,0)`;
-
-      ticks.forEach((tick) => {
-        const i = Number(tick.dataset.rulerIndex);
-        const distance = Math.abs(i - d);
-        const x = (i - d) * PITCH;
-        const fromStation = Math.abs(x) - stationHalf;
-        const magnet = Math.max(0, Math.min(1, 1 - fromStation / (PITCH * 2)));
-        const wantedPull = -Math.sign(x) * magnet * 5;
-        const pulledX = x + wantedPull;
-        const safeX =
-          fromStation >= 0
-            ? Math.sign(x) * Math.max(stationHalf + 3, Math.abs(pulledX))
-            : pulledX;
-        const pull = safeX - x;
-        const boundary = Math.max(
-          0,
-          Math.min(1, (Math.abs(safeX) - stationHalf) / 9),
-        );
-        const lean = -Math.sign(x) * magnet * 4;
-        const focus = Math.max(0, 1 - distance / 9);
-        const selected = Math.max(0, 1 - distance / 0.65);
-        const passed = i <= d;
-        const alpha =
-          Math.min(
-            1,
-            (passed ? 0.68 : 0.44) +
-              focus * (passed ? 0.3 : 0.34) +
-              magnet * 0.08,
-          ) * (fromStation >= 0 ? boundary : 0);
-        const mark = marks[i];
-        const color =
-          magnet > 0.02
-            ? "var(--color-accent)"
-            : mark?.first
-              ? "var(--color-accent-deep)"
-              : !mark
-                ? "color-mix(in srgb, var(--color-accent) 34%, var(--color-ink-muted) 66%)"
-                : passed
-                  ? "color-mix(in srgb, var(--color-accent) 78%, var(--color-ink) 22%)"
-                  : "color-mix(in srgb, var(--color-accent) 46%, var(--color-ink-muted) 54%)";
-        tick.style.setProperty("--tick-alpha", alpha.toFixed(3));
-        tick.style.setProperty(
-          "--tick-scale",
-          (1 + focus * 0.1 + selected * 0.18 + magnet * 0.3).toFixed(3),
-        );
-        tick.style.setProperty("--tick-color", color);
-        tick.style.setProperty("--tick-x", `${pull.toFixed(2)}px`);
-        tick.style.setProperty("--tick-lean", `${lean.toFixed(2)}deg`);
-      });
+    const read = (d: number) => {
       const i = Math.round(clamp(d));
-      if (i !== entry) {
-        const direction = entry < 0 ? 1 : i - entry;
-        entry = i;
-        bar.setAttribute("aria-valuenow", String(i));
-        bar.setAttribute("aria-valuetext", String(marks[i].year));
-        changeYear(i, direction);
-      }
-
-      const tail = document.getElementById(
-        marks[last].targetId ?? `e-${marks[last].id}`,
-      );
-      const over = !!tail && tail.getBoundingClientRect().bottom <= 0;
-      if (over !== done) {
-        done = over;
-        show(!over);
-      }
+      if (i === entry) return;
+      const direction = entry < 0 ? 1 : i - entry;
+      entry = i;
+      bar.setAttribute("aria-valuenow", String(i));
+      bar.setAttribute("aria-valuetext", String(marks[i].year));
+      changeYear(i, direction);
     };
 
-    const paint = () => {
-      frame = 0;
-      paintAt(here());
-    };
-    const kick = () => {
-      if (!frame) frame = requestAnimationFrame(paint);
-    };
-
-    let pageFrame = 0;
-    let pageTarget = window.scrollY;
-    let pageVelocity = 0;
-    let pageThen = performance.now();
-
-    const stopPage = () => {
-      if (pageFrame) cancelAnimationFrame(pageFrame);
-      pageFrame = 0;
-      pageVelocity = 0;
-      commandedAt = -Infinity;
-    };
-
-    const movePage = (target: number) => {
-      const limit = Math.max(
-        0,
-        document.documentElement.scrollHeight - window.innerHeight,
-      );
-      pageTarget = Math.min(limit, Math.max(0, target));
-      if (still) {
-        commandedY = target;
-        commandedAt = performance.now();
-        window.scrollTo({ top: target, behavior: "instant" });
-        return;
-      }
-      if (pageFrame) return;
-
-      pageThen = performance.now();
-      const run = (now: number) => {
-        const dt = Math.min(0.032, Math.max(0.008, (now - pageThen) / 1000));
-        pageThen = now;
-        const y = window.scrollY;
-        const acceleration = (pageTarget - y) * 220 - pageVelocity * 30;
-        pageVelocity += acceleration * dt;
-        const next = y + pageVelocity * dt;
-
-        if (Math.abs(pageTarget - next) < 0.35 && Math.abs(pageVelocity) < 5) {
-          commandedY = pageTarget;
-          commandedAt = now;
-          window.scrollTo({ top: pageTarget, behavior: "instant" });
-          pageFrame = 0;
-          pageVelocity = 0;
-          return;
-        }
-
-        commandedY = next;
-        commandedAt = now;
-        window.scrollTo({ top: next, behavior: "instant" });
-        pageFrame = requestAnimationFrame(run);
-      };
-      pageFrame = requestAnimationFrame(run);
-    };
-
-    const put = (d: number, visual = d) => {
-      const detent = Math.round(clamp(d));
-      movePage(from + scrollAt(detent) * span);
-      paintAt(visual);
-    };
-
-    const stopDial = () => {
-      if (motion) cancelAnimationFrame(motion);
-      motion = 0;
-    };
-    const stop = () => {
-      stopDial();
-      stopPage();
-    };
-
-    const spring = (to: number, start = paintedDial, velocity = 0) => {
-      stopDial();
-      const target = clamp(to);
-      if (still) {
-        put(target);
-        return;
-      }
-      let x = start;
-      let v = velocity * 1000;
-      let then = performance.now();
-      const run = (now: number) => {
-        const dt = Math.min(0.032, Math.max(0.008, (now - then) / 1000));
-        then = now;
-        const acceleration = (target - x) * 240 - v * 29;
-        v += acceleration * dt;
-        x += v * dt;
-        put(x, elastic(x));
-        if (Math.abs(target - x) < 0.002 && Math.abs(v) < 0.015) {
-          put(target);
-          motion = 0;
-          return;
-        }
-        motion = requestAnimationFrame(run);
-      };
-      motion = requestAnimationFrame(run);
-    };
-
-    let press: {
+    let touch: { id: number; x: number; y: number; axis: "" | "x" | "y" } | null =
+      null;
+    let mouse: {
       id: number;
       x: number;
-      y: number;
-      d: number;
-      lastD: number;
-      lastT: number;
+      s: number;
+      t: number;
+      v: number;
       live: boolean;
     } | null = null;
-    let velocity = 0;
-
-    const down = (e: PointerEvent) => {
-      if (e.button !== 0) return;
-      stop();
-      velocity = 0;
-      const now = performance.now();
-      const d = paintedDial;
-      press = {
-        id: e.pointerId,
-        x: e.clientX,
-        y: e.clientY,
-        d,
-        lastD: d,
-        lastT: now,
-        live: false,
-      };
-      bar.dataset.pressed = "1";
-      bar.setPointerCapture(e.pointerId);
-      show(true);
-      bar.focus({ preventScroll: true });
-    };
-    const move = (e: PointerEvent) => {
-      if (!press || press.id !== e.pointerId) return;
-      const dx = e.clientX - press.x;
-      const dy = e.clientY - press.y;
-      if (!press.live) {
-        if (Math.abs(dx) < SLOP && Math.abs(dy) < SLOP) return;
-        if (Math.abs(dy) > Math.abs(dx)) {
-          press = null;
-          delete bar.dataset.pressed;
-          return;
-        }
-        press.live = true;
-        bar.dataset.dragging = "1";
-      }
-
-      e.preventDefault();
-      const now = performance.now();
-      const d = press.d - dx / PITCH;
-      const dt = Math.max(8, now - press.lastT);
-      const instant = (d - press.lastD) / dt;
-      velocity = velocity * 0.68 + instant * 0.32;
-      press.lastD = d;
-      press.lastT = now;
-      put(d, elastic(d));
-    };
-
-    const release = (e: PointerEvent) => {
-      const was = press;
-      press = null;
-      delete bar.dataset.pressed;
-      delete bar.dataset.dragging;
-      if (!was || was.id !== e.pointerId) return;
-      if (bar.hasPointerCapture(e.pointerId))
-        bar.releasePointerCapture(e.pointerId);
-
-      if (!was.live) {
-        const r = bar.getBoundingClientRect();
-        const to = Math.round(
-          was.d + (e.clientX - (r.left + r.width / 2)) / PITCH,
-        );
-        spring(to, was.d);
-        return;
-      }
-
-      const d = was.lastD;
-      if (d < 0 || d > last) spring(clamp(d), d, velocity);
-      else if (!still && Math.abs(velocity) > 0.0025) {
-        let x = d;
-        let v = velocity;
-        let then = performance.now();
-        const coast = (now: number) => {
-          const dt = Math.min(32, Math.max(8, now - then));
-          then = now;
-          x += v * dt;
-          v *= Math.exp(-DRAG * dt);
-          if (x <= 0 || x >= last) {
-            spring(clamp(x), x, v);
-            return;
-          }
-          put(x);
-          if (Math.abs(v) < 0.0025) spring(Math.round(x), x, v);
-          else motion = requestAnimationFrame(coast);
-        };
-        motion = requestAnimationFrame(coast);
-      } else {
-        spring(Math.round(clamp(d)), d, velocity);
-      }
-    };
-    const cancel = (e: PointerEvent) => {
-      if (!press || press.id !== e.pointerId) return;
-      press = null;
-      delete bar.dataset.pressed;
-      delete bar.dataset.dragging;
-      spring(Math.round(paintedDial));
-    };
-
-    const key = (e: KeyboardEvent) => {
-      const keys = [
-        "ArrowLeft",
-        "ArrowRight",
-        "ArrowUp",
-        "ArrowDown",
-        "Home",
-        "End",
-      ];
-      if (!keys.includes(e.key)) return;
-      e.preventDefault();
-      show(true);
-      if (e.key === "Home") spring(0);
-      else if (e.key === "End") spring(last);
-      else {
-        const forward = e.key === "ArrowRight" || e.key === "ArrowDown";
-        spring(Math.round(paintedDial) + (forward ? 1 : -1));
-      }
-    };
-
+    let dragged = false;
+    let moving = false;
+    let aim = -1;
+    let glideTo: number | null = null;
+    let ourY = NaN;
+    let ourAt = -Infinity;
+    let quiet = 0;
+    let lost = 0;
     let lastY = window.scrollY;
     let rest = 0;
     let nativeRest = 0;
     let readerHeld = false;
+    const held = () => (!!touch && touch.axis !== "y") || !!mouse;
+    const busy = () => held() || moving || glideTo !== null;
+
+    const judge = (using: boolean) => {
+      const y = window.scrollY;
+      const over =
+        tailBottom - y <= 0 ||
+        (!using && y + window.innerHeight > footTop);
+      if (over === done) return;
+      done = over;
+      show(!over);
+    };
+
+    const landed = () => {
+      window.clearTimeout(lost);
+      if (glideTo === null) return;
+      ourY = glideTo;
+      ourAt = performance.now();
+      glideTo = null;
+    };
+    const glide = (k: number) => {
+      const y = Math.min(bottom(), Math.max(0, from + scrollAt(k) * span));
+      if (Math.abs((glideTo ?? window.scrollY) - y) < 0.5) return;
+      glideTo = y;
+      window.clearTimeout(lost);
+      lost = window.setTimeout(landed, LOST);
+      window.scrollTo({ top: y, behavior });
+    };
+
+    const grab = () => {
+      window.clearTimeout(nativeRest);
+      show(true);
+      if (line === "dial") return;
+      scroller.scrollTo({ left: (ROOM + here()) * PITCH, behavior: "instant" });
+      drive("dial");
+      read(dialOf());
+    };
+    const drop = () => {
+      window.clearTimeout(quiet);
+      window.clearTimeout(lost);
+      moving = false;
+      aim = -1;
+      glideTo = null;
+      if (line === "page") return;
+      delete bar.dataset.free;
+      drive("page");
+      read(here());
+    };
+    const choose = (d: number) => {
+      const k = Math.round(clamp(d));
+      aim = k;
+      scroller.scrollTo({ left: (ROOM + k) * PITCH, behavior });
+      glide(k);
+    };
+
+    const settle = () => {
+      window.clearTimeout(quiet);
+      moving = false;
+      aim = -1;
+      if (line !== "dial") return;
+      if (!mouse) delete bar.dataset.free;
+      glide(Math.round(clamp(dialOf())));
+    };
+    const onDial = () => {
+      if (line !== "dial") return;
+      moving = true;
+      read(dialOf());
+      kick();
+      window.clearTimeout(quiet);
+      quiet = window.setTimeout(settle, QUIET);
+    };
+    const dialEnd = () => {
+      if (line === "dial" && !held()) settle();
+    };
+
     const settleNative = () => {
       nativeRest = 0;
-      if (readerHeld || press || pageFrame || motion) return;
+      if (readerHeld || touch || mouse || glideTo !== null || line === "dial")
+        return;
       const f = (window.scrollY - from) / span;
       if (f < 0 || f > 1) return;
       const d = here();
       const target = Math.round(clamp(d));
       if (Math.abs(target - d) < 0.002) return;
       show(true);
-      spring(target, d);
+      glide(target);
     };
     const scheduleNative = () => {
       window.clearTimeout(nativeRest);
-      nativeRest = window.setTimeout(settleNative, 140);
+      nativeRest = window.setTimeout(settleNative, LAND);
     };
+    const touchDown = (e: TouchEvent) => {
+      const t = e.changedTouches[0];
+      if (touch || !t) return;
+      touch = { id: t.identifier, x: t.clientX, y: t.clientY, axis: "" };
+      bar.dataset.pressed = "1";
+      grab();
+      bar.focus({ preventScroll: true });
+    };
+    const touchMove = (e: TouchEvent) => {
+      if (!touch || touch.axis) return;
+      const id = touch.id;
+      const t = Array.from(e.changedTouches).find((c) => c.identifier === id);
+      if (!t) return;
+      const dx = t.clientX - touch.x;
+      const dy = t.clientY - touch.y;
+      if (Math.abs(dx) < SLOP && Math.abs(dy) < SLOP) return;
+      if (Math.abs(dy) > Math.abs(dx)) {
+        touch.axis = "y";
+        delete bar.dataset.pressed;
+        drop();
+        return;
+      }
+      touch.axis = "x";
+      bar.dataset.dragging = "1";
+    };
+    const touchUp = (e: TouchEvent) => {
+      if (!touch) return;
+      const id = touch.id;
+      if (!Array.from(e.changedTouches).some((c) => c.identifier === id)) return;
+      const axis = touch.axis;
+      touch = null;
+      delete bar.dataset.pressed;
+      delete bar.dataset.dragging;
+      if (axis === "y") scheduleNative();
+      else if (line === "dial" && !moving) settle();
+    };
+
+    const down = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      grab();
+      mouse = {
+        id: e.pointerId,
+        x: e.clientX,
+        s: scroller.scrollLeft,
+        t: performance.now(),
+        v: 0,
+        live: false,
+      };
+      dragged = false;
+      bar.dataset.pressed = "1";
+      bar.setPointerCapture(e.pointerId);
+      bar.focus({ preventScroll: true });
+    };
+    const move = (e: PointerEvent) => {
+      if (!mouse || mouse.id !== e.pointerId) return;
+      const dx = e.clientX - mouse.x;
+      if (!mouse.live) {
+        if (Math.abs(dx) < SLOP) return;
+        mouse.live = true;
+        dragged = true;
+        bar.dataset.dragging = "1";
+        bar.dataset.free = "1";
+      }
+      e.preventDefault();
+      const now = performance.now();
+      const was = scroller.scrollLeft;
+      scroller.scrollLeft = mouse.s - dx;
+      const instant = (scroller.scrollLeft - was) / Math.max(8, now - mouse.t);
+      mouse.v = mouse.v * 0.68 + instant * 0.32;
+      mouse.t = now;
+    };
+    const up = (e: PointerEvent) => {
+      if (!mouse || mouse.id !== e.pointerId) return;
+      const was = mouse;
+      mouse = null;
+      delete bar.dataset.pressed;
+      delete bar.dataset.dragging;
+      if (bar.hasPointerCapture(e.pointerId))
+        bar.releasePointerCapture(e.pointerId);
+      if (!was.live) return;
+      const fling = still || e.type === "pointercancel" ? 0 : was.v * FLING;
+      choose(dialOf() + fling / PITCH);
+    };
+
+    const tap = (e: MouseEvent) => {
+      if (dragged) {
+        dragged = false;
+        return;
+      }
+      grab();
+      const r = bar.getBoundingClientRect();
+      choose(dialOf() + (e.clientX - (r.left + r.width / 2)) / PITCH);
+    };
+
+    const key = (e: KeyboardEvent) => {
+      if (!KEYS.includes(e.key)) return;
+      e.preventDefault();
+      grab();
+      const base = aim >= 0 ? aim : Math.round(clamp(dialOf()));
+      if (e.key === "Home") choose(0);
+      else if (e.key === "End") choose(last);
+      else {
+        const forward = e.key === "ArrowRight" || e.key === "ArrowDown";
+        choose(base + (forward ? 1 : -1));
+      }
+    };
+
     const onScroll = () => {
       const y = window.scrollY;
       const ours =
-        performance.now() - commandedAt < 120 && Math.abs(y - commandedY) < 2;
+        held() ||
+        glideTo !== null ||
+        (performance.now() - ourAt < 120 && Math.abs(y - ourY) < 2);
+      if (glideTo !== null && Math.abs(y - glideTo) < 1) landed();
+      if (line === "page" || !ours) {
+        if (!ours) drop();
+        read(here());
+        kick();
+      }
+      judge(ours || busy());
       if (ours) {
         lastY = y;
         return;
       }
-      kick();
-      stop();
       if (y > lastY + AWAY) show(false);
       else if (y < lastY - 8) show(true);
       lastY = y;
@@ -518,10 +518,13 @@ export default function YearRuler({
       scheduleNative();
     };
     const away = (e: Event) => {
-      if (!press && !bar.contains(e.target as Node)) {
-        stop();
-        window.clearTimeout(nativeRest);
-      }
+      if (bar.contains(e.target as Node)) return;
+      drop();
+      window.clearTimeout(nativeRest);
+    };
+    const wheel = (e: WheelEvent) => {
+      if (!bar.contains(e.target as Node)) return away(e);
+      if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) grab();
     };
     const holdPage = (e: TouchEvent) => {
       if (bar.contains(e.target as Node)) return;
@@ -534,55 +537,86 @@ export default function YearRuler({
       scheduleNative();
     };
 
-    const ro = new ResizeObserver(() => {
+    const refit = () => {
       measure();
-      paintAt(here());
-    });
+      set(pageRuns, pageFrames());
+      if (line === "dial") set(dialRuns, dialFrames());
+      read(line === "page" ? here() : dialOf());
+      paint();
+      judge(busy());
+    };
+    const ro = new ResizeObserver(refit);
     const host = document
       .getElementById(marks[0].targetId ?? `e-${marks[0].id}`)
       ?.closest("main");
     if (host) ro.observe(host);
+    ro.observe(bar);
 
-    measure();
-    paintAt(here());
+    refit();
+    window.addEventListener("resize", refit);
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("wheel", away, { passive: true });
+    window.addEventListener("wheel", wheel, { passive: true });
     window.addEventListener("touchstart", holdPage, { passive: true });
     window.addEventListener("touchend", freePage, { passive: true });
     window.addEventListener("touchcancel", freePage, { passive: true });
     window.addEventListener("keydown", away);
+    scroller.addEventListener("scroll", onDial, { passive: true });
+    scroller.addEventListener("scrollend", dialEnd);
+    bar.addEventListener("touchstart", touchDown, { passive: true });
+    bar.addEventListener("touchmove", touchMove, { passive: true });
+    bar.addEventListener("touchend", touchUp, { passive: true });
+    bar.addEventListener("touchcancel", touchUp, { passive: true });
     bar.addEventListener("pointerdown", down);
     bar.addEventListener("pointermove", move, { passive: false });
-    bar.addEventListener("pointerup", release);
-    bar.addEventListener("pointercancel", cancel);
+    bar.addEventListener("pointerup", up);
+    bar.addEventListener("pointercancel", up);
+    bar.addEventListener("click", tap);
     bar.addEventListener("keydown", key);
 
     return () => {
       if (frame) cancelAnimationFrame(frame);
-      stop();
+      [...pageRuns, ...dialRuns].forEach((run) => run.cancel());
+      window.clearTimeout(quiet);
+      window.clearTimeout(lost);
       window.clearTimeout(rest);
       window.clearTimeout(nativeRest);
       ro.disconnect();
+      window.removeEventListener("resize", refit);
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("wheel", away);
+      window.removeEventListener("wheel", wheel);
       window.removeEventListener("touchstart", holdPage);
       window.removeEventListener("touchend", freePage);
       window.removeEventListener("touchcancel", freePage);
       window.removeEventListener("keydown", away);
+      scroller.removeEventListener("scroll", onDial);
+      scroller.removeEventListener("scrollend", dialEnd);
+      bar.removeEventListener("touchstart", touchDown);
+      bar.removeEventListener("touchmove", touchMove);
+      bar.removeEventListener("touchend", touchUp);
+      bar.removeEventListener("touchcancel", touchUp);
       bar.removeEventListener("pointerdown", down);
       bar.removeEventListener("pointermove", move);
-      bar.removeEventListener("pointerup", release);
-      bar.removeEventListener("pointercancel", cancel);
+      bar.removeEventListener("pointerup", up);
+      bar.removeEventListener("pointercancel", up);
+      bar.removeEventListener("click", tap);
       bar.removeEventListener("keydown", key);
     };
   }, [marks]);
 
   if (marks.length === 0) return null;
 
-  const ticks = Array.from({ length: marks.length + TAIL * 2 }, (_, slot) => {
-    const index = slot - TAIL;
-    return { index, mark: marks[index] };
-  });
+  const tail = Array.from({ length: TAIL }, (_, i) => <span key={i} />);
+  const ticks = (
+    <>
+      <span data-tail="">{tail}</span>
+      <span>
+        {marks.map((mark, i) => (
+          <span key={i} data-major={mark.first ? "" : undefined} />
+        ))}
+      </span>
+      <span data-tail="">{tail}</span>
+    </>
+  );
 
   return (
     <div
@@ -597,20 +631,23 @@ export default function YearRuler({
       aria-valuenow={0}
       aria-valuetext={String(marks[0].year)}
       className="year-ruler"
+      style={
+        {
+          "--ruler-pitch": `${PITCH}px`,
+          "--ruler-room": `${ROOM * PITCH}px`,
+        } as CSSProperties
+      }
     >
       <div className="year-ruler__window" aria-hidden="true">
-        <div ref={trackRef} className="year-ruler__track">
-          {ticks.map(({ index, mark }) => (
-            <span
-              key={index}
-              data-ruler-tick
-              data-ruler-index={index}
-              data-major={mark?.first ? "1" : undefined}
-              style={{ left: `${index * PITCH}px` }}
-              className="year-ruler__tick"
-            />
-          ))}
-        </div>
+        {PANES.map((pane) => (
+          <div key={pane} className={`year-ruler__pane year-ruler__pane--${pane}`}>
+            <div className="year-ruler__lens">
+              <div data-ruler-track className="year-ruler__track">
+                {ticks}
+              </div>
+            </div>
+          </div>
+        ))}
 
         <span className="year-ruler__edge-blur year-ruler__edge-blur--left" />
         <span className="year-ruler__edge-blur year-ruler__edge-blur--right" />
@@ -636,6 +673,19 @@ export default function YearRuler({
               </span>
             ))}
         </p>
+      </div>
+
+      <div
+        ref={scrollerRef}
+        tabIndex={-1}
+        aria-hidden="true"
+        className="year-ruler__scroller"
+      >
+        <div className="year-ruler__rail">
+          {marks.map((_, i) => (
+            <span key={i} />
+          ))}
+        </div>
       </div>
     </div>
   );

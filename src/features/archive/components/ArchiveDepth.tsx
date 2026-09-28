@@ -141,7 +141,7 @@ export default function ArchiveDepth({
                       sizes={`${Math.ceil((w / SHEET) * 100)}vw`}
                       className={`w-full opacity-0 transition-opacity duration-300 ease-out group-hover/plate:opacity-100 group-focus-visible/plate:opacity-100 motion-reduce:transition-none`}
                     />
-                    <p className="u-knock mt-xs line-clamp-2 text-body-sm leading-[1.35] text-ink-muted transition-colors duration-300 group-hover/plate:text-ink group-focus-visible/plate:text-ink motion-reduce:transition-none">
+                    <p className="u-knock mt-xs line-clamp-2 text-body-sm leading-[1.35] text-ink">
                       {name.en}
                       <span data-arrow={"\u00a0↗"} className="after:content-[attr(data-arrow)/'']" />
                     </p>

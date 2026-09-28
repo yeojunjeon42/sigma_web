@@ -56,15 +56,15 @@ export default async function MachineHistory() {
 
       <Section id="cohorts" title="Cohorts">
         <p className="text-machine-dim">
-          기수 is the club&apos;s cohort number, counted from 1984. Entry year is the matriculation year (학번). Members on record counts
-          the names the club has for that cohort.
+          기수 is the club&apos;s cohort number, counted from 1984. Entry year is the matriculation year (학번). Members is the number of
+          names in that cohort.
         </p>
         <Table
           caption="Cohorts"
-          head={["기수", "Entry year", "Members on record", "Source"]}
+          head={["기수", "Entry year", "Members"]}
           rows={cohorts.map((c) => ({
             id: `g${c.generation}`,
-            cells: [String(c.generation), String(c.entryYear), String(c.count), c.source === "ob" ? "alumni contact list" : "annual roster"],
+            cells: [String(c.generation), String(c.entryYear), String(c.count)],
           }))}
         />
       </Section>

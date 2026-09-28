@@ -3,7 +3,7 @@ import { getBuilds } from "@/app/ai/corpus";
 import { buildsList, page } from "@/app/ai/ld";
 import { Bil, Ext, Head, Ld, Section, Table } from "@/app/ai/machine";
 
-const DESCRIPTION = "Every build on record, 2007–2025: year, bilingual title, award, tags and team.";
+const DESCRIPTION = "Every build, 2007–2025: year, bilingual title, award, tags and team.";
 
 export const metadata: Metadata = {
   title: "Archive",

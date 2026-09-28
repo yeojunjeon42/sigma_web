@@ -327,7 +327,8 @@ export default function RecordLines({
     const scroll = () => {
       const dy = window.scrollY - lastScroll;
       lastScroll = window.scrollY;
-      if (seen && !press) v = clamp(v - dy * PUSH, -PUSH_MAX, PUSH_MAX);
+      const k = clamp(window.innerWidth / 1200, 0.4, 1);
+      if (seen && !press) v = clamp(v - dy * PUSH * k, -PUSH_MAX * k, PUSH_MAX * k);
     };
     const tab = (e: FocusEvent) => {
       const el = (e.target as HTMLElement).closest<HTMLElement>("[data-id]");
@@ -406,7 +407,7 @@ export default function RecordLines({
           >
             {b.name}
             {b.year ? (
-              <span className="ml-[0.5em] inline-block -translate-y-[2em] font-mono text-[12px] tracking-normal text-ink-muted tabular-nums">
+              <span className="ml-[0.5em] inline-block -translate-y-[2em] font-mono text-[12px] tracking-normal text-ink tabular-nums">
                 {b.year}
               </span>
             ) : null}
@@ -424,7 +425,7 @@ export default function RecordLines({
     <ul aria-hidden={copy > 0 || undefined} className="inline">
       {results.map((r) => (
         <li key={r.key} className="mr-[2.4em] inline">
-          <span className="mr-[0.9em] font-mono text-[12px] text-ink-muted tabular-nums">
+          <span className="mr-[0.9em] font-mono text-[12px] text-ink tabular-nums">
             {r.year}
           </span>
           {r.contest}
@@ -473,7 +474,7 @@ export default function RecordLines({
       <div className={`${fade} mt-sm`}>
         <div
           data-track="2"
-          className="inline-block origin-bottom text-[length:clamp(0.9375rem,1.5vw,1.1875rem)] leading-[1.3] tracking-[-0.01em] text-ink-muted will-change-transform"
+          className="inline-block origin-bottom text-[length:clamp(0.9375rem,1.5vw,1.1875rem)] leading-[1.3] tracking-[-0.01em] text-ink will-change-transform"
         >
           {awards(0)}
           <span className="motion-reduce:hidden">

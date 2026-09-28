@@ -32,7 +32,7 @@ export default function Chronology({
         <section
           key={node.year}
           id={`y${node.year}`}
-          className="u-rule-in scroll-mt-[var(--masthead)] border-t border-rule py-lg md:grid md:grid-cols-12 md:items-baseline md:gap-x-lg md:py-xl"
+          className="u-rule-in -mx-[var(--gutter)] scroll-mt-[var(--masthead)] border-t border-rule px-[var(--gutter)] py-lg even:bg-surface md:-mx-md md:px-md md:grid md:grid-cols-12 md:items-baseline md:gap-x-lg md:py-xl"
         >
           <div className="mb-xs flex items-start justify-between gap-md md:col-span-2 md:mb-0 md:flex-col md:justify-start md:gap-sm">
             <h2 className="text-body tabular-nums text-ink">{node.year}</h2>

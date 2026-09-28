@@ -12,9 +12,10 @@ import { generationOf, INCOMING } from "@/features/members/data/roster";
 import { CURRICULUM, EQUIPMENT, FACTS, PARTNERS, VOICE } from "@/features/site/data/about";
 import { EMAIL, MAPS } from "@/features/site/data/contact";
 import { SOCIAL } from "@/features/site/data/social";
+import { SITE_URL } from "@/features/site/data/site";
 import { isDateTag, tagLabel } from "@/features/content/data/tags";
 
-export const SITE = "https://sigmaintelligence.org";
+export const SITE = SITE_URL;
 export const ORG_ID = `${SITE}/#organization`;
 
 export type Bi = { en: string; ko?: string };
@@ -36,7 +37,7 @@ export const ORG = {
 
 export const PAGES = [
   { key: "index", title: "Index", ai: "/ai", md: "/ai/index.md", human: "/", note: "Identity, key facts and a map of every machine page" },
-  { key: "about", title: "About", ai: "/ai/about", md: "/ai/about.md", human: "/", note: "Operations, curriculum, equipment, partners and the club's own words" },
+  { key: "about", title: "About", ai: "/ai/about", md: "/ai/about.md", human: "/", note: "Operations, curriculum, equipment, partners and quotes" },
   { key: "archive", title: "Archive", ai: "/ai/archive", md: "/ai/archive.md", human: "/archive", note: "Every build 2007–2025: year, bilingual title, award, tags, team; entry texts are in the full corpus" },
   { key: "history", title: "History", ai: "/ai/history", md: "/ai/history.md", human: "/history", note: "Dated timeline 1984–2026, awards, and cohort counts" },
   { key: "members", title: "Members", ai: "/ai/members", md: "/ai/members.md", human: "/members", note: "The current executive team" },
@@ -269,7 +270,7 @@ async function mdIndex(): Promise<string> {
       ["Measure", "Value"],
       [
         ["Builds in the archive", `${ARCHIVE.length} (2007–2025)`],
-        ["Awards on record", `${AWARDS.length} (${Math.min(...AWARDS.map((a) => a.year))}–${Math.max(...AWARDS.map((a) => a.year))})`],
+        ["Awards", `${AWARDS.length} (${Math.min(...AWARDS.map((a) => a.year))}–${Math.max(...AWARDS.map((a) => a.year))})`],
         ["Timeline entries", String(entries)],
         ["Cohorts (기수)", `${cohorts.length} (entry years ${cohorts[0].entryYear}–${cohorts[cohorts.length - 1].entryYear})`],
         ["Published posts", String(getPosts().length)],
@@ -309,11 +310,9 @@ function mdAbout(): string {
     "",
     table(["Name", "Relationship", "Korean"], PARTNERS.map((p) => [p.name, p.note.en, p.note.ko])),
     "",
-    "## In the club's own words",
+    "## Quotes",
     "",
-    "Quoted from club documents; the source of each is given.",
-    "",
-    ...VOICE.flatMap((v) => [`> ${v.quote.en}`, `> (${v.quote.ko})`, "", `Source: ${v.source.en}`, ""]),
+    ...VOICE.flatMap((v) => [`> ${v.quote.en}`, `> (${v.quote.ko})`, ""]),
   ].join("\n");
 }
 
@@ -348,11 +347,10 @@ function mdArchive(full = false): string {
       ...(b.award ? [`- Award: ${bi(b.award)}`] : []),
       ...(b.tags.length ? [`- Tags: ${b.tags.map(bi).join(", ")}`] : []),
       ...(b.team.length ? [`- Team: ${b.team.join(", ")}`] : []),
-      ...(b.source ? [`- Source document: ${b.source}`] : []),
       `- URL: ${b.url}`,
       "",
     );
-    if (full && b.body) out.push("Entry text (verbatim, Korean):", "", b.body, "");
+    if (full && b.body) out.push("Entry text (Korean):", "", b.body, "");
   }
   return out.join("\n");
 }
@@ -386,11 +384,11 @@ async function mdHistory(): Promise<string> {
   out.push(
     "## Cohorts",
     "",
-    "기수 is the club's cohort number, counted from 1984. Entry year is the matriculation year (학번). Count is how many members of that cohort are on record.",
+    "기수 is the club's cohort number, counted from 1984. Entry year is the matriculation year (학번). Members is the number of names in that cohort.",
     "",
     table(
-      ["기수", "Entry year", "Members on record", "Source"],
-      cohorts.map((c) => [String(c.generation), String(c.entryYear), String(c.count), c.source === "ob" ? "alumni contact list" : "annual roster"]),
+      ["기수", "Entry year", "Members"],
+      cohorts.map((c) => [String(c.generation), String(c.entryYear), String(c.count)]),
     ),
   );
   return out.join("\n");
@@ -438,11 +436,10 @@ function mdBlog(full = false): string {
       ...(p.title.ko ? [`- Korean title: ${p.title.ko}`] : []),
       ...(p.tags.length ? [`- Tags: ${p.tags.map(bi).join(", ")}`] : []),
       ...(p.team.length ? [`- Team: ${p.team.join(", ")}`] : []),
-      ...(p.source ? [`- Source document: ${p.source}`] : []),
       `- URL: ${p.url}`,
       "",
     );
-    if (full && p.body) out.push("Post text (verbatim, Korean):", "", p.body, "");
+    if (full && p.body) out.push("Post text (Korean):", "", p.body, "");
   }
   return out.join("\n");
 }
@@ -486,7 +483,7 @@ export function llmsTxt(): string {
   return [
     "# Sigma Intelligence",
     "",
-    `> ${ORG.summary} This site is its archive of builds, its dated record, its members, its writing and how to reach it. Every page has a plain Markdown twin listed below; the club's own documents are Korean and are quoted verbatim, with English alongside.`,
+    `> ${ORG.summary} This site is its archive of builds, its dated record, its members, its writing and how to reach it. Every page has a plain Markdown twin listed below.`,
     "",
     `Korean name: ${ORG.nameKo}. Founded ${ORG.founded} at ${ORG.institution} (${ORG.department.en}). Club room: ${ORG.room.en}. Email: ${ORG.email}. Dates in these files are ISO 8601. 기수 means cohort number (1 = 1984); 학번 means matriculation year.`,
     "",
@@ -496,7 +493,7 @@ export function llmsTxt(): string {
     "",
     "## Full text",
     "",
-    `- [Complete corpus](${SITE}/llms-full.txt): Every page above in one file, including the verbatim text of every archive entry and post`,
+    `- [Complete corpus](${SITE}/llms-full.txt): Every page above in one file, including the full text of every archive entry and post`,
     "",
     "## Optional",
     "",

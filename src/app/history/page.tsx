@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { share } from "@/app/share";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Container, GridField } from "@/components/ui";
@@ -10,10 +11,12 @@ import Collage from "@/features/history/components/Collage";
 import { CLUB_EVENTS, HERO_PHOTO } from "@/features/history/data/photos";
 import { ALUMNI_TOTAL, COHORTS } from "@/features/alumni/data/cohorts";
 
+const DESCRIPTION = "Events and competition results of SIGMA INTELLIGENCE at Seoul National University, year by year.";
+
 export const metadata: Metadata = {
   title: "History",
-  description:
-    "The dated record of Sigma Intelligence at Seoul National University — events and competition results, assembled from the club's own documents.",
+  description: DESCRIPTION,
+  ...share("/history", { title: "History", description: DESCRIPTION }),
 };
 
 export default async function ClubLifePage() {

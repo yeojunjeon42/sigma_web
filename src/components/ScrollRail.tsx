@@ -9,7 +9,7 @@ export function ScrollRail() {
   useEffect(() => {
     const rail = railRef.current;
     const thumb = thumbRef.current;
-    if (!rail || !thumb) return;
+    if (!rail || !thumb || !window.matchMedia("(pointer: fine)").matches) return;
 
     let frame = 0;
     let thumbHeight = 0;

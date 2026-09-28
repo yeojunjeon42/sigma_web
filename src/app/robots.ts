@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const SITE_URL = "https://sigmaintelligence.org";
+import { SITE_URL } from "@/features/site/data/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
