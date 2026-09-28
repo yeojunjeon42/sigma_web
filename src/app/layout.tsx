@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { Archivo, Caveat, Geist_Mono, Newsreader, Noto_Serif_KR } from "next/font/google";
@@ -82,6 +82,10 @@ const machine = Geist_Mono({
 
 
 const SCREEN = `(()=>{const s=document.createElement("style"),r=()=>{s.textContent=":root{--screen:"+innerHeight+"px}"};let w=innerWidth;r();document.head.appendChild(s);addEventListener("resize",()=>{if(innerWidth!==w||!matchMedia("(pointer:coarse)").matches){w=innerWidth;r()}})})()`;
+
+export const viewport: Viewport = {
+  themeColor: "#dfe1dc",
+};
 
 export const metadata: Metadata = {
   title: {

@@ -11,6 +11,7 @@ export type HeroBuild = {
   year: number | null;
 };
 
+const PHONE_SCREEN = 5;
 const SIZES = 40;
 const BANDS = 10;
 const SWELL = 1.6;
@@ -96,7 +97,8 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const frozen = !!canvas.closest("[inert]");
     const fine = window.matchMedia("(hover: hover)").matches;
-    const top = SCREEN * DOT;
+    const cell = window.matchMedia("(min-width: 768px)").matches ? SCREEN : PHONE_SCREEN;
+    const top = cell * DOT;
     const rTop = top * SWELL;
     const rGround = (1 - GROUND) * top;
 
@@ -167,8 +169,8 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     };
 
     const measure = (i: number, img: HTMLImageElement, r: Box) => {
-      const c = Math.max(1, Math.round(r.w / SCREEN));
-      const n = Math.max(1, Math.round(r.h / SCREEN));
+      const c = Math.max(1, Math.round(r.w / cell));
+      const n = Math.max(1, Math.round(r.h / cell));
       const key = `${c}x${n}`;
       const had = tones.get(i);
       if (had && had.key === key) return had;
@@ -244,8 +246,8 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.round(W * dpr);
       canvas.height = Math.round(H * dpr);
-      cols = Math.ceil(W / SCREEN);
-      rows = Math.ceil(H / SCREEN);
+      cols = Math.ceil(W / cell);
+      rows = Math.ceil(H / cell);
       rev = new Float32Array(cols * rows);
       revMax = 0;
       mc.width = cols;
@@ -260,13 +262,13 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     };
 
     const stamp = (x: number, y: number, r: number, gain: number) => {
-      const i0 = Math.max(0, Math.floor((x - r) / SCREEN));
-      const i1 = Math.min(cols - 1, Math.ceil((x + r) / SCREEN));
-      const j0 = Math.max(0, Math.floor((y - r) / SCREEN));
-      const j1 = Math.min(rows - 1, Math.ceil((y + r) / SCREEN));
+      const i0 = Math.max(0, Math.floor((x - r) / cell));
+      const i1 = Math.min(cols - 1, Math.ceil((x + r) / cell));
+      const j0 = Math.max(0, Math.floor((y - r) / cell));
+      const j1 = Math.min(rows - 1, Math.ceil((y + r) / cell));
       for (let j = j0; j <= j1; j++) {
         for (let i = i0; i <= i1; i++) {
-          const d = Math.hypot((i + 0.5) * SCREEN - x, (j + 0.5) * SCREEN - y);
+          const d = Math.hypot((i + 0.5) * cell - x, (j + 0.5) * cell - y);
           const v = smooth(clamp((r - d) / (r * 0.5), 0, 1)) * gain;
           const k = j * cols + i;
           if (v > rev[k]) rev[k] = v;
@@ -312,9 +314,9 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
         groundKey = base + pale + accent + deep + dpr;
         mixes = [...ramp([base, accent, deep], BANDS), pale];
         ink = css("--color-ink", "#0f0d09");
-        const patch = groundPatch(SCREEN, GROUND, dpr, PAPER_INK);
+        const patch = groundPatch(cell, GROUND, dpr, PAPER_INK);
         ground = patch && ctx.createPattern(patch, "repeat");
-        if (ground && patch) ground.setTransform(new DOMMatrix().scaleSelf(SCREEN / patch.width));
+        if (ground && patch) ground.setTransform(new DOMMatrix().scaleSelf(cell / patch.width));
       }
 
       const ox = -par.x * DRIFT[0];
@@ -328,10 +330,10 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
 
       const R = clamp(W * 0.085, 70, 150) * (1 + lens.boost);
       const lensOn = lens.amp > 0.01 && !still;
-      const li0 = lensOn ? Math.max(0, Math.floor((lens.x - R) / SCREEN)) : 0;
-      const li1 = lensOn ? Math.min(cols - 1, Math.ceil((lens.x + R) / SCREEN)) : -1;
-      const lj0 = lensOn ? Math.max(0, Math.floor((lens.y - R) / SCREEN)) : 0;
-      const lj1 = lensOn ? Math.min(rows - 1, Math.ceil((lens.y + R) / SCREEN)) : -1;
+      const li0 = lensOn ? Math.max(0, Math.floor((lens.x - R) / cell)) : 0;
+      const li1 = lensOn ? Math.min(cols - 1, Math.ceil((lens.x + R) / cell)) : -1;
+      const lj0 = lensOn ? Math.max(0, Math.floor((lens.y - R) / cell)) : 0;
+      const lj1 = lensOn ? Math.min(rows - 1, Math.ceil((lens.y + R) / cell)) : -1;
 
       if (ground) {
         ctx.save();
@@ -340,8 +342,8 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
           hole.rect(0, 0, W, H);
           for (let j = lj0; j <= lj1; j++) {
             for (let i = li0; i <= li1; i++) {
-              if (Math.hypot((i + 0.5) * SCREEN - lens.x, (j + 0.5) * SCREEN - lens.y) < R)
-                hole.rect(i * SCREEN, j * SCREEN, SCREEN, SCREEN);
+              if (Math.hypot((i + 0.5) * cell - lens.x, (j + 0.5) * cell - lens.y) < R)
+                hole.rect(i * cell, j * cell, cell, cell);
             }
           }
           ctx.clip(hole, "evenodd");
@@ -378,14 +380,14 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
           Math.hypot(x0 - origin.x, y1 - origin.y),
           Math.hypot(x1 - origin.x, y1 - origin.y),
         );
-        const i0 = Math.max(0, Math.floor(x0 / SCREEN));
-        const i1 = Math.min(cols - 1, Math.ceil(x1 / SCREEN));
-        const j0 = Math.max(0, Math.floor(y0 / SCREEN));
-        const j1 = Math.min(rows - 1, Math.ceil(y1 / SCREEN));
+        const i0 = Math.max(0, Math.floor(x0 / cell));
+        const i1 = Math.min(cols - 1, Math.ceil(x1 / cell));
+        const j0 = Math.max(0, Math.floor(y0 / cell));
+        const j1 = Math.min(rows - 1, Math.ceil(y1 / cell));
         for (let j = j0; j <= j1; j++) {
-          const py = (j + 0.5) * SCREEN;
+          const py = (j + 0.5) * cell;
           for (let i = i0; i <= i1; i++) {
-            const px = (i + 0.5) * SCREEN;
+            const px = (i + 0.5) * cell;
             let tone = gb && rb ? sample(gb, rb, px, py) : 1;
             let lt = 1;
             if (t < 1) {
@@ -459,7 +461,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
         }
         pctx.globalCompositeOperation = "source-over";
         pctx.clearRect(0, 0, pw, ph);
-        pctx.drawImage(mc, -fr.x * dpr, -fr.y * dpr, cols * SCREEN * dpr, rows * SCREEN * dpr);
+        pctx.drawImage(mc, -fr.x * dpr, -fr.y * dpr, cols * cell * dpr, rows * cell * dpr);
         pctx.globalCompositeOperation = "source-in";
         pctx.drawImage(face, 0, 0, pw, ph);
         ctx.drawImage(pc, fr.x, fr.y, fr.w, fr.h);

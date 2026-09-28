@@ -25,13 +25,6 @@ const META = "text-caption tracking-normal";
 const HIT = "relative before:absolute before:inset-x-[-0.25rem] before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] lg:before:hidden";
 const COLS = "md:grid md:grid-cols-12 md:gap-x-lg";
 
-function Sample() {
-  return (
-    <span className="ml-sm inline-block rounded-full border border-rule-strong px-[0.45em] align-[0.1em] text-[12px] leading-[1.5] tracking-normal text-ink-muted">
-      Sample
-    </span>
-  );
-}
 
 function Section({ post, className = "" }: { post: BlogItem; className?: string }) {
   return post.section ? <span className={className}>{post.section}</span> : null;
@@ -61,7 +54,6 @@ function Grid({ posts }: { posts: BlogItem[] }) {
                   {post.date}
                 </span>
               )}
-              {post.sample && <Sample />}
             </p>
           </Link>
         </li>
@@ -109,19 +101,9 @@ function List({ posts }: { posts: BlogItem[] }) {
                   <h2 className="u-trim text-title text-ink transition-[translate,color] duration-200 ease-out motion-reduce:transition-none md:col-span-7 lg:text-ink-muted lg:group-hover/row:translate-x-sm lg:group-hover/row:text-ink lg:group-focus-visible/row:translate-x-sm lg:group-focus-visible/row:text-ink">
                     {post.title}
                     <span className="text-ink-muted">{" ↗"}</span>
-                    {post.sample && (
-                      <span className="max-md:hidden">
-                        <Sample />
-                      </span>
-                    )}
                   </h2>
-                  <p className={`u-trim col-span-2 row-start-2 text-ink-muted md:col-span-2 md:row-start-auto ${META}`}>
+                  <p className={`u-trim hidden text-ink-muted md:col-span-2 md:block ${META}`}>
                     <Section post={post} />
-                    {post.sample && (
-                      <span className="md:hidden">
-                        <Sample />
-                      </span>
-                    )}
                   </p>
                   <p className="u-trim col-start-2 row-start-1 justify-self-end text-body-sm tabular-nums text-ink-muted md:col-span-2 md:col-start-auto md:row-start-auto md:text-right">
                     {post.date}
