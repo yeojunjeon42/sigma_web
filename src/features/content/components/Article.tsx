@@ -73,11 +73,6 @@ export default function Article({
             <Back back={back} />
           </div>
           <p className="mt-xl flex flex-wrap items-center justify-center gap-x-md gap-y-xs text-[0.875rem] leading-[1.4] text-ink-muted tabular-nums lg:mt-0">
-            {doc.sample && (
-              <span className="rounded-pill border border-ink/20 px-2 py-px text-ink">
-                Sample
-              </span>
-            )}
             {dateLabel && (
               <span className="text-ink">
                 {dateLabel}

@@ -14,19 +14,7 @@ const NAV = [
   { label: "Contact", href: "/contact" },
 ];
 
-const BLUR: React.CSSProperties = {
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
-  maskImage: "linear-gradient(rgb(0,0,0), rgba(0,0,0,0) 100%)",
-  WebkitMaskImage: "linear-gradient(rgb(0,0,0), rgba(0,0,0,0) 100%)",
-};
-
-const SCRIM_STYLE = (onDark: boolean): React.CSSProperties => ({
-  ...BLUR,
-  backgroundImage: onDark
-    ? "linear-gradient(to bottom, rgb(10 9 7 / 0.22), rgb(10 9 7 / 0.06) 60%, rgb(10 9 7 / 0))"
-    : "linear-gradient(to bottom, rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.2) 60%, rgb(255 255 255 / 0))",
-});
+const INVERT = "text-white before:bg-white/[0.14]";
 
 const BOX =
   "relative isolate before:absolute before:inset-x-[4px] lg:before:inset-x-[-2px] before:top-1/2 before:-z-10 before:h-[30px] before:-translate-y-1/2 before:rounded-[2px] before:opacity-0 before:transition-opacity before:duration-250 before:ease-[ease] before:content-[''] hover:before:opacity-100 focus-visible:before:opacity-100 aria-[current=page]:before:opacity-100 motion-reduce:before:transition-none";
@@ -135,20 +123,13 @@ export default function Navbar({
     <header
       className={`fixed inset-x-0 top-0 z-40 w-full transition-transform duration-300 ease-out motion-reduce:transition-none ${
         hidden && !open ? "-translate-y-full" : "translate-y-0"
-      } ${open ? t.bar : ""}`}
+      } ${open ? t.bar : "mix-blend-difference"}`}
     >
-      <div
-        aria-hidden="true"
-        style={SCRIM_STYLE(onDark)}
-        className={`pointer-events-none absolute inset-x-0 top-0 h-[var(--masthead)] transition-opacity duration-300 motion-reduce:transition-none ${
-          hidden && !open ? "opacity-0" : "opacity-100"
-        }`}
-      />
 
       <div className="u-gutter relative mx-auto flex h-14 max-w-wide items-center justify-between gap-lg md:h-16">
         <Link
           href="/"
-          className={`-mx-sm -my-sm flex shrink-0 items-center gap-sm px-sm py-sm ${t.mark}`}
+          className={`-mx-sm -my-sm flex shrink-0 items-center gap-sm px-sm py-sm ${open ? t.mark : "text-white"}`}
         >
           <Image
             src="/logo-mark.svg"
@@ -156,7 +137,7 @@ export default function Navbar({
             width={22}
             height={24}
             style={{ height: "auto" }}
-            className={onDark ? "brightness-0 invert" : ""}
+            className={open && !onDark ? "" : "brightness-0 invert"}
           />
           <span className="sr-only">Sigma Intelligence</span>
         </Link>
@@ -168,7 +149,7 @@ export default function Navbar({
                 <Link
                   href={item.href}
                   aria-current={isCurrent(item.href) ? "page" : undefined}
-                  className={`${BOX} -mx-xs flex items-center px-xs py-md font-[family-name:var(--f-display)] text-ui font-semibold uppercase tracking-[0.02em] [font-stretch:125%] transition-colors duration-250 motion-reduce:transition-none ${t.link}`}
+                  className={`${BOX} -mx-xs flex items-center px-xs py-md font-[family-name:var(--f-display)] text-ui font-semibold uppercase tracking-[0.02em] [font-stretch:125%] transition-colors duration-250 motion-reduce:transition-none ${INVERT}`}
                 >
                   {item.label}
                 </Link>
@@ -183,7 +164,7 @@ export default function Navbar({
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-controls="masthead-nav"
-            className={`-mr-2 flex size-11 items-center justify-center ${t.mark}`}
+            className={`-mr-2 flex size-11 items-center justify-center ${open ? t.mark : "text-white"}`}
           >
             <span className="sr-only">
               Menu

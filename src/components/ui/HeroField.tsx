@@ -82,7 +82,7 @@ export default function HeroField({
           </Stmt>
           <Stmt
             depth={34}
-            className="col-start-2 row-start-2 self-center md:col-span-3 md:col-start-10 md:row-start-2 md:self-end"
+            className="col-start-2 row-start-2 self-center justify-self-end text-right md:col-span-3 md:col-start-10 md:row-start-2 md:self-end"
           >
             Room 215-2, Mabang
           </Stmt>
@@ -94,13 +94,13 @@ export default function HeroField({
           </Stmt>
           <Stmt
             depth={28}
-            className="col-start-2 row-start-4 self-center md:col-span-3 md:col-start-4 md:row-start-5 md:self-start"
+            className="col-start-2 row-start-4 self-center justify-self-end text-right md:col-span-3 md:col-start-4 md:row-start-5 md:self-start md:justify-self-start md:text-left"
           >
             Media and kinetic art
           </Stmt>
           <Stmt
             depth={20}
-            className="col-start-1 row-start-5 self-end md:col-span-3 md:col-start-10 md:row-start-4 md:self-center"
+            className="col-start-1 row-start-5 self-end md:col-span-3 md:col-start-10 md:row-start-4 md:self-center md:justify-self-end md:text-right"
           >
             Korea’s first university robotics club
           </Stmt>
