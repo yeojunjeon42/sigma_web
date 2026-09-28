@@ -120,107 +120,110 @@ export default function Navbar({
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-40 w-full transition-transform duration-300 ease-out motion-reduce:transition-none ${
-        hidden && !open ? "-translate-y-full" : "translate-y-0"
-      } ${open ? t.bar : "mix-blend-difference"}`}
-    >
+    <>
+      <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-40 h-0.5 bg-canvas" />
+      <header
+        className={`fixed inset-x-0 top-0 z-40 w-full transition-[translate,opacity] duration-300 ease-out motion-reduce:transition-none ${
+          hidden && !open ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"
+        } ${open ? t.bar : "mix-blend-difference"}`}
+      >
 
-      <div className="u-gutter relative mx-auto flex h-14 max-w-wide items-center justify-between gap-lg md:h-16">
-        <Link
-          href="/"
-          className={`-mx-sm -my-sm flex shrink-0 items-center gap-sm px-sm py-sm ${open ? t.mark : "text-white"}`}
-        >
-          <Image
-            src="/logo-mark.svg"
-            alt=""
-            width={22}
-            height={24}
-            style={{ height: "auto" }}
-            className={open && !onDark ? "" : "brightness-0 invert"}
+        <div className="u-gutter relative mx-auto flex h-14 max-w-wide items-center justify-between gap-lg md:h-16">
+          <Link
+            href="/"
+            className={`-mx-sm -my-sm flex shrink-0 items-center gap-sm px-sm py-sm ${open ? t.mark : "text-white"}`}
+          >
+            <Image
+              src="/logo-mark.svg"
+              alt=""
+              width={22}
+              height={24}
+              style={{ height: "auto" }}
+              className={open && !onDark ? "" : "brightness-0 invert"}
+            />
+            <span className="sr-only">Sigma Intelligence</span>
+          </Link>
+
+          <nav aria-label="Primary" className="hidden md:block">
+            <ul className="flex items-center gap-md lg:gap-lg">
+              {NAV.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    aria-current={isCurrent(item.href) ? "page" : undefined}
+                    className={`${BOX} -mx-xs flex items-center px-xs py-md font-[family-name:var(--f-display)] text-ui font-semibold uppercase tracking-[0.02em] [font-stretch:125%] transition-colors duration-250 motion-reduce:transition-none ${INVERT}`}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div className="flex items-center md:hidden">
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              aria-controls="masthead-nav"
+              className={`-mr-2 flex size-11 items-center justify-center ${open ? t.mark : "text-white"}`}
+            >
+              <span className="sr-only">
+                Menu
+              </span>
+              <span aria-hidden="true" className="relative block h-[7px] w-5">
+                <span
+                  className={`absolute left-0 top-0 h-px w-5 bg-current transition-transform duration-300 ease-out motion-reduce:transition-none ${
+                    open ? "translate-y-[3px] rotate-45" : ""
+                  }`}
+                />
+                <span
+                  className={`absolute bottom-0 left-0 h-px w-5 bg-current transition-transform duration-300 ease-out motion-reduce:transition-none ${
+                    open ? "-translate-y-[3px] -rotate-45" : ""
+                  }`}
+                />
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {open ? (
+          <div
+            aria-hidden="true"
+            onClick={() => setOpen(false)}
+            className="absolute inset-x-0 top-full h-[100dvh] bg-ink/25 transition-opacity duration-300 starting:opacity-0 motion-reduce:transition-none md:hidden"
           />
-          <span className="sr-only">Sigma Intelligence</span>
-        </Link>
+        ) : null}
 
-        <nav aria-label="Primary" className="hidden md:block">
-          <ul className="flex items-center gap-md lg:gap-lg">
+        <nav
+          id="masthead-nav"
+          aria-label="Primary"
+          hidden={!open}
+          className={`nav-sheet absolute inset-x-0 top-full overflow-hidden rounded-b-[1.5rem] shadow-[0_18px_40px_rgb(10_9_7/0.14)] [corner-shape:squircle] md:hidden ${
+            open ? "nav-open" : ""
+          } ${t.sheet}`}
+        >
+          <ul className="u-gutter u-arrive mx-auto max-w-wide pb-sm">
             {NAV.map((item) => (
-              <li key={item.href}>
+              <li key={item.href} className={`border-b last:border-b-0 ${t.rule}`}>
                 <Link
                   href={item.href}
                   aria-current={isCurrent(item.href) ? "page" : undefined}
-                  className={`${BOX} -mx-xs flex items-center px-xs py-md font-[family-name:var(--f-display)] text-ui font-semibold uppercase tracking-[0.02em] [font-stretch:125%] transition-colors duration-250 motion-reduce:transition-none ${INVERT}`}
+                  onClick={() => setOpen(false)}
+                  className={`flex min-h-14 items-center font-[family-name:var(--f-display)] text-title font-semibold uppercase tracking-[0.02em] [font-stretch:125%] ${t.sheetLink}`}
                 >
-                  {item.label}
+                  <span>
+                    {item.label}
+                    {isCurrent(item.href) ? (
+                      <span aria-hidden="true" className="ml-sm inline-block size-[0.3em] bg-accent align-[calc((1cap-0.3em)/2)]" />
+                    ) : null}
+                  </span>
                 </Link>
               </li>
             ))}
           </ul>
         </nav>
-
-        <div className="flex items-center md:hidden">
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-expanded={open}
-            aria-controls="masthead-nav"
-            className={`-mr-2 flex size-11 items-center justify-center ${open ? t.mark : "text-white"}`}
-          >
-            <span className="sr-only">
-              Menu
-            </span>
-            <span aria-hidden="true" className="relative block h-[7px] w-5">
-              <span
-                className={`absolute left-0 top-0 h-px w-5 bg-current transition-transform duration-300 ease-out motion-reduce:transition-none ${
-                  open ? "translate-y-[3px] rotate-45" : ""
-                }`}
-              />
-              <span
-                className={`absolute bottom-0 left-0 h-px w-5 bg-current transition-transform duration-300 ease-out motion-reduce:transition-none ${
-                  open ? "-translate-y-[3px] -rotate-45" : ""
-                }`}
-              />
-            </span>
-          </button>
-        </div>
-      </div>
-
-      {open ? (
-        <div
-          aria-hidden="true"
-          onClick={() => setOpen(false)}
-          className="absolute inset-x-0 top-full h-[100dvh] bg-ink/25 transition-opacity duration-300 starting:opacity-0 motion-reduce:transition-none md:hidden"
-        />
-      ) : null}
-
-      <nav
-        id="masthead-nav"
-        aria-label="Primary"
-        hidden={!open}
-        className={`nav-sheet absolute inset-x-0 top-full overflow-hidden rounded-b-[1.5rem] shadow-[0_18px_40px_rgb(10_9_7/0.14)] [corner-shape:squircle] md:hidden ${
-          open ? "nav-open" : ""
-        } ${t.sheet}`}
-      >
-        <ul className="u-gutter u-arrive mx-auto max-w-wide pb-sm">
-          {NAV.map((item) => (
-            <li key={item.href} className={`border-b last:border-b-0 ${t.rule}`}>
-              <Link
-                href={item.href}
-                aria-current={isCurrent(item.href) ? "page" : undefined}
-                onClick={() => setOpen(false)}
-                className={`flex min-h-14 items-center font-[family-name:var(--f-display)] text-title font-semibold uppercase tracking-[0.02em] [font-stretch:125%] ${t.sheetLink}`}
-              >
-                <span>
-                  {item.label}
-                  {isCurrent(item.href) ? (
-                    <span aria-hidden="true" className="ml-sm inline-block size-[0.3em] bg-accent align-[calc((1cap-0.3em)/2)]" />
-                  ) : null}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    </header>
+      </header>
+    </>
   );
 }
