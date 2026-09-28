@@ -168,7 +168,7 @@ export default function BlogIndex({ posts, topics, span }: { posts: BlogItem[]; 
           Blog
           <span className="tabular-nums text-ink-muted">{span}</span>
         </h1>
-        <nav aria-label="Sections" className="max-lg:order-last max-lg:w-full max-lg:min-w-0 lg:flex-1">
+        <nav aria-label="Sections" className="max-md:hidden max-lg:order-last max-lg:w-full max-lg:min-w-0 lg:flex-1">
           <ul className="u-scroll-x flex items-baseline gap-x-md whitespace-nowrap max-lg:overflow-x-auto max-lg:pr-10 max-lg:[mask-image:linear-gradient(to_right,#000_calc(100%-2.5rem),transparent)] lg:flex-wrap lg:gap-x-sm xl:gap-x-md">
             <li className="shrink-0">{pick(null)}</li>
             {topics.map((t) => (

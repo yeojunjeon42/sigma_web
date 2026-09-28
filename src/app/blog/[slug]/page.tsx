@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { share } from "@/app/share";
+import { coverFor } from "@/features/content/data/covers";
+import { SITE_URL } from "@/features/site/data/site";
 import "katex/dist/katex.min.css";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
@@ -19,7 +22,12 @@ export async function generateMetadata({
   const { slug } = await params;
   const doc = await getDoc("posts", slug);
   if (!doc) return { title: "Not found" };
-  return { title: doc.title, description: doc.summary };
+  const description = doc.summary ?? "Writing from SIGMA INTELLIGENCE at Seoul National University.";
+  return {
+    title: doc.title,
+    description,
+    ...share(`/blog/${slug}`, { title: doc.title, description, image: `/og/blog/${slug}`, published: doc.date }),
+  };
 }
 
 export default async function PostPage({
@@ -34,9 +42,29 @@ export default async function PostPage({
   const at = all.findIndex((p) => p.slug === slug);
   const others = all.filter((p) => p.slug !== slug);
   const near = others.slice(Math.max(0, at - 2), Math.max(0, at - 2) + 4);
+  const cover = coverFor(slug);
+  const ld = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: doc.title,
+    ...(doc.summary ? { description: doc.summary } : {}),
+    ...(doc.date ? { datePublished: doc.date } : {}),
+    ...(cover ? { image: `${SITE_URL}${cover}` } : {}),
+    inLanguage: "ko",
+    url: `${SITE_URL}/blog/${slug}`,
+    mainEntityOfPage: `${SITE_URL}/blog/${slug}`,
+    author: doc.authors.length
+      ? doc.authors.map((name) => ({ "@type": "Person", name }))
+      : { "@id": `${SITE_URL}/#organization` },
+    publisher: { "@id": `${SITE_URL}/#organization` },
+  };
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }}
+      />
       <Navbar />
       <main id="main" className="pb-section">
         <GridField>

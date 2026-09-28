@@ -76,7 +76,7 @@ function Row({
         <Preview project={project} look={look} />
       </div>
       <h3
-        className={`u-trim text-title text-ink transition-[translate,color] duration-200 ease-out motion-reduce:transition-none md:col-span-7 lg:text-ink-muted lg:group-hover/row:translate-x-sm lg:group-hover/row:text-ink lg:group-focus-visible/row:translate-x-sm lg:group-focus-visible/row:text-ink`}
+        className={`u-trim text-title text-ink transition-[translate] duration-200 ease-out motion-reduce:transition-none md:col-span-7 lg:group-hover/row:translate-x-sm lg:group-focus-visible/row:translate-x-sm`}
       >
         {name.en}
         <span className="text-ink-muted">{"\u00a0↗"}</span>
@@ -90,7 +90,7 @@ function Row({
         ) : null}
       </h3>
       <p
-        className={`col-span-2 row-start-2 flex flex-wrap gap-x-sm text-ink-muted md:col-span-2 md:row-start-auto md:h-[1lh] md:overflow-hidden ${META} ${LIFT}`}
+        className={`hidden flex-wrap gap-x-sm text-ink md:col-span-2 md:flex md:h-[1lh] md:overflow-hidden ${META} ${LIFT}`}
       >
         {tags.map((t) => (
           <span key={t.ko} className="md:my-[calc((1lh-1cap)/2)] md:[text-box:trim-both_cap_alphabetic]">
@@ -98,11 +98,11 @@ function Row({
           </span>
         ))}
       </p>
-      <p className={`hidden tabular-nums text-ink-muted md:col-span-1 md:block ${META} ${LIFT}`}>
+      <p className={`hidden tabular-nums text-ink md:col-span-1 md:block ${META} ${LIFT}`}>
         {team ?? "—"}
       </p>
       <p
-        className={`col-start-2 row-start-1 justify-self-end text-body-sm tabular-nums text-ink-muted md:col-span-1 md:col-start-auto md:row-start-auto md:text-right ${LIFT}`}
+        className={`col-start-2 row-start-1 justify-self-end text-body-sm tabular-nums text-ink md:col-span-1 md:col-start-auto md:row-start-auto md:text-right ${LIFT}`}
       >
         {year}
       </p>

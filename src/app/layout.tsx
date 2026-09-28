@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { Archivo, Caveat, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { Archivo, Caveat, Geist_Mono, Newsreader, Noto_Serif_KR } from "next/font/google";
 import { MachineToggle } from "@/components/MachineToggle";
 import { JsonLd } from "@/components/JsonLd";
 import { ScrollRail } from "@/components/ScrollRail";
@@ -8,6 +9,7 @@ import SmoothScroll from "@/components/SmoothScroll";
 import PageTurn from "@/components/PageTurn";
 import "lenis/dist/lenis.css";
 import "./globals.css";
+import { SITE_URL } from "@/features/site/data/site";
 
 const sans = localFont({
   src: [
@@ -26,16 +28,16 @@ const sans = localFont({
 
 const kr = localFont({
   src: [
-    { path: "../fonts/ibm-plex-sans-kr-regular.woff2", weight: "400", style: "normal" },
-    { path: "../fonts/ibm-plex-sans-kr-medium.woff2", weight: "700", style: "normal" },
+    { path: "../fonts/pretendard-regular.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/pretendard-medium.woff2", weight: "700", style: "normal" },
   ],
   variable: "--f-kr",
   display: "swap",
   preload: false,
   declarations: [
-    { prop: "size-adjust", value: "102%" },
-    { prop: "ascent-override", value: "95.7%" },
-    { prop: "descent-override", value: "22%" },
+    { prop: "size-adjust", value: "104.6%" },
+    { prop: "ascent-override", value: "93.3%" },
+    { prop: "descent-override", value: "21.4%" },
     { prop: "line-gap-override", value: "0%" },
   ],
 });
@@ -45,6 +47,20 @@ const display = Archivo({
   axes: ["wdth"],
   variable: "--f-display",
   display: "block",
+});
+
+const serif = Newsreader({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  variable: "--f-serif",
+  display: "swap",
+  preload: false,
+});
+
+const serifKr = Noto_Serif_KR({
+  weight: ["400"],
+  variable: "--f-serif-kr",
+  display: "swap",
   preload: false,
 });
 
@@ -64,23 +80,33 @@ const machine = Geist_Mono({
   preload: false,
 });
 
-const SITE_URL = "https://sigmaintelligence.org";
+
+const SCREEN = `(()=>{const s=document.createElement("style"),r=()=>{s.textContent=":root{--screen:"+innerHeight+"px}"};let w=innerWidth;r();document.head.appendChild(s);addEventListener("resize",()=>{if(innerWidth!==w||!matchMedia("(pointer:coarse)").matches){w=innerWidth;r()}})})()`;
 
 export const metadata: Metadata = {
   title: {
-    default: "Home \\ SIGMA",
-    template: "%s \\ SIGMA",
+    default: "SIGMA INTELLIGENCE \\ SNU Robotics Club",
+    template: "%s \\ SIGMA INTELLIGENCE",
   },
   description:
-    "Sigma Intelligence is the robotics club of Seoul National University. Founded in 1984, it is Korea's first university robotics club. 서울대학교 로봇동아리 시그마 인텔리전스.",
+    "SIGMA INTELLIGENCE is the robotics club of Seoul National University. Founded in 1984, it is Korea's first university robotics club. 서울대학교 로봇동아리 시그마 인텔리전스.",
   keywords: [
     "서울대 로봇동아리",
     "서울대학교 로봇동아리",
     "시그마 인텔리전스",
-    "Sigma Intelligence",
+    "SIGMA INTELLIGENCE",
     "SNU robotics club",
     "로봇 동아리",
+    "서울대 로봇",
+    "SNU robotics",
+    "Seoul National University robotics club",
+    "university robotics club Korea",
   ],
+  applicationName: "SIGMA INTELLIGENCE",
+  authors: [{ name: "SIGMA INTELLIGENCE", url: SITE_URL }],
+  creator: "SIGMA INTELLIGENCE",
+  publisher: "SIGMA INTELLIGENCE",
+  category: "education",
   icons: {
     icon: [{ url: "/logo-mark.svg", type: "image/svg+xml" }],
     shortcut: "/logo-mark.svg",
@@ -88,17 +114,17 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL(SITE_URL),
   openGraph: {
-    title: "Sigma Intelligence — SNU Robotics Club",
+    title: "SIGMA INTELLIGENCE — SNU Robotics Club",
     description: "Korea's first university robotics club, founded 1984 at Seoul National University.",
     url: SITE_URL,
-    siteName: "Sigma Intelligence",
+    siteName: "SIGMA INTELLIGENCE",
     locale: "en_US",
     alternateLocale: ["ko_KR"],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Sigma Intelligence — SNU Robotics Club",
+    title: "SIGMA INTELLIGENCE — SNU Robotics Club",
     description: "Korea's first university robotics club, founded 1984 at Seoul National University.",
   },
   robots: { index: true, follow: true },
@@ -111,8 +137,11 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${sans.variable} ${kr.variable} ${machine.variable} ${display.variable} ${hand.variable}`}
+      className={`${sans.variable} ${kr.variable} ${machine.variable} ${display.variable} ${hand.variable} ${serif.variable} ${serifKr.variable}`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: SCREEN }} />
+      </head>
       <body id="top" className="max-md:has-[.nav-open]:overflow-hidden">
         <a
           href="#main"
@@ -126,6 +155,7 @@ export default function RootLayout({
         <SmoothScroll />
         <PageTurn />
         <MachineToggle />
+        <Analytics />
       </body>
     </html>
   );

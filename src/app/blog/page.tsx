@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { share } from "@/app/share";
 import ContactPill from "@/components/ContactPill";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -9,9 +10,12 @@ import { formatDate } from "@/lib/date";
 import BlogIndex, { type BlogItem, type Topic } from "@/features/content/components/BlogIndex";
 import { coverFor } from "@/features/content/data/covers";
 
+const DESCRIPTION = "Writing from SIGMA INTELLIGENCE at Seoul National University.";
+
 export const metadata: Metadata = {
   title: "Blog",
-  description: "Writing from Sigma Intelligence at Seoul National University.",
+  description: DESCRIPTION,
+  ...share("/blog", { title: "Blog", description: DESCRIPTION }),
 };
 
 const TOPICS = 6;

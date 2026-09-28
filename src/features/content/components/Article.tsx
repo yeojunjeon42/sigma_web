@@ -113,7 +113,7 @@ export default function Article({
           {leadPhoto ? (
             <Image
               src={leadPhoto.src}
-              alt=""
+              alt={doc.title}
               width={leadPhoto.width}
               height={leadPhoto.height}
               sizes="(min-width: 768px) 42.25rem, 100vw"
@@ -140,7 +140,7 @@ export default function Article({
                 <li key={photo.src} className="u-settle">
                   <Image
                     src={photo.src}
-                    alt=""
+                    alt={doc.title}
                     width={photo.width}
                     height={photo.height}
                     sizes="(min-width: 768px) 42.25rem, 100vw"
@@ -156,14 +156,8 @@ export default function Article({
             </ul>
           )}
 
-          {doc.source && (
-            <p className="mt-xxl border-t border-rule pt-md text-caption text-ink-muted">
-              Source — {doc.source}
-            </p>
-          )}
-
           {(newer || older) && (
-            <nav aria-label="Next and previous posts" className={`grid border-t border-rule md:grid-cols-2 ${doc.source ? "mt-lg" : "mt-section"}`}>
+            <nav aria-label="Next and previous posts" className="mt-section grid border-t border-rule md:grid-cols-2">
               {[
                 older && { post: older, label: "Older", align: "" },
                 newer && { post: newer, label: "Newer", align: "md:col-start-2 md:text-right" },

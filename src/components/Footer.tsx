@@ -37,113 +37,98 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="u-card-rise overflow-hidden rounded-t-[2.5rem] bg-band text-ink [corner-shape:squircle]">
-      <div className="u-gutter mx-auto w-full max-w-wide pt-xxl lg:pt-section">
-        <div className="grid grid-cols-2 gap-x-md gap-y-xl text-body lg:grid-cols-12 lg:gap-x-lg">
-          <div className="hidden lg:col-span-4 lg:block">
-            <p>
-              Where Imagination Meets Reality
-            </p>
-            <a href={`mailto:${EMAIL}`} className={`mt-xs inline-block ${LINK}`}>
-              {EMAIL}&nbsp;↗
-            </a>
-          </div>
+    <div className="overflow-clip">
+      <footer className="u-card-rise overflow-hidden rounded-t-[2.5rem] bg-band text-ink [corner-shape:squircle]">
+        <div className="u-gutter mx-auto w-full max-w-wide pt-xxl lg:pt-section">
+          <div className="grid grid-cols-2 gap-x-md gap-y-xxxl text-body lg:grid-cols-12 lg:gap-x-lg lg:gap-y-xl">
+            <div className="hidden lg:col-span-4 lg:block">
+              <p>
+                Where Imagination Meets Reality
+              </p>
+              <a href={`mailto:${EMAIL}`} className={`mt-xs inline-block ${LINK}`}>
+                {EMAIL}&nbsp;↗
+              </a>
+            </div>
 
-          <nav aria-label="Footer" className="lg:col-span-2 lg:col-start-6">
-            <p className={`${LABEL} max-lg:hidden`}>
-              Pages
-            </p>
-            <ul className="flex flex-col gap-y-xxs">
-              {PAGES.map((page) => (
-                <li key={page.href}>
-                  <Link href={page.href} className={ITEM}>
-                    {page.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+            <nav aria-label="Footer" className="lg:col-span-2 lg:col-start-6">
+              <p className={`${LABEL} max-lg:hidden`}>
+                Pages
+              </p>
+              <ul className="flex flex-col gap-y-xxs">
+                {PAGES.map((page) => (
+                  <li key={page.href}>
+                    <Link href={page.href} className={ITEM}>
+                      {page.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
 
-          <div className="lg:col-span-2">
-            <p className={`${LABEL} max-lg:hidden`}>
-              Follow
-            </p>
-            <ul className="flex flex-col gap-y-xxs">
-              {SOCIAL.map((s) => (
-                <li key={s.name}>
-                  <a href={s.href} target="_blank" rel="noopener noreferrer" className={ITEM}>
-                    {s.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+            <div className="max-lg:mt-[calc(4*(1lh+var(--spacing-xxs)))] max-lg:text-right lg:col-span-2">
+              <p className={`${LABEL} max-lg:hidden`}>
+                Follow
+              </p>
+              <ul className="flex flex-col gap-y-xxs max-lg:items-end">
+                {SOCIAL.map((s) => (
+                  <li key={s.name}>
+                    <a href={s.href} target="_blank" rel="noopener noreferrer" className={ITEM}>
+                      {s.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div className="hidden lg:col-span-3 lg:block">
-            <p className={LABEL}>
-              Visit
-            </p>
-            <p>
-              Building 302, Room 215‑2
-              <br />
-              Seoul National University
-              <br />
-              1 Gwanak-ro, Gwanak-gu, Seoul
-            </p>
-          </div>
-
-          <dl className="col-span-2 grid gap-y-sm lg:hidden">
-            <div className="grid grid-cols-[4rem_minmax(0,1fr)] gap-x-sm">
-              <dt className="pt-[0.2rem] text-caption text-ink-muted">
-                Room
-              </dt>
-              <dd>
+            <div className="col-span-2 lg:col-span-3">
+              <p className={`${LABEL} max-lg:hidden`}>
+                Visit
+              </p>
+              <p>
                 Building 302, Room 215‑2
                 <br />
                 Seoul National University
-              </dd>
+                <br />
+                1 Gwanak-ro, Gwanak-gu, Seoul
+              </p>
             </div>
-            <div className="grid grid-cols-[4rem_minmax(0,1fr)] gap-x-sm">
-              <dt className="pt-[0.2rem] text-caption text-ink-muted">
-                Email
-              </dt>
-              <dd>
-                <a href={`mailto:${EMAIL}`} className={`${HIT} ${LINK}`}>
-                  {EMAIL}
-                </a>
-              </dd>
+
+            <div className="col-span-2 justify-self-end lg:hidden">
+              <a href={`mailto:${EMAIL}`} className={`${HIT} ${LINK}`}>
+                {EMAIL}
+              </a>
             </div>
-          </dl>
+          </div>
+
+          <div className="mt-xxxl flex flex-col gap-y-xxs text-body text-ink-muted lg:mt-section lg:text-caption lg:flex-row lg:justify-between lg:gap-x-lg">
+            <p>
+              © {year} SIGMA INTELLIGENCE · {`EST. ${FOUNDED}`}
+            </p>
+            <p className="max-lg:hidden">
+              {LEGAL.map((l, i) => (
+                <Fragment key={l.href}>
+                  {i > 0 && " · "}
+                  <a href={l.href} target="_blank" rel="noopener noreferrer" className={LINK}>
+                    {l.label}
+                  </a>
+                </Fragment>
+              ))}
+            </p>
+            <p>
+              Made by{" "}
+              <a href="https://github.com/yeojunjeon42" target="_blank" rel="noopener noreferrer" className={LINK}>
+                Yeojun Jeon
+              </a>
+              {" & "}
+              <a href="https://xlaude2040.com/" target="_blank" rel="noopener noreferrer" className={LINK}>
+                Jin Myung Lee
+              </a>
+            </p>
+          </div>
         </div>
 
-        <div className="mt-xxl flex flex-col gap-y-xxs text-caption text-ink-muted lg:mt-section lg:flex-row lg:justify-between lg:gap-x-lg">
-          <p>
-            © {year} SIGMA INTELLIGENCE · {`EST. ${FOUNDED}`}
-          </p>
-          <p className="max-lg:hidden">
-            {LEGAL.map((l, i) => (
-              <Fragment key={l.href}>
-                {i > 0 && " · "}
-                <a href={l.href} target="_blank" rel="noopener noreferrer" className={LINK}>
-                  {l.label}
-                </a>
-              </Fragment>
-            ))}
-          </p>
-          <p>
-            Made by{" "}
-            <a href="https://github.com/yeojunjeon42" target="_blank" rel="noopener noreferrer" className={LINK}>
-              Yeojun Jeon
-            </a>
-            {" & "}
-            <a href="https://xlaude2040.com/" target="_blank" rel="noopener noreferrer" className={LINK}>
-              Jin Myung Lee
-            </a>
-          </p>
-        </div>
-      </div>
-
-      <Wordmark />
-    </footer>
+        <Wordmark />
+      </footer>
+    </div>
   );
 }

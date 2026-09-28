@@ -3,7 +3,7 @@ import { CURRICULUM, EQUIPMENT, FACTS, ORG, PARTNERS, VOICE } from "@/app/ai/cor
 import { page } from "@/app/ai/ld";
 import { Bil, Ext, Facts, Head, Ld, Section, Table } from "@/app/ai/machine";
 
-const DESCRIPTION = "How Sigma Intelligence runs: operations, curriculum, equipment, partners and the club's own words.";
+const DESCRIPTION = "How Sigma Intelligence runs: operations, curriculum, equipment, partners and quotes.";
 
 export const metadata: Metadata = {
   title: "About",
@@ -56,8 +56,7 @@ export default function MachineAbout() {
         />
       </Section>
 
-      <Section id="voice" title="In the club's own words">
-        <p className="text-machine-dim">Quoted from club documents; the source of each is given.</p>
+      <Section id="voice" title="Quotes">
         {VOICE.map((v) => (
           <figure key={v.quote.ko} className="flex flex-col gap-1">
             <blockquote>
@@ -68,7 +67,6 @@ export default function MachineAbout() {
                 </p>
               )}
             </blockquote>
-            <figcaption className="text-machine-dim">Source: {v.source.en}</figcaption>
           </figure>
         ))}
       </Section>

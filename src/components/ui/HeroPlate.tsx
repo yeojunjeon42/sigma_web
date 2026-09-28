@@ -62,13 +62,13 @@ export function HeroCaption({ builds, className = "" }: { builds: HeroBuild[]; c
         className="inline-flex min-h-11 items-center gap-x-xs leading-none text-ink transition-opacity hover:opacity-60 lg:min-h-0"
       >
         {b.name}
-        {b.year ? <span className="tabular-nums text-ink-muted">{b.year}</span> : null}
+        {b.year ? <span className="tabular-nums text-ink">{b.year}</span> : null}
         <span aria-hidden="true">↗</span>
       </Link>
       <button
         type="button"
         onClick={() => advance?.()}
-        className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-end leading-none text-ink-muted uppercase transition-colors hover:text-ink lg:min-h-0 lg:min-w-0"
+        className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-end leading-none text-ink uppercase transition-opacity hover:opacity-60 lg:min-h-0 lg:min-w-0"
       >
         Next
       </button>
@@ -523,7 +523,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       }
 
       if (!still) {
-        roam = !ptr.in && now - ptr.left > IDLE;
+        roam = fine && !ptr.in && now - ptr.left > IDLE;
         const s = now / 1000;
         const gx = roam ? box.x + box.w * (0.5 + 0.3 * Math.cos(s * 0.57)) : ptr.x;
         const gy = roam ? box.y + box.h * (0.5 + 0.26 * Math.sin(s * 0.83 + 1)) : ptr.y;
@@ -569,10 +569,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       lens.px = lens.x;
       lens.py = lens.y;
 
-      if (seen && !document.hidden && (t < 1 || want || revMax > 0.004 || (!still && !frozen))) {
-        if (roam && !fine) window.setTimeout(kick, 24);
-        else kick();
-      }
+      if (seen && !document.hidden && (t < 1 || want || revMax > 0.004 || (fine && !still && !frozen))) kick();
     };
 
     function kick() {
@@ -651,11 +648,13 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
 
     let timer = 0;
     if (!frozen) {
-      host.addEventListener("pointermove", at);
-      host.addEventListener("pointerdown", at);
-      host.addEventListener("pointerup", up);
-      host.addEventListener("pointerleave", out);
-      host.addEventListener("pointercancel", out);
+      if (fine) {
+        host.addEventListener("pointermove", at);
+        host.addEventListener("pointerdown", at);
+        host.addEventListener("pointerup", up);
+        host.addEventListener("pointerleave", out);
+        host.addEventListener("pointercancel", out);
+      }
       host.addEventListener("click", click);
       window.addEventListener(PLATE_SHOW, asked);
       window.addEventListener(PLATE_RELEASE, released);

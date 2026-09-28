@@ -1,4 +1,4 @@
-const SITE = "https://sigmaintelligence.org";
+import { SITE_URL as SITE } from "@/features/site/data/site";
 
 export const MACHINE_NAV = [
   { label: "/ai", href: "/ai" },

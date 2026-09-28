@@ -48,6 +48,12 @@ export default function ArchiveGrid({
                     <span aria-hidden="true" className="text-ink-muted">
                       {" ↗"}
                     </span>
+                    {b.award ? (
+                      <span className="md:hidden">
+                        <span aria-hidden="true" className="ml-xs inline-block size-[0.34em] bg-accent align-[calc((1cap-0.34em)/2)]" />
+                        <span className="sr-only">{b.award}</span>
+                      </span>
+                    ) : null}
                   </h3>
                   <Caption b={b} />
                 </Link>
@@ -72,5 +78,5 @@ function Caption({ b }: { b: ReelBuild }) {
     b.tags[0]
   ) : null;
   if (!line) return null;
-  return <p className="mt-xxs truncate text-caption text-ink-muted">{line}</p>;
+  return <p className="mt-xxs truncate text-caption text-ink-muted max-md:hidden">{line}</p>;
 }

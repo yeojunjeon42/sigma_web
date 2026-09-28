@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { EMAIL } from "@/features/site/data/contact";
-import { SOCIAL } from "@/features/site/data/social";
 
 const NAV = [
   { label: "Home", href: "/" },
@@ -40,8 +38,7 @@ const TONE = {
     sheet: "bg-canvas-inverse",
     bar: "max-md:bg-canvas-inverse",
     rule: "border-overlay-ink/15",
-    sheetLink: "text-overlay-ink/60 aria-[current=page]:text-overlay-ink",
-    sheetFoot: "text-overlay-ink/70",
+    sheetLink: "text-overlay-ink",
   },
   solid: {
     link:
@@ -50,8 +47,7 @@ const TONE = {
     sheet: "bg-canvas",
     bar: "max-md:bg-canvas",
     rule: "border-rule",
-    sheetLink: "text-ink-muted aria-[current=page]:text-ink",
-    sheetFoot: "text-ink-muted",
+    sheetLink: "text-ink",
   },
 } as const;
 
@@ -172,7 +168,7 @@ export default function Navbar({
                 <Link
                   href={item.href}
                   aria-current={isCurrent(item.href) ? "page" : undefined}
-                  className={`${BOX} -mx-xs flex items-center px-xs py-md text-ui uppercase tracking-[0.04em] transition-colors duration-250 motion-reduce:transition-none ${t.link}`}
+                  className={`${BOX} -mx-xs flex items-center px-xs py-md font-[family-name:var(--f-display)] text-ui font-semibold uppercase tracking-[0.02em] [font-stretch:125%] transition-colors duration-250 motion-reduce:transition-none ${t.link}`}
                 >
                   {item.label}
                 </Link>
@@ -208,45 +204,41 @@ export default function Navbar({
         </div>
       </div>
 
+      {open ? (
+        <div
+          aria-hidden="true"
+          onClick={() => setOpen(false)}
+          className="absolute inset-x-0 top-full h-[100dvh] bg-ink/25 transition-opacity duration-300 starting:opacity-0 motion-reduce:transition-none md:hidden"
+        />
+      ) : null}
+
       <nav
         id="masthead-nav"
         aria-label="Primary"
         hidden={!open}
-        className={`nav-sheet absolute inset-x-0 top-full h-[calc(100dvh-var(--masthead))] overflow-y-auto overscroll-contain border-t border-transparent md:hidden ${
+        className={`nav-sheet absolute inset-x-0 top-full overflow-hidden rounded-b-[1.5rem] shadow-[0_18px_40px_rgb(10_9_7/0.14)] [corner-shape:squircle] md:hidden ${
           open ? "nav-open" : ""
         } ${t.sheet}`}
       >
-        <div className="u-gutter mx-auto flex min-h-full max-w-wide flex-col pb-[max(var(--spacing-lg),env(safe-area-inset-bottom))] pt-sm">
-          <ul className={`u-arrive border-t ${t.rule}`}>
-            {NAV.map((item) => (
-              <li key={item.href} className={`border-b ${t.rule}`}>
-                <Link
-                  href={item.href}
-                  aria-current={isCurrent(item.href) ? "page" : undefined}
-                  onClick={() => setOpen(false)}
-                  className={`flex min-h-16 items-center text-display-lg ${t.sheetLink}`}
-                >
+        <ul className="u-gutter u-arrive mx-auto max-w-wide pb-sm">
+          {NAV.map((item) => (
+            <li key={item.href} className={`border-b last:border-b-0 ${t.rule}`}>
+              <Link
+                href={item.href}
+                aria-current={isCurrent(item.href) ? "page" : undefined}
+                onClick={() => setOpen(false)}
+                className={`flex min-h-14 items-center font-[family-name:var(--f-display)] text-title font-semibold uppercase tracking-[0.02em] [font-stretch:125%] ${t.sheetLink}`}
+              >
+                <span>
                   {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-
-          <div className={`mt-auto grid gap-y-md pt-xxl text-body ${t.sheetFoot}`}>
-            <a href={`mailto:${EMAIL}`} className="-my-sm flex min-h-11 items-center">
-              {EMAIL}
-            </a>
-            <ul className="flex flex-wrap gap-x-lg">
-              {SOCIAL.map((s) => (
-                <li key={s.name}>
-                  <a href={s.href} target="_blank" rel="noopener noreferrer" className="-my-sm flex min-h-11 items-center">
-                    {s.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+                  {isCurrent(item.href) ? (
+                    <span aria-hidden="true" className="ml-sm inline-block size-[0.3em] bg-accent align-[calc((1cap-0.3em)/2)]" />
+                  ) : null}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </nav>
     </header>
   );

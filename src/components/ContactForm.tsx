@@ -66,7 +66,7 @@ export function ContactForm() {
     setDraft(`mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
     data.append("access_key", KEY);
     data.append("subject", subject);
-    data.append("from_name", "sigmaintelligence.org");
+    data.append("from_name", "snusigma.net");
     setStatus("sending");
     try {
       const res = await fetch(ENDPOINT, { method: "POST", body: data });

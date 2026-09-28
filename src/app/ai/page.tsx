@@ -5,7 +5,7 @@ import { page } from "@/app/ai/ld";
 import { Bil, Ext, Facts, Head, Ld, Section, Table } from "@/app/ai/machine";
 
 const DESCRIPTION =
-  "Machine-readable index of sigmaintelligence.org: identity, key facts and every machine page, with Markdown twins.";
+  `Machine-readable index of ${new URL(SITE).host}: identity, key facts and every machine page, with Markdown twins.`;
 
 export const metadata: Metadata = {
   title: { absolute: "Index \\ Machine" },

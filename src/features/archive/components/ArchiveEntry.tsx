@@ -1,5 +1,6 @@
 import Link from "next/link";
 import EntryBody from "./EntryBody";
+import EntryTop from "./EntryTop";
 import type { ReelBuild } from "./ArchiveReel";
 
 const META = "text-caption tracking-normal leading-[1.35]";
@@ -34,7 +35,8 @@ export default function ArchiveEntry({
     );
 
   return (
-    <article className="u-gutter pt-[calc(var(--masthead)+var(--spacing-sm))]">
+    <article className="u-gutter pt-sm">
+      <EntryTop key={build.id} />
       <nav aria-label="Entry" className={`flex items-center justify-between gap-x-lg text-ink-muted ${META}`}>
         <Link href={close} replace className={`${TAP} gap-x-xs`}>
           <span aria-hidden="true">←</span>

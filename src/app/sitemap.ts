@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getIndex } from "@/features/content/api/getContent";
 
-const SITE_URL = "https://sigmaintelligence.org";
+import { SITE_URL } from "@/features/site/data/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();

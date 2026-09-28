@@ -3,6 +3,7 @@
 @theme {
   --font-sans: var(--f-sans), var(--f-kr), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--f-machine), var(--f-kr), ui-monospace, SFMono-Regular, monospace;
+  --font-serif: var(--f-serif), var(--f-serif-kr), ui-serif, Georgia, "Times New Roman", serif;
   --default-font-family: var(--font-sans);
 
   --radius-photo: clamp(10px, 0.6rem + 0.5vw, 16px);
@@ -10,9 +11,9 @@
   --color-surface: #d7d9d3;
   --color-surface-sunken: #cfd2cb;
   --color-ink: #0f110d;
-  --color-ink-muted: #5c6058;
-  --color-rule: #c7cac2;
-  --color-rule-strong: #abafa6;
+  --color-ink-muted: #4b4f47;
+  --color-rule: #b6bab0;
+  --color-rule-strong: #979b91;
   --color-rule-field: #76767a;
 
   --color-band: #f0d8d1;
@@ -83,7 +84,7 @@
   --radius-pill: 24px;
   --duration-chrome: 300ms;
   --duration-reveal: 500ms;
-  --duration-arrive: 520ms;
+  --duration-arrive: 420ms;
   --ease-magnify: cubic-bezier(0.22, 1, 0.36, 1);
 
   --spacing-xxs: 4px;
@@ -110,6 +111,7 @@
 :root {
   --gutter: clamp(1rem, 2vw, 1.5rem);
   --masthead: 3.5rem;
+  --screen: 100svh;
 }
 
 @media (min-width: 768px) {
@@ -161,7 +163,6 @@
     z-index: 2147483000;
     pointer-events: none;
     opacity: 0.045;
-    mix-blend-mode: multiply;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   }
 
@@ -186,46 +187,48 @@
     border-radius: 0;
   }
 
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-rule-field) transparent;
-  }
-  html,
-  body {
-    scrollbar-width: none;
-  }
-  html::-webkit-scrollbar,
-  body::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
-  }
-  ::-webkit-scrollbar {
-    width: 11px;
-    height: 11px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-    box-shadow: inset 1px 0 0 var(--color-rule);
-  }
-  ::-webkit-scrollbar-track:horizontal {
-    box-shadow: inset 0 1px 0 var(--color-rule);
-  }
-  ::-webkit-scrollbar-thumb {
-    background: var(--color-rule-strong);
-    border: 4px solid transparent;
-    background-clip: content-box;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-ink-muted);
-    background-clip: content-box;
-  }
-  ::-webkit-scrollbar-corner {
-    background: transparent;
-  }
-  [data-machine] *,
-  .bg-canvas-inverse * {
-    scrollbar-color: var(--color-rule-inverse) transparent;
+  @media (pointer: fine) {
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-rule-field) transparent;
+    }
+    html,
+    body {
+      scrollbar-width: none;
+    }
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+    ::-webkit-scrollbar {
+      width: 11px;
+      height: 11px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+      box-shadow: inset 1px 0 0 var(--color-rule);
+    }
+    ::-webkit-scrollbar-track:horizontal {
+      box-shadow: inset 0 1px 0 var(--color-rule);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--color-rule-strong);
+      border: 4px solid transparent;
+      background-clip: content-box;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--color-ink-muted);
+      background-clip: content-box;
+    }
+    ::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+    [data-machine] *,
+    .bg-canvas-inverse * {
+      scrollbar-color: var(--color-rule-inverse) transparent;
+    }
   }
 }
 
@@ -245,6 +248,11 @@
   .site-scroll-rail[data-on="1"] {
     opacity: 1;
     pointer-events: auto;
+  }
+  @media not (pointer: fine) {
+    .site-scroll-rail {
+      display: none;
+    }
   }
   .site-scroll-rail::before {
     content: "";
@@ -309,9 +317,18 @@
     -webkit-text-stroke: 5px var(--color-canvas);
   }
 
+  .u-lift {
+    text-shadow:
+      0 0 1px var(--color-canvas),
+      0 0 6px var(--color-canvas),
+      0 0 14px var(--color-canvas);
+  }
+
   .year-ruler {
     --ruler-paper: color-mix(in srgb, var(--color-canvas) 96%, white);
     --ruler-station: 96px;
+    --ruler-edge: calc(var(--ruler-station) / 2);
+    --ruler-magnet: calc(var(--ruler-edge) + 2 * var(--ruler-pitch));
     position: fixed;
     inset-inline: 0;
     width: min(calc(100% - var(--gutter) - var(--gutter)), 36rem);
@@ -320,7 +337,7 @@
     z-index: 30;
     height: 76px;
     overflow: hidden;
-    touch-action: pan-y;
+    touch-action: pan-x pan-y;
     user-select: none;
     -webkit-user-select: none;
     cursor: grab;
@@ -362,47 +379,128 @@
     position: absolute;
     inset: 0;
     overflow: hidden;
-    -webkit-mask-image: linear-gradient(
+  }
+  .year-ruler__pane {
+    --tick: color-mix(in srgb, var(--color-accent) 78%, var(--color-ink) 22%);
+    --tick-major: var(--color-accent-deep);
+    --tick-tail: color-mix(in srgb, var(--color-accent) 34%, var(--color-ink-muted) 66%);
+    position: absolute;
+    inset: 0;
+    -webkit-mask-image: var(--pane-mask);
+    mask-image: var(--pane-mask);
+  }
+  .year-ruler__pane--past {
+    --pane-mask: linear-gradient(
       to right,
-      #000 0 calc(50% - var(--ruler-station) / 2),
-      transparent calc(50% - var(--ruler-station) / 2) calc(50% + var(--ruler-station) / 2),
-      #000 calc(50% + var(--ruler-station) / 2)
+      rgb(0 0 0 / 0.68) calc(50% - 9 * var(--ruler-pitch)),
+      rgb(0 0 0 / 0.79) calc(50% - var(--ruler-magnet)),
+      transparent calc(50% - var(--ruler-magnet) + 3px)
     );
-    mask-image: linear-gradient(
+  }
+  .year-ruler__pane--ahead {
+    --tick: color-mix(in srgb, var(--color-accent) 46%, var(--color-ink-muted) 54%);
+    --pane-mask: linear-gradient(
       to right,
-      #000 0 calc(50% - var(--ruler-station) / 2),
-      transparent calc(50% - var(--ruler-station) / 2) calc(50% + var(--ruler-station) / 2),
-      #000 calc(50% + var(--ruler-station) / 2)
+      transparent calc(50% + var(--ruler-magnet) - 3px),
+      rgb(0 0 0 / 0.56) calc(50% + var(--ruler-magnet)),
+      rgb(0 0 0 / 0.44) calc(50% + 9 * var(--ruler-pitch))
     );
+  }
+  .year-ruler__pane--past-pull,
+  .year-ruler__pane--ahead-pull {
+    --tick: var(--color-accent);
+    --tick-major: var(--color-accent);
+    --tick-tail: var(--color-accent);
+  }
+  .year-ruler__pane--past-pull {
+    --pane-mask: linear-gradient(
+      to right,
+      transparent calc(50% - var(--ruler-magnet)),
+      rgb(0 0 0 / 0.85) calc(50% - var(--ruler-magnet) + 3px),
+      rgb(0 0 0 / 0.89) calc(50% - var(--ruler-edge) - 7px),
+      transparent calc(50% - var(--ruler-edge))
+    );
+  }
+  .year-ruler__pane--ahead-pull {
+    --pane-mask: linear-gradient(
+      to right,
+      transparent calc(50% + var(--ruler-edge)),
+      rgb(0 0 0 / 0.67) calc(50% + var(--ruler-edge) + 7px),
+      rgb(0 0 0 / 0.63) calc(50% + var(--ruler-magnet) - 3px),
+      transparent calc(50% + var(--ruler-magnet))
+    );
+  }
+  .year-ruler__lens {
+    position: absolute;
+    inset: 0;
+  }
+  .year-ruler__pane--past-pull .year-ruler__lens {
+    transform-origin: calc(50% - var(--ruler-magnet)) 50%;
+    transform: skewX(-2.5deg) scale(1.09, 1.2);
+  }
+  .year-ruler__pane--ahead-pull .year-ruler__lens {
+    transform-origin: calc(50% + var(--ruler-magnet)) 50%;
+    transform: skewX(2.5deg) scale(1.09, 1.2);
   }
   .year-ruler__track {
     position: absolute;
     inset-block: 0;
     left: 0;
+    display: flex;
     will-change: transform;
   }
-  .year-ruler__tick {
-    --tick-alpha: 0.5;
-    --tick-color: var(--color-accent);
-    --tick-scale: 1;
-    --tick-x: 0px;
-    --tick-lean: 0deg;
+  .year-ruler__track > span {
+    display: flex;
+  }
+  .year-ruler__track > [data-tail] {
+    --tick: var(--tick-tail);
+  }
+  .year-ruler__track > span > span {
+    position: relative;
+    flex: none;
+    width: var(--ruler-pitch);
+  }
+  .year-ruler__track > span > span::before {
+    content: "";
     position: absolute;
     top: 50%;
+    left: 50%;
     width: 2px;
     height: 20px;
     border-radius: 1px;
-    background: var(--tick-color);
-    opacity: var(--tick-alpha);
-    transform:
-      translate(calc(-1px + var(--tick-x)), -50%)
-      rotate(var(--tick-lean))
-      scaleY(var(--tick-scale));
-    transform-origin: 50% 50%;
-    will-change: opacity, transform;
+    background: var(--tick);
+    translate: -50% -50%;
   }
-  .year-ruler__tick[data-major="1"] {
+  .year-ruler__track > span > [data-major]::before {
     height: 34px;
+    background: var(--tick-major);
+  }
+  .year-ruler__scroller {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: none;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .year-ruler__scroller::-webkit-scrollbar {
+    display: none;
+  }
+  .year-ruler[data-free="1"] .year-ruler__scroller {
+    scroll-snap-type: none;
+  }
+  .year-ruler__rail {
+    display: flex;
+    width: max-content;
+    height: 100%;
+    padding-inline: calc(50% - var(--ruler-pitch) / 2 + var(--ruler-room));
+  }
+  .year-ruler__rail > span {
+    flex: none;
+    width: var(--ruler-pitch);
+    scroll-snap-align: center;
   }
   .year-ruler__edge-blur {
     position: absolute;
@@ -547,8 +645,12 @@
 @keyframes arrive {
   from {
     opacity: 0;
-    filter: blur(5px);
+    translate: 0 12px;
   }
+}
+html[data-turn] body > :not(header) {
+  opacity: 0;
+  transition: opacity 160ms ease-out;
 }
 .u-arrive > * {
   animation: arrive var(--duration-arrive) cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -690,14 +792,14 @@
 }
 .prose.flow h1,
 .prose.flow h2 {
-  margin: calc(var(--flow) * 3.2) 0 calc(var(--flow) * 0.75);
+  margin: calc(var(--flow) * 2.2) 0 calc(var(--flow) * 0.75);
   font-size: calc(var(--flow) * 1.41);
   line-height: 1.3;
   letter-spacing: -0.012em;
 }
 .prose.flow h3,
 .prose.flow h4 {
-  margin: calc(var(--flow) * 2) 0 calc(var(--flow) * 0.5);
+  margin: calc(var(--flow) * 1.5) 0 calc(var(--flow) * 0.5);
   font-size: calc(var(--flow) * 1.18);
   line-height: 1.4;
   letter-spacing: -0.006em;
@@ -883,7 +985,7 @@
 }
 @keyframes scroll-card {
   from {
-    translate: 0 14svh;
+    translate: 0 calc(var(--screen) * 0.14);
   }
 }
 @keyframes scroll-settle {
@@ -1004,14 +1106,14 @@
 }
 .prose.flow:is(.article-prose, .flow-panel) h1,
 .prose.flow:is(.article-prose, .flow-panel) h2 {
-  margin: 4rem 0 1.5rem;
+  margin: 2.5rem 0 1.25rem;
   font-size: clamp(1.5rem, 1.2rem + 0.9vw, 1.875rem);
   line-height: 1.32;
   letter-spacing: -0.01em;
 }
 .prose.flow:is(.article-prose, .flow-panel) h3,
 .prose.flow:is(.article-prose, .flow-panel) h4 {
-  margin: 2.5rem 0 1rem;
+  margin: 1.75rem 0 0.75rem;
   font-size: 1.25rem;
   line-height: 1.4;
   letter-spacing: -0.01em;
@@ -1120,12 +1222,12 @@
 }
 .prose.flow.flow-panel h1,
 .prose.flow.flow-panel h2 {
-  margin: 2.5rem 0 1rem;
+  margin: 1.75rem 0 0.75rem;
   font-size: 1.25rem;
 }
 .prose.flow.flow-panel h3,
 .prose.flow.flow-panel h4 {
-  margin: 2rem 0 0.75rem;
+  margin: 1.5rem 0 0.5rem;
   font-size: 1.0625rem;
 }
 .prose.flow.flow-panel blockquote {
