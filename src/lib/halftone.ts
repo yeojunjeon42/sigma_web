@@ -5,20 +5,6 @@ export const DOT = 0.42;
 export const GROUND_INK = "--color-rule-field";
 export const GROUND_DOT = (1 - GROUND) * SCREEN * DOT;
 
-export function groundPatch(cell: number, ground: number, dpr: number, colour = GROUND_INK) {
-  const c = document.createElement("canvas");
-  c.width = Math.max(1, Math.round(cell * dpr));
-  c.height = c.width;
-  const g = c.getContext("2d");
-  if (!g) return null;
-  g.setTransform(dpr, 0, 0, dpr, 0, 0);
-  g.fillStyle = cssVar(colour, "#76767a");
-  g.beginPath();
-  g.arc(cell / 2, cell / 2, (1 - ground) * cell * DOT, 0, Math.PI * 2);
-  g.fill();
-  return c;
-}
-
 export function halftone(
   canvas: HTMLCanvasElement,
   paint: (g: CanvasRenderingContext2D, w: number, h: number) => void,
@@ -31,7 +17,7 @@ export function halftone(
   if (!w || !h) return false;
   const paper = cssVar("--color-canvas", "#e2e2e2");
   const ink = cssVar("--color-ink", "#0f0d09");
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
   canvas.width = Math.round(w * dpr);
   canvas.height = Math.round(h * dpr);
   const out = canvas.getContext("2d");
