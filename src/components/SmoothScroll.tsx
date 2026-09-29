@@ -20,12 +20,29 @@ export default function SmoothScroll() {
     const fit = window.matchMedia("(min-width: 64rem) and (pointer: fine)");
     const still = window.matchMedia("(prefers-reduced-motion: reduce)");
     let lenis: Lenis | null = null;
+    let raf = 0;
+    let last = -1;
+    let clock = 0;
+
+    const loop = (t: number) => {
+      clock += last < 0 ? 1000 / 60 : Math.min(Math.max(t - last, 0), 50);
+      last = t;
+      lenis?.raf(clock);
+      raf = lenis?.isScrolling === "smooth" ? requestAnimationFrame(loop) : 0;
+    };
+    const wake = () => {
+      if (!lenis || raf) return;
+      last = -1;
+      raf = requestAnimationFrame(loop);
+    };
 
     const sync = () => {
       const want = fit.matches && !still.matches && !path.startsWith("/archive") && !/^\/blog\/./.test(path);
       if (want && !lenis) {
-        lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1, smoothWheel: true, syncTouch: false, autoRaf: true, prevent: scrollable });
+        lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1, smoothWheel: true, syncTouch: false, autoRaf: false, prevent: scrollable });
       } else if (!want && lenis) {
+        cancelAnimationFrame(raf);
+        raf = 0;
         lenis.destroy();
         lenis = null;
       }
@@ -39,13 +56,17 @@ export default function SmoothScroll() {
       e.preventDefault();
       const margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
       lenis.scrollTo(el.getBoundingClientRect().top + window.scrollY - margin);
+      wake();
       history.replaceState(null, "", `#${id}`);
     };
     sync();
+    window.addEventListener("wheel", wake, { passive: true });
     document.addEventListener("click", jump);
     fit.addEventListener("change", sync);
     still.addEventListener("change", sync);
     return () => {
+      window.removeEventListener("wheel", wake);
+      cancelAnimationFrame(raf);
       document.removeEventListener("click", jump);
       fit.removeEventListener("change", sync);
       still.removeEventListener("change", sync);
