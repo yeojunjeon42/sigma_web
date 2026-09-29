@@ -121,7 +121,6 @@ export default function Navbar({
 
   return (
     <>
-      <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-40 h-0.5 bg-canvas" />
       <header
         className={`fixed inset-x-0 top-0 z-40 w-full transition-[translate,opacity] duration-300 ease-out motion-reduce:transition-none ${
           hidden && !open ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"
