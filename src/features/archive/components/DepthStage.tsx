@@ -46,6 +46,7 @@ export default function DepthStage() {
       raf = 0;
       if (still.matches || !host.offsetParent) {
         FIELD_POINTER.k = 0;
+        FIELD_POINTER.staged = false;
         return;
       }
       mx += (tx - mx) * 0.08;
@@ -83,6 +84,7 @@ export default function DepthStage() {
         if (Math.abs(gx - lx[i]) > 0.05 || Math.abs(gy - ly[i]) > 0.05) settled = false;
         el.style.translate = `${(dx + lx[i]).toFixed(1)}px ${(dy + tilt + ly[i]).toFixed(1)}px`;
       });
+      FIELD_POINTER.staged = true;
       host.dispatchEvent(new Event("field:moved"));
       if (!settled && visible) raf = requestAnimationFrame(frame);
     };
@@ -94,10 +96,21 @@ export default function DepthStage() {
       if (px > -1e4) place(px, py);
       kick();
     };
+    let chip: HTMLElement | null = null;
+    const chipOf = (t: EventTarget | null) => {
+      const next = (t as HTMLElement | null)?.closest?.("[data-plate-link]")?.nextElementSibling;
+      return next instanceof HTMLElement && next.hasAttribute("data-chip") ? next : null;
+    };
     const place = (x: number, y: number) => {
+      if (!chip) return;
       const o = probe.getBoundingClientRect();
-      host.style.setProperty("--mx", `${x - o.left}px`);
-      host.style.setProperty("--my", `${y - o.top}px`);
+      chip.style.setProperty("--mx", `${x - o.left}px`);
+      chip.style.setProperty("--my", `${y - o.top}px`);
+    };
+    const onOver = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+      chip = chipOf(e.target);
+      place(e.clientX, e.clientY);
     };
     const onPointer = (e: PointerEvent) => {
       if (e.pointerType !== "mouse") return;
@@ -115,6 +128,7 @@ export default function DepthStage() {
       if (pressing) return;
       const link = (e.target as HTMLElement).closest?.("[data-plate-link]");
       if (!link) return;
+      chip = chipOf(link);
       const b = link.getBoundingClientRect();
       place(b.left - 14, b.bottom - 6);
     };
@@ -147,6 +161,7 @@ export default function DepthStage() {
     window.addEventListener("pointerdown", onDown, true);
     window.addEventListener("keydown", onKey, true);
     host.addEventListener("focusin", onFocus);
+    host.addEventListener("pointerover", onOver, { passive: true });
     still.addEventListener("change", onMotion);
 
     return () => {
@@ -159,6 +174,7 @@ export default function DepthStage() {
       window.removeEventListener("pointerdown", onDown, true);
       window.removeEventListener("keydown", onKey, true);
       host.removeEventListener("focusin", onFocus);
+      host.removeEventListener("pointerover", onOver);
       still.removeEventListener("change", onMotion);
     };
   }, []);
