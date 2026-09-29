@@ -189,6 +189,7 @@ export default function Navbar({
         {open ? (
           <div
             aria-hidden="true"
+            data-backdrop
             onClick={() => setOpen(false)}
             className="absolute inset-x-0 top-full h-[100dvh] bg-ink/25 transition-opacity duration-300 starting:opacity-0 motion-reduce:transition-none md:hidden"
           />
@@ -198,7 +199,7 @@ export default function Navbar({
           id="masthead-nav"
           aria-label="Primary"
           hidden={!open}
-          className={`nav-sheet absolute inset-x-0 top-full overflow-hidden rounded-b-[1.5rem] shadow-[0_18px_40px_rgb(10_9_7/0.14)] [corner-shape:squircle] md:hidden ${
+          className={`nav-sheet absolute inset-x-0 top-full max-h-[calc(100dvh-var(--masthead))] overflow-y-auto overscroll-contain rounded-b-[1.5rem] shadow-[0_18px_40px_rgb(10_9_7/0.14)] [corner-shape:squircle] md:hidden ${
             open ? "nav-open" : ""
           } ${t.sheet}`}
         >
@@ -209,7 +210,7 @@ export default function Navbar({
                   href={item.href}
                   aria-current={isCurrent(item.href) ? "page" : undefined}
                   onClick={() => setOpen(false)}
-                  className={`flex min-h-14 items-center font-[family-name:var(--f-display)] text-title font-semibold uppercase tracking-[0.02em] [font-stretch:125%] ${t.sheetLink}`}
+                  className={`flex min-h-14 items-center [@media(max-height:30rem)]:min-h-11 font-[family-name:var(--f-display)] text-title font-semibold uppercase tracking-[0.02em] [font-stretch:125%] ${t.sheetLink}`}
                 >
                   <span>
                     {item.label}
