@@ -1,5 +1,6 @@
 "use client";
 
+import { glide, type Glide } from "@/lib/glide";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useWide } from "@/lib/media";
@@ -181,51 +182,19 @@ export default function ArchiveReel({
     let settle = 0;
     let held = false;
     let from = start;
-    let settling = false;
     const landing = (t: number) => {
       const d = t - from;
       if (Math.abs(d) < DEADZONE) return from;
       return d > 0 ? Math.max(from + 1, Math.round(t)) : Math.min(from - 1, Math.round(t));
     };
-    let pull = 0;
-    const glide = (to: number) => {
-      cancelAnimationFrame(pull);
-      settling = false;
+    let pull: Glide | null = null;
+    const pullTo = (to: number) => {
+      pull?.stop();
       if (still.matches) {
         window.scrollTo({ top: to, behavior: "instant" });
         return;
       }
-      let y0 = NaN;
-      let then = 0;
-      let last = NaN;
-      let velocity = 0;
-      const frame = (now: number) => {
-        if (Number.isNaN(y0)) {
-          y0 = window.scrollY;
-          if (Math.abs(to - y0) < 1) return;
-          then = now;
-        } else if (Math.abs(window.scrollY - last) > 2) {
-          settling = false;
-          return;
-        }
-        const dt = Math.min(0.032, Math.max(0.008, (now - then) / 1000));
-        then = now;
-        const y = window.scrollY;
-        const acceleration = (to - y) * 250 - velocity * 32;
-        velocity += acceleration * dt;
-        const next = y + velocity * dt;
-        settling = true;
-        if (Math.abs(to - next) < 0.35 && Math.abs(velocity) < 5) {
-          last = to;
-          window.scrollTo({ top: to, behavior: "instant" });
-          settling = false;
-          return;
-        }
-        last = next;
-        window.scrollTo({ top: next, behavior: "instant" });
-        pull = requestAnimationFrame(frame);
-      };
-      pull = requestAnimationFrame(frame);
+      pull = glide(to);
     };
 
     const rest = () => {
@@ -237,18 +206,17 @@ export default function ArchiveReel({
       }
       const i = clamp(landing(target()), 0, count - 1);
       from = i;
-      glide(top() + i * STEP);
+      pullTo(top() + i * STEP);
     };
     const soon = () => {
-      if (settling) return;
+      if (pull?.settling) return;
       window.clearTimeout(settle);
       settle = window.setTimeout(rest, 70);
     };
     const grab = () => {
       held = true;
       window.clearTimeout(settle);
-      cancelAnimationFrame(pull);
-      settling = false;
+      pull?.stop();
       settle = 0;
     };
     const free = () => {
@@ -326,7 +294,7 @@ export default function ArchiveReel({
       if (raf) cancelAnimationFrame(raf);
       ro.disconnect();
       window.clearTimeout(settle);
-      cancelAnimationFrame(pull);
+      pull?.stop();
       window.removeEventListener("scroll", onScroll);
       if (hasScrollEnd) window.removeEventListener("scrollend", soon);
       window.removeEventListener("pointerdown", grab);
@@ -442,6 +410,7 @@ export default function ArchiveReel({
                   tile={x.tile}
                   sizes="(min-width: 1024px) 26vw, 60vw"
                   eager={i === start}
+                  fetchPriority={i === start ? "high" : "low"}
                   className="w-full overflow-hidden u-corner"
                 />
               </div>

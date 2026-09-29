@@ -677,6 +677,10 @@ html[data-turn] body > :not(header) {
     translate: 0 -6px;
   }
 }
+html[data-foot] {
+  background-color: var(--color-band);
+}
+
 .nav-sheet {
   animation: sheet-in var(--duration-chrome) cubic-bezier(0.22, 1, 0.36, 1) both;
 }
