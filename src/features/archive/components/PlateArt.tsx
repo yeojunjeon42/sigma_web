@@ -14,6 +14,7 @@ export default function PlateArt({
   sizes,
   hover = false,
   eager = false,
+  fetchPriority,
   className = "",
   style,
 }: {
@@ -21,6 +22,7 @@ export default function PlateArt({
   sizes: string;
   hover?: boolean;
   eager?: boolean;
+  fetchPriority?: "high" | "low";
   className?: string;
   style?: CSSProperties;
 }) {
@@ -112,7 +114,7 @@ export default function PlateArt({
     >
       {tile.kind === "lift" && tile.src ? (
         <div className="absolute" style={box}>
-          <Image src={tile.src} alt="" fill sizes={sizes} loading={loading} className="object-contain" />
+          <Image src={tile.src} alt="" fill sizes={sizes} loading={loading} fetchPriority={fetchPriority} className="object-contain" />
         </div>
       ) : null}
 
@@ -123,6 +125,7 @@ export default function PlateArt({
           fill
           sizes={sizes}
           loading={loading}
+          fetchPriority={fetchPriority}
           style={tile.focus ? { objectPosition: tile.focus } : undefined}
           className="object-cover"
         />
