@@ -103,7 +103,7 @@ export default function Arcade({ word, label, extra }: { word: string; label: st
       W = Math.round(r.width);
       H = Math.round(r.height);
       if (!W || !H) return;
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, 3);
       canvas.width = W * dpr;
       canvas.height = H * dpr;
       cell = W < 640 ? 18 : W < 1100 ? 22 : 26;
