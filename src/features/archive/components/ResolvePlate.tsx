@@ -45,7 +45,7 @@ export default function ResolvePlate({ tile, sizes }: { tile: Tile; sizes: strin
       const w = canvas.clientWidth;
       const h = canvas.clientHeight;
       if (!w || !h || !img.complete || !img.naturalWidth) return false;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, 3);
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       cols = Math.ceil(w / SCREEN);
