@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useSyncExternalStore } from "react";
-import { DOT, GROUND, GROUND_INK, SCREEN, groundPatch } from "@/lib/halftone";
+import { DOT, GROUND, GROUND_INK, SCREEN } from "@/lib/halftone";
+import { printer, vignette } from "@/lib/printer";
 
 export type HeroBuild = {
   id: string;
@@ -26,7 +27,11 @@ const CYCLE = 7000;
 const IDLE = 2200;
 const HOLD = 300;
 const DRIFT = [14, 9];
-const EDGE = [0.11, 0.84];
+const EDGE = [0.11, 0.84] as const;
+const PAD = 3;
+const FEATHER = 12;
+const KNOCK = 0.8;
+const EBB = 0.35;
 const PAPER_INK = "--color-rule-strong";
 const KEY = "sigma_plate";
 
@@ -87,29 +92,27 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     const canvas = ref.current;
     const host = canvas?.closest<HTMLElement>("section");
     const plate = host?.querySelector<HTMLElement>("[data-plate]");
-    const ctx = canvas?.getContext("2d");
-    const mc = document.createElement("canvas");
-    const pc = document.createElement("canvas");
-    const mctx = mc.getContext("2d");
-    const pctx = pc.getContext("2d");
-    if (!canvas || !host || !plate || !ctx || !mctx || !pctx || !builds.length) return;
+    if (!canvas || !host || !plate || !builds.length) return;
+    const pr = printer(canvas, () => kick());
+    if (!pr) return;
 
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const frozen = !!canvas.closest("[inert]");
     const fine = window.matchMedia("(hover: hover)").matches;
-    const cell = window.matchMedia("(min-width: 768px)").matches ? SCREEN : PHONE_SCREEN;
+    const paper = window.matchMedia("(min-width: 768px)").matches;
+    const cell = paper ? SCREEN : PHONE_SCREEN;
     const top = cell * DOT;
     const rTop = top * SWELL;
     const rGround = (1 - GROUND) * top;
 
     let W = 0;
     let H = 0;
-    let dpr = 1;
     let cols = 0;
     let rows = 0;
     let box: Box = { x: 0, y: 0, w: 0, h: 0 };
     let rev = new Float32Array(0);
-    let mask: ImageData | null = null;
+    let quiet = new Float32Array(0);
+    let shown = new Float32Array(0);
     let revMax = 0;
 
     const SLOTS = SIZES * (BANDS + 1);
@@ -119,7 +122,6 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     const held = new Int32Array(SLOTS);
     let mixes: string[] = [];
     let ink = "#0f0d09";
-    let ground: CanvasPattern | null = null;
     let groundKey = "";
 
     const all = [...builds];
@@ -238,27 +240,75 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
 
     const resize = () => {
       const hr = host.getBoundingClientRect();
-      const pr = plate.getBoundingClientRect();
+      const pb = plate.getBoundingClientRect();
       W = hr.width;
       H = hr.height;
       if (!W || !H) return;
-      box = { x: pr.left - hr.left, y: pr.top - hr.top, w: pr.width, h: pr.height };
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.round(W * dpr);
-      canvas.height = Math.round(H * dpr);
+      box = { x: pb.left - hr.left, y: pb.top - hr.top, w: pb.width, h: pb.height };
+      pr.size(W, H, Math.min(window.devicePixelRatio || 1, 3));
       cols = Math.ceil(W / cell);
       rows = Math.ceil(H / cell);
       rev = new Float32Array(cols * rows);
       revMax = 0;
-      mc.width = cols;
-      mc.height = rows;
-      mask = mctx.createImageData(cols, rows);
+      hush();
       if (t >= 1) origin = { x: box.x + box.w / 2, y: box.y + box.h / 2 };
       if (!ptr.in && lens.amp < 0.02) {
         lens.x = lens.px = origin.x;
         lens.y = lens.py = origin.y;
       }
       kick();
+    };
+
+    const hush = () => {
+      quiet = new Float32Array(cols * rows);
+      if (!W || !H) return;
+      const hr = host.getBoundingClientRect();
+      const c = document.createElement("canvas");
+      c.width = Math.ceil(W);
+      c.height = Math.ceil(H);
+      const g = c.getContext("2d", { willReadFrequently: true });
+      if (!g) return;
+      const range = document.createRange();
+      for (const el of host.querySelectorAll<HTMLElement>(".u-lift")) {
+        const cs = getComputedStyle(el);
+        g.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+        g.fontStretch = cs.fontStretch === "125%" ? "expanded" : "normal";
+        g.letterSpacing = cs.letterSpacing === "normal" ? "0px" : cs.letterSpacing;
+        const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+          for (const m of (n.textContent ?? "").matchAll(/\S+/g)) {
+            range.setStart(n, m.index);
+            range.setEnd(n, m.index + m[0].length);
+            const q = range.getClientRects()[0];
+            if (!q) continue;
+            const word = cs.textTransform === "uppercase" ? m[0].toUpperCase() : m[0];
+            g.fillText(word, q.left - hr.left, q.top - hr.top + g.measureText(word).fontBoundingBoxAscent);
+          }
+        }
+      }
+      const px = g.getImageData(0, 0, c.width, c.height).data;
+      const inked = new Uint8Array(cols * rows);
+      for (let y = 0; y < c.height; y++) {
+        const row = Math.floor(y / cell) * cols;
+        for (let x = 0; x < c.width; x++) if (px[(y * c.width + x) * 4 + 3] > 96) inked[row + Math.floor(x / cell)] = 1;
+      }
+      const reach = Math.ceil((PAD + FEATHER) / cell);
+      for (let j = 0; j < rows; j++) {
+        for (let i = 0; i < cols; i++) {
+          if (!inked[j * cols + i]) continue;
+          for (let dj = -reach; dj <= reach; dj++) {
+            const jj = j + dj;
+            if (jj < 0 || jj >= rows) continue;
+            for (let di = -reach; di <= reach; di++) {
+              const ii = i + di;
+              if (ii < 0 || ii >= cols) continue;
+              const v = 1 - smooth(clamp((Math.hypot(di, dj) * cell - PAD) / FEATHER, 0, 1));
+              const k = jj * cols + ii;
+              if (v > quiet[k]) quiet[k] = v;
+            }
+          }
+        }
+      }
     };
 
     const stamp = (x: number, y: number, r: number, gain: number) => {
@@ -303,20 +353,16 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
 
     const draw = () => {
       if (!W || !H) return;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, W, H);
+      pr.clear();
 
       const base = css(GROUND_INK, "#76767a");
       const pale = css(PAPER_INK, "#b0b0b0");
       const accent = css("--color-accent", "#ed2024");
       const deep = css("--color-accent-deep", "#8e1316");
-      if (groundKey !== base + pale + accent + deep + dpr) {
-        groundKey = base + pale + accent + deep + dpr;
+      if (groundKey !== base + pale + accent + deep) {
+        groundKey = base + pale + accent + deep;
         mixes = [...ramp([base, accent, deep], BANDS), pale];
         ink = css("--color-ink", "#0f0d09");
-        const patch = groundPatch(cell, GROUND, dpr, PAPER_INK);
-        ground = patch && ctx.createPattern(patch, "repeat");
-        if (ground && patch) ground.setTransform(new DOMMatrix().scaleSelf(cell / patch.width));
       }
 
       const ox = -par.x * DRIFT[0];
@@ -330,28 +376,8 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
 
       const R = clamp(W * 0.085, 70, 150) * (1 + lens.boost);
       const lensOn = lens.amp > 0.01 && !still;
-      const li0 = lensOn ? Math.max(0, Math.floor((lens.x - R) / cell)) : 0;
-      const li1 = lensOn ? Math.min(cols - 1, Math.ceil((lens.x + R) / cell)) : -1;
-      const lj0 = lensOn ? Math.max(0, Math.floor((lens.y - R) / cell)) : 0;
-      const lj1 = lensOn ? Math.min(rows - 1, Math.ceil((lens.y + R) / cell)) : -1;
 
-      if (ground) {
-        ctx.save();
-        if (lensOn) {
-          const hole = new Path2D();
-          hole.rect(0, 0, W, H);
-          for (let j = lj0; j <= lj1; j++) {
-            for (let i = li0; i <= li1; i++) {
-              if (Math.hypot((i + 0.5) * cell - lens.x, (j + 0.5) * cell - lens.y) < R)
-                hole.rect(i * cell, j * cell, cell, cell);
-            }
-          }
-          ctx.clip(hole, "evenodd");
-        }
-        ctx.fillStyle = ground;
-        ctx.fillRect(0, 0, W, H);
-        ctx.restore();
-      }
+      if (paper) pr.ground(cell / 2, cell / 2, cell, rGround, pale, lensOn ? { x: lens.x, y: lens.y, r: R } : null, EDGE);
 
       let x0 = Infinity;
       let y0 = Infinity;
@@ -400,14 +426,18 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
             const built = r > rGround + 0.06;
             const d = lensOn ? Math.hypot(px - lens.x, py - lens.y) : Infinity;
             const loupe = d < R;
-            if (!built && !loupe) continue;
+            if (!built && (!loupe || !paper)) continue;
 
             let x = px;
             let y = py;
             if (built) {
+              const q = quiet[j * cols + i];
+              if (q > 0) r = rGround + (r - rGround) * (1 - KNOCK * q);
+              if (!paper) r *= smooth(clamp((r - rGround) / (EBB * top), 0, 1));
               r *= 1 - rev[j * cols + i];
               if (lt > 0 && lt < 1) r *= 1 + FRONT * Math.sin(Math.PI * lt);
             } else r = rGround;
+            r *= vignette(py / H, EDGE);
             if (loupe) {
               const q = (1 - (d / R) * (d / R)) * lens.amp * LENS;
               x = lens.x + (px - lens.x) * (1 + q);
@@ -429,71 +459,32 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
         }
       }
 
-      const flush = (from: number, to: number) => {
-        for (let slot = from; slot < to; slot++) {
-          const n = held[slot];
-          if (!n) continue;
-          const r = (rTop * ((slot % SIZES) + 1)) / SIZES;
-          ctx.fillStyle = mixes[Math.floor(slot / SIZES)];
-          ctx.beginPath();
-          for (let k = 0; k < n; k++) {
-            const x = bx[slot * cap + k];
-            const y = by[slot * cap + k];
-            ctx.moveTo(x + r, y);
-            ctx.arc(x, y, r, 0, Math.PI * 2);
-          }
-          ctx.fill();
-        }
+      const slots = {
+        x: bx,
+        y: by,
+        held,
+        cap,
+        radius: (slot: number) => (rTop * ((slot % SIZES) + 1)) / SIZES,
+        ink: (slot: number) => Math.floor(slot / SIZES),
       };
-
-      flush(SIZES * BANDS, SLOTS);
+      pr.dots(slots, SIZES * BANDS, SLOTS, mixes);
 
       const face = t > 0.5 ? ib : ia;
       const fr = t > 0.5 ? rb : ra;
-      if (revMax > 0.01 && face && fr && mask) {
-        for (let k = 0; k < rev.length; k++) mask.data[k * 4 + 3] = rev[k] * 255;
-        mctx.putImageData(mask, 0, 0);
-        const pw = Math.max(1, Math.ceil(fr.w * dpr));
-        const ph = Math.max(1, Math.ceil(fr.h * dpr));
-        if (pc.width !== pw || pc.height !== ph) {
-          pc.width = pw;
-          pc.height = ph;
+      if (revMax > 0.01 && face && fr) {
+        if (shown.length !== rev.length) shown = new Float32Array(rev.length);
+        for (let j = 0; j < rows; j++) {
+          const e = vignette(((j + 0.5) * cell) / H, EDGE);
+          for (let i = 0, k = j * cols; i < cols; i++, k++) shown[k] = rev[k] * e;
         }
-        pctx.globalCompositeOperation = "source-over";
-        pctx.clearRect(0, 0, pw, ph);
-        pctx.drawImage(mc, -fr.x * dpr, -fr.y * dpr, cols * cell * dpr, rows * cell * dpr);
-        pctx.globalCompositeOperation = "source-in";
-        pctx.drawImage(face, 0, 0, pw, ph);
-        ctx.drawImage(pc, fr.x, fr.y, fr.w, fr.h);
+        pr.photo(face, fr, shown, cols, rows, cell);
       }
 
-      flush(0, SIZES * BANDS);
-
-      const edge = ctx.createLinearGradient(0, 0, 0, H);
-      edge.addColorStop(0, "rgb(0 0 0 / 1)");
-      edge.addColorStop(EDGE[0], "rgb(0 0 0 / 0)");
-      edge.addColorStop(EDGE[1], "rgb(0 0 0 / 0)");
-      edge.addColorStop(1, "rgb(0 0 0 / 1)");
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.fillStyle = edge;
-      ctx.fillRect(0, 0, W, H);
-      ctx.globalCompositeOperation = "source-over";
+      pr.dots(slots, 0, SIZES * BANDS, mixes);
 
       if (lensOn) {
-        ctx.globalAlpha = 0.5 * lens.amp;
-        ctx.strokeStyle = ink;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(lens.x, lens.y, R, 0, Math.PI * 2);
-        ctx.stroke();
-        if (ptr.in) {
-          ctx.globalAlpha = lens.amp;
-          ctx.fillStyle = ink;
-          ctx.beginPath();
-          ctx.arc(ptr.x, ptr.y, 2.5, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        ctx.globalAlpha = 1;
+        pr.circle(lens.x, lens.y, R, ink, 0.5 * lens.amp, 1);
+        if (ptr.in) pr.circle(ptr.x, ptr.y, 2.5, ink, lens.amp);
       }
 
       if (grew) {
@@ -544,8 +535,6 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
         const ty = ptr.in ? (ptr.y / H) * 2 - 1 : 0;
         par.x += (tx - par.x) * (1 - Math.exp(-dt * 4));
         par.y += (ty - par.y) * (1 - Math.exp(-dt * 4));
-        host.style.setProperty("--hx", par.x.toFixed(3));
-        host.style.setProperty("--hy", par.y.toFixed(3));
 
         if (revMax > 0) {
           const fade = Math.exp(-dt / (t < 1 ? FADE / 4 : FADE));
@@ -647,6 +636,12 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     ro.observe(host);
     io.observe(host);
     resize();
+    let live = true;
+    document.fonts?.ready.then(() => {
+      if (!live) return;
+      hush();
+      kick();
+    });
 
     let timer = 0;
     if (!frozen) {
@@ -669,6 +664,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     }
 
     return () => {
+      live = false;
       if (raf) cancelAnimationFrame(raf);
       window.clearInterval(timer);
       ro.disconnect();
@@ -683,6 +679,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       window.removeEventListener(PLATE_RELEASE, released);
       host.style.cursor = "";
       advance = null;
+      pr.dispose();
     };
   }, [builds]);
 

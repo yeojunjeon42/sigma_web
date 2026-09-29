@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { preload } from "react-dom";
 import HeroPlate, { HeroCaption, type HeroBuild } from "./HeroPlate";
 import type { Sponsor } from "@/features/sponsors/api/getSponsors";
 
@@ -11,24 +12,12 @@ const BIG =
   "u-trim u-lift font-[family-name:var(--f-display)] text-[length:var(--S)] leading-[0.9] font-bold tracking-[-0.02em] text-ink uppercase [font-stretch:125%] md:text-[length:var(--Swide)]";
 
 const STMT =
-  "u-lift max-w-[19ch] text-[1rem] leading-[1.1] tracking-[-0.02em] text-ink [word-break:keep-all] [translate:calc(var(--hx,0)*var(--d)*-1px)_calc(var(--hy,0)*var(--d)*-0.6px)] md:text-[length:clamp(0.8125rem,1.7vw,2rem)]";
+  "u-lift max-w-[19ch] text-title max-[359px]:text-[1.125rem] text-ink [word-break:keep-all] md:text-[length:clamp(0.8125rem,1.7vw,2rem)] md:leading-[1.1] md:tracking-[-0.02em]";
 
 const META = "font-mono text-[12px] tracking-normal uppercase";
 
-function Stmt({
-  depth,
-  className,
-  children,
-}: {
-  depth: number;
-  className: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <p style={{ "--d": depth } as React.CSSProperties} className={`${STMT} ${className}`}>
-      {children}
-    </p>
-  );
+function Stmt({ className, children }: { className: string; children: React.ReactNode }) {
+  return <p className={`${STMT} ${className}`}>{children}</p>;
 }
 
 export default function HeroField({
@@ -38,6 +27,8 @@ export default function HeroField({
   sponsors: Sponsor[];
   builds: HeroBuild[];
 }) {
+  if (builds[0]) preload(builds[0].src, { as: "image", fetchPriority: "high" });
+
   return (
     <section style={FRAME} className="relative isolate touch-pan-y overflow-hidden bg-canvas">
       <h1 className="sr-only">
@@ -75,31 +66,26 @@ export default function HeroField({
 
         <div className="mt-md grid min-h-[13rem] flex-1 [contain:size] grid-cols-2 grid-rows-5 gap-x-md md:mt-0 md:contents">
           <Stmt
-            depth={22}
             className="col-start-1 row-start-1 self-start md:col-span-3 md:col-start-7 md:row-start-1"
           >
             Seoul National University
           </Stmt>
           <Stmt
-            depth={34}
             className="col-start-2 row-start-2 self-center justify-self-end text-right md:col-span-3 md:col-start-10 md:row-start-2 md:self-end"
           >
             Room 215-2, Mabang
           </Stmt>
           <Stmt
-            depth={16}
             className="col-start-1 row-start-3 self-center md:col-span-3 md:col-start-1 md:row-start-3 md:self-end"
           >
             Undergraduate research community
           </Stmt>
           <Stmt
-            depth={28}
             className="col-start-2 row-start-4 self-center justify-self-end text-right md:col-span-3 md:col-start-4 md:row-start-5 md:self-start md:justify-self-start md:text-left"
           >
             Media and kinetic art
           </Stmt>
           <Stmt
-            depth={20}
             className="col-start-1 row-start-5 self-end md:col-span-3 md:col-start-10 md:row-start-4 md:self-center md:justify-self-end md:text-right"
           >
             Korea’s first university robotics club
