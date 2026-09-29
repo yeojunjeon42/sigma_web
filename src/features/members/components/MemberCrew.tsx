@@ -33,6 +33,7 @@ type Sheet = {
   w: number;
   h: number;
   crop: [number, number, number];
+  dots: HTMLCanvasElement | null;
 };
 
 export function Print({
@@ -100,10 +101,10 @@ export function Print({
       const lo = sorted[Math.floor(0.04 * sorted.length)];
       const hi = Math.max(lo + 0.08, sorted[Math.min(sorted.length - 1, Math.floor(0.96 * sorted.length))]);
       for (let i = 0; i < tone.length; i++) tone[i] = 0.12 + 0.88 * Math.min(1, Math.max(0, (tone[i] - lo) / (hi - lo)));
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, 3);
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
-      return { bmp, tone, cols, rows, cell, w, h, crop };
+      return { bmp, tone, cols, rows, cell, w, h, crop, dots: null };
     };
 
     const paint = () => {
@@ -111,31 +112,32 @@ export function Print({
       if (!sheet) return false;
       const g = canvas.getContext("2d");
       if (!g) return false;
-      const { bmp, tone, cols, rows, cell, w, h, crop } = sheet;
-      const paper = getComputedStyle(document.documentElement).getPropertyValue("--color-canvas").trim() || "#dfe1dc";
-      const ink = getComputedStyle(document.documentElement).getPropertyValue("--color-ink").trim() || "#0f110d";
+      const { bmp, w, h, crop } = sheet;
       const dpr = canvas.width / w;
       g.setTransform(dpr, 0, 0, dpr, 0, 0);
       const t = s.t;
+      if (t >= 1 || t <= 0) sheet.dots = null;
       if (t >= 1) {
         g.imageSmoothingEnabled = true;
         g.drawImage(bmp, crop[0], crop[1], w * crop[2], h * crop[2], 0, 0, w, h);
         return true;
       }
-      g.fillStyle = paper;
-      g.fillRect(0, 0, w, h);
-      g.fillStyle = ink;
-      g.beginPath();
-      for (let y = 0; y < rows; y++)
-        for (let x = 0; x < cols; x++) {
-          const r = (1 - tone[y * cols + x]) * cell * DOT;
-          if (r < 0.3) continue;
-          const cx = x * cell + cell / 2;
-          const cy = y * cell + cell / 2;
-          g.moveTo(cx + r, cy);
-          g.arc(cx, cy, r, 0, Math.PI * 2);
+      if (t <= 0) press(g, sheet);
+      else {
+        if (!sheet.dots) {
+          const c = document.createElement("canvas");
+          c.width = canvas.width;
+          c.height = canvas.height;
+          const cg = c.getContext("2d");
+          if (cg) {
+            cg.setTransform(dpr, 0, 0, dpr, 0, 0);
+            press(cg, sheet);
+            sheet.dots = c;
+          }
         }
-      g.fill();
+        if (sheet.dots) g.drawImage(sheet.dots, 0, 0, w, h);
+        else press(g, sheet);
+      }
       if (t > 0) {
         g.globalAlpha = t * t * (3 - 2 * t);
         g.drawImage(bmp, crop[0], crop[1], w * crop[2], h * crop[2], 0, 0, w, h);
@@ -208,6 +210,24 @@ export function Print({
   );
 }
 
+function press(g: CanvasRenderingContext2D, { tone, cols, rows, cell, w, h }: Sheet) {
+  const css = getComputedStyle(document.documentElement);
+  g.fillStyle = css.getPropertyValue("--color-canvas").trim() || "#dfe1dc";
+  g.fillRect(0, 0, w, h);
+  g.fillStyle = css.getPropertyValue("--color-ink").trim() || "#0f110d";
+  g.beginPath();
+  for (let y = 0; y < rows; y++)
+    for (let x = 0; x < cols; x++) {
+      const r = (1 - tone[y * cols + x]) * cell * DOT;
+      if (r < 0.3) continue;
+      const cx = x * cell + cell / 2;
+      const cy = y * cell + cell / 2;
+      g.moveTo(cx + r, cy);
+      g.arc(cx, cy, r, 0, Math.PI * 2);
+    }
+  g.fill();
+}
+
 export function useInView<T extends Element>(share = 0.6) {
   const ref = useRef<T>(null);
   const [seen, setSeen] = useState(false);
@@ -241,7 +261,7 @@ function Drawer({ id, open, m }: { id: string; open: boolean; m: CrewMember }) {
       }`}
     >
       <div className={`min-h-0 overflow-hidden ${SUB}`}>
-        <p className="pt-sm pb-md text-body text-ink lg:col-span-2 lg:col-start-2 lg:pb-lg">
+        <p className="pt-sm text-body text-ink lg:col-span-2 lg:col-start-2 lg:pb-lg">
           Hello, I am {m.nameEn ?? m.name}, nice to meet you!
         </p>
       </div>
@@ -318,7 +338,7 @@ export default function MemberCrew({ members }: { members: CrewMember[] }) {
               <MemberLinks name={m.name} links={m.links} />
               <Toggle m={m} open={open === m.id} controls={`crew-m-${m.id}`} onToggle={() => toggle(m.id)} />
             </div>
-            <div className="col-span-2 md:col-span-3">
+            <div className="col-[2/-1]">
               <Drawer id={`crew-m-${m.id}`} open={open === m.id} m={m} />
             </div>
           </li>
