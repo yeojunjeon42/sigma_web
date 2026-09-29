@@ -28,6 +28,8 @@ const CHIP_AT: CSSProperties = {
 
 const pct = (n: number) => `${n * 100}%`;
 
+const FIRST_SCREEN = SHEET * 0.7;
+
 const EDGE: CSSProperties = {
   maskImage:
     "linear-gradient(to bottom, transparent 0, #000 7rem, #000 calc(100% - 7rem), transparent 100%)",
@@ -139,6 +141,7 @@ export default function ArchiveDepth({
                     <PlateArt
                       tile={tile}
                       sizes={`${Math.ceil((w / SHEET) * 100)}vw`}
+                      eager={y < FIRST_SCREEN}
                       className={`w-full opacity-0 transition-opacity duration-300 ease-out group-hover/plate:opacity-100 group-focus-visible/plate:opacity-100 motion-reduce:transition-none`}
                     />
                     <p className="u-knock mt-xs line-clamp-2 text-body-sm leading-[1.35] text-ink">
@@ -149,6 +152,7 @@ export default function ArchiveDepth({
                   </Link>
                   <span
                     aria-hidden="true"
+                    data-chip
                     style={CHIP_AT}
                     className={`pointer-events-none fixed top-0 left-0 z-30 hidden max-w-[18rem] bg-canvas-inverse px-sm pt-[0.55rem] pb-sm text-ink-inverse peer-hover:block peer-focus-visible:block ${META}`}
                   >

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, type CSSProperties } from "react";
-import { DOT, GROUND, GROUND_INK, SCREEN, groundPatch } from "@/lib/halftone";
+import { DOT, GROUND, GROUND_INK, SCREEN } from "@/lib/halftone";
+import { printer } from "@/lib/printer";
 import { FIELD_POINTER, WARM } from "./fieldPointer";
 
 const STEPS = 32;
@@ -21,8 +22,8 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
     const canvas = ref.current;
     const host = canvas?.closest<HTMLElement>("[data-depth]");
     if (!canvas || !host) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const pr = printer(canvas, () => kick());
+    if (!pr) return;
 
     let plates: Plate[] = [];
     const measured = new WeakMap<HTMLElement, Tones>();
@@ -34,12 +35,10 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
     const held = new Int32Array(SLOTS);
     let mixes: string[] = [];
     let mixKey = "";
-    let ground: CanvasPattern | null = null;
-    let groundKey = "";
     let raf = 0;
     let seen = false;
     let retry = 0;
-    let last = 0;
+    let moved = -1;
 
     const collect = () => {
       const links = host.querySelectorAll<HTMLElement>("[data-plate-link]");
@@ -105,9 +104,11 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
 
     const draw = () => {
       raf = 0;
-      const t = performance.now();
-      if (t - last < 8) return;
-      last = t;
+      if (frame() === moved) return;
+      paint();
+    };
+
+    const paint = () => {
       const w = canvas.clientWidth;
       const h = canvas.clientHeight;
       if (!w || !h) return;
@@ -118,21 +119,11 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
       const fx = sheet.left;
       const fy = sheet.top + y;
 
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
-        canvas.width = Math.round(w * dpr);
-        canvas.height = Math.round(h * dpr);
-      }
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, w, h);
+      pr.size(w, h, Math.min(window.devicePixelRatio || 1, 3));
+      pr.clear();
 
       const paper = cssVar("--color-canvas", "#e2e2e2");
       const base = cssVar(GROUND_INK, "#76767a");
-      if (groundKey !== base + dpr) {
-        const patch = groundPatch(SCREEN, GROUND, dpr, GROUND_INK);
-        ground = patch && ctx.createPattern(patch, "repeat");
-        groundKey = base + dpr;
-      }
       const accent = cssVar("--color-accent", "#ed2024");
       const deep = cssVar("--color-accent-deep", "#8e1316");
       if (mixKey !== base + accent + deep) {
@@ -146,15 +137,7 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
       const gx = sheet.left - fx + SCREEN / 2;
       const gy = sheet.top - fy + SCREEN / 2;
 
-      if (ground) {
-        ground.setTransform(
-          new DOMMatrix()
-            .translateSelf(gx - SCREEN / 2, gy - SCREEN / 2)
-            .scaleSelf(1 / dpr, 1 / dpr),
-        );
-        ctx.fillStyle = ground;
-        ctx.fillRect(0, 0, w, h);
-      }
+      pr.ground(gx, gy, SCREEN, (1 - GROUND) * SCREEN * DOT, base);
 
       let pending = false;
       let grew = false;
@@ -259,21 +242,19 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
         }
       }
 
-      for (let slot = 0; slot < SLOTS; slot++) {
-        const n = held[slot];
-        if (!n) continue;
-        const r = (max * ((slot % STEPS) + 1)) / STEPS;
-        const base = slot * cap;
-        ctx.fillStyle = mixes[Math.floor(slot / STEPS)];
-        ctx.beginPath();
-        for (let k = 0; k < n; k++) {
-          const x = bx[base + k];
-          const y = by[base + k];
-          ctx.moveTo(x + r, y);
-          ctx.arc(x, y, r, 0, Math.PI * 2);
-        }
-        ctx.fill();
-      }
+      pr.dots(
+        {
+          x: bx,
+          y: by,
+          held,
+          cap,
+          radius: (slot) => (max * ((slot % STEPS) + 1)) / STEPS,
+          ink: (slot) => Math.floor(slot / STEPS),
+        },
+        0,
+        SLOTS,
+        mixes,
+      );
 
       if (grew) {
         cap *= 2;
@@ -291,10 +272,13 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
     const kick = () => {
       if (!raf) raf = requestAnimationFrame(draw);
     };
-    const now = () => draw();
+    const now = () => {
+      moved = frame();
+      paint();
+    };
 
     const onScroll = () => {
-      if (seen) kick();
+      if (seen && !FIELD_POINTER.staged) kick();
     };
     const onLoad = (e: Event) => {
       if ((e.target as HTMLElement).tagName === "IMG") kick();
@@ -330,6 +314,7 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
       window.removeEventListener("scroll", onScroll);
       host.removeEventListener("load", onLoad, true);
       host.removeEventListener("field:moved", now);
+      pr.dispose();
     };
   }, []);
 
@@ -341,6 +326,7 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
 }
 
 const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
+const frame = () => Number(document.timeline.currentTime ?? -1);
 
 function mask(depth: number) {
   const t = clamp(depth / FEATHER, 0, 1);
