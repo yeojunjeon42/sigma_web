@@ -57,12 +57,13 @@ export default function YearRuler({
     );
     const Scroll = (window as unknown as { ScrollTimeline?: Timeline })
       .ScrollTimeline;
-    const masthead = () =>
-      parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue(
-          "--masthead",
-        ),
-      ) * 16 || 64;
+    const masthead = () => {
+      const root = getComputedStyle(document.documentElement);
+      return (
+        parseFloat(root.getPropertyValue("--masthead")) *
+          parseFloat(root.fontSize) || 64
+      );
+    };
     const bottom = () =>
       Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
 
@@ -372,7 +373,14 @@ export default function YearRuler({
 
     const settleNative = () => {
       nativeRest = 0;
-      if (readerHeld || touch || mouse || glideTo !== null || line === "dial")
+      if (
+        readerHeld ||
+        touch ||
+        mouse ||
+        glideTo !== null ||
+        line === "dial" ||
+        !bar.clientWidth
+      )
         return;
       const f = (window.scrollY - from) / span;
       if (f < 0 || f > 1) return;
@@ -414,8 +422,10 @@ export default function YearRuler({
     const touchUp = (e: TouchEvent) => {
       if (!touch) return;
       const id = touch.id;
-      if (!Array.from(e.changedTouches).some((c) => c.identifier === id)) return;
+      const t = Array.from(e.changedTouches).find((c) => c.identifier === id);
+      if (!t) return;
       const axis = touch.axis;
+      dragged = Math.abs(t.clientX - touch.x) >= SLOP;
       touch = null;
       delete bar.dataset.pressed;
       delete bar.dataset.dragging;
@@ -546,11 +556,16 @@ export default function YearRuler({
       judge(busy());
     };
     const ro = new ResizeObserver(refit);
-    const host = document
-      .getElementById(marks[0].targetId ?? `e-${marks[0].id}`)
-      ?.closest("main");
+    const lead = document.getElementById(
+      marks[0].targetId ?? `e-${marks[0].id}`,
+    );
+    const host = lead?.closest("main");
+    const arrived = (e: AnimationEvent) => {
+      if ((e.target as Element).contains(lead)) refit();
+    };
     if (host) ro.observe(host);
     ro.observe(bar);
+    host?.addEventListener("animationend", arrived);
 
     refit();
     window.addEventListener("resize", refit);
@@ -581,6 +596,7 @@ export default function YearRuler({
       window.clearTimeout(rest);
       window.clearTimeout(nativeRest);
       ro.disconnect();
+      host?.removeEventListener("animationend", arrived);
       window.removeEventListener("resize", refit);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("wheel", wheel);
@@ -679,7 +695,7 @@ export default function YearRuler({
         ref={scrollerRef}
         tabIndex={-1}
         aria-hidden="true"
-        className="year-ruler__scroller"
+        className="year-ruler__scroller u-scroll-x"
       >
         <div className="year-ruler__rail">
           {marks.map((_, i) => (
