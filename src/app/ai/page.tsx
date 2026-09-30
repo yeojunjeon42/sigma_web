@@ -20,8 +20,8 @@ export default async function MachineHome() {
 
   return (
     <>
-      <Ld data={page("/ai", "Sigma Intelligence — machine-readable index", DESCRIPTION)} />
-      <Head title="Sigma Intelligence — machine-readable index" lede={ORG.summary} md="/ai/index.md" human="/" />
+      <Ld data={page("/ai", "SIGMA INTELLIGENCE — machine-readable index", DESCRIPTION)} />
+      <Head title="SIGMA INTELLIGENCE — machine-readable index" lede={ORG.summary} md="/ai/index.md" human="/" />
 
       <Section id="identity" title="Identity">
         <Facts
