@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useSyncExternalStore } from "react";
 import PostImage from "./PostImage";
 
 export type BlogItem = {
@@ -24,6 +24,19 @@ const OFF = "text-ink-muted transition-colors hover:text-ink";
 const META = "text-caption tracking-normal";
 const HIT = "relative before:absolute before:inset-x-[-0.25rem] before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] lg:before:hidden";
 const COLS = "md:grid md:grid-cols-12 md:gap-x-lg";
+
+// Topic and view live in the address (?topic=, ?view=list), so Back from a post returns to them.
+// The page is prerendered: the server sees no query, the browser reads it once hydrated.
+const MOVED = "blog:query";
+const subscribe = (fn: () => void) => {
+  window.addEventListener("popstate", fn);
+  window.addEventListener(MOVED, fn);
+  return () => {
+    window.removeEventListener("popstate", fn);
+    window.removeEventListener(MOVED, fn);
+  };
+};
+const readQuery = () => window.location.search;
 
 
 function Section({ post, className = "" }: { post: BlogItem; className?: string }) {
@@ -119,8 +132,20 @@ function List({ posts }: { posts: BlogItem[] }) {
 }
 
 export default function BlogIndex({ posts, topics, span }: { posts: BlogItem[]; topics: Topic[]; span: string }) {
-  const [topic, setTopic] = useState<string | null>(null);
-  const [view, setView] = useState<View>("grid");
+  const query = new URLSearchParams(useSyncExternalStore(subscribe, readQuery, () => ""));
+  const asked = query.get("topic");
+  const topic = asked && topics.some((t) => t.key === asked) ? asked : null;
+  const view: View = query.get("view") === "list" ? "list" : "grid";
+  const go = (next: { topic: string | null; view: View }) => {
+    const q = new URLSearchParams();
+    if (next.topic) q.set("topic", next.topic);
+    if (next.view !== "grid") q.set("view", next.view);
+    const s = q.toString();
+    window.history.replaceState(null, "", s ? `?${s}` : window.location.pathname);
+    window.dispatchEvent(new Event(MOVED));
+  };
+  const setTopic = (key: string | null) => go({ topic: key, view });
+  const setView = (key: View) => go({ topic, view: key });
   const shown = topic ? posts.filter((p) => p.keys.includes(topic)) : posts;
 
   const pick = (key: string | null) => (

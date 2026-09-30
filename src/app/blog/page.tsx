@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { share } from "@/app/share";
-import ContactPill from "@/components/ContactPill";
+import ContactPill, { ContactRow } from "@/components/ContactPill";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Container, GridField } from "@/components/ui";
@@ -9,6 +9,8 @@ import { displayTags, isDateTag, tagLabel } from "@/features/content/data/tags";
 import { formatDate } from "@/lib/date";
 import BlogIndex, { type BlogItem, type Topic } from "@/features/content/components/BlogIndex";
 import { coverFor } from "@/features/content/data/covers";
+
+const PILL = "Have something to share? Write for the blog";
 
 const DESCRIPTION = "Writing from SIGMA INTELLIGENCE at Seoul National University.";
 
@@ -49,12 +51,10 @@ export default async function PostsPage() {
           <GridField>
             <Container className="page-opening pb-section">
               <BlogIndex posts={posts} topics={topics} span={span} />
+              <ContactRow about="blog" pill={PILL} className="mt-section" />
             </Container>
           </GridField>
-          <ContactPill
-            about="blog"
-            pill={"Have something to share? Write for the blog"}
-          />
+          <ContactPill about="blog" pill={PILL} />
         </main>
 
         <Footer />
