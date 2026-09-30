@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -46,6 +46,7 @@ export default function Navbar({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const bar = useRef<HTMLElement>(null);
   const [hidden, setHidden] = useState(false);
   const [onDark, setOnDark] = useState(tone === "overlay");
   const t = TONE[onDark ? "overlay" : "solid"];
@@ -67,6 +68,16 @@ export default function Navbar({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
+
+  useEffect(() => {
+    const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    if (!open || !meta || !bar.current) return;
+    const was = meta.content;
+    meta.content = getComputedStyle(bar.current).backgroundColor;
+    return () => {
+      meta.content = was;
+    };
+  }, [open, onDark]);
 
   useEffect(() => {
     let last = window.scrollY;
@@ -122,6 +133,7 @@ export default function Navbar({
   return (
     <>
       <header
+        ref={bar}
         className={`fixed inset-x-0 top-0 z-40 w-full transition-[translate,opacity] duration-300 ease-out motion-reduce:transition-none ${
           hidden && !open ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"
         } ${open ? t.bar : "mix-blend-difference"}`}
@@ -199,7 +211,7 @@ export default function Navbar({
           id="masthead-nav"
           aria-label="Primary"
           hidden={!open}
-          className={`nav-sheet absolute inset-x-0 top-full max-h-[calc(100dvh-var(--masthead))] overflow-y-auto overscroll-contain rounded-b-[1.5rem] shadow-[0_18px_40px_rgb(10_9_7/0.14)] [corner-shape:squircle] md:hidden ${
+          className={`nav-sheet absolute inset-x-0 top-full max-h-[calc(100dvh-var(--masthead))] overflow-y-auto overscroll-contain rounded-b-[1.5rem] [clip-path:inset(0_-4rem_-4rem_-4rem)] shadow-[0_18px_40px_rgb(10_9_7/0.14)] [corner-shape:squircle] md:hidden ${
             open ? "nav-open" : ""
           } ${t.sheet}`}
         >
