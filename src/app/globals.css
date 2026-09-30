@@ -681,6 +681,9 @@ html[data-foot],
 html[data-foot] body {
   background-color: var(--color-band);
 }
+html:has([data-drawer]) {
+  overflow-anchor: none;
+}
 @media (width < 64rem) {
   html[data-foot],
   html[data-foot] body {
