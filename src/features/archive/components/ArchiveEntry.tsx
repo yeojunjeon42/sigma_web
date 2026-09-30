@@ -1,11 +1,13 @@
 import Link from "next/link";
+import { Arrow } from "@/components/ui";
 import EntryBody from "./EntryBody";
 import EntryTop from "./EntryTop";
+import Pending from "./Pending";
 import type { ReelBuild } from "./ArchiveReel";
 
 const META = "text-caption tracking-normal leading-[1.35]";
 const HIT = "-mx-sm inline-flex min-h-11 items-center px-sm";
-const TAP = `${HIT} transition-colors hover:text-ink`;
+const TAP = `${HIT} transition-[color,opacity] hover:text-ink has-[[data-pending]]:opacity-50 has-[[data-pending]]:delay-150`;
 
 interface EntryStep {
   href: string;
@@ -26,11 +28,12 @@ export default function ArchiveEntry({
   const step = (s: EntryStep | null, label: string) =>
     s ? (
       <Link href={s.href} replace className={TAP}>
-        {label}
+        <Pending />
+        <span className="u-trim">{label}</span>
       </Link>
     ) : (
       <span aria-hidden="true" className={`${HIT} text-rule-strong`}>
-        {label}
+        <span className="u-trim">{label}</span>
       </span>
     );
 
@@ -39,8 +42,9 @@ export default function ArchiveEntry({
       <EntryTop key={build.id} />
       <nav aria-label="Entry" className={`flex items-center justify-between gap-x-lg text-ink-muted ${META}`}>
         <Link href={close} replace className={`${TAP} gap-x-xs`}>
-          <span aria-hidden="true">←</span>
-          Archive
+          <Pending />
+          <Arrow />
+          <span className="u-trim">Archive</span>
         </Link>
         <span className="flex items-center gap-x-lg">
           {step(prev, "Previous")}
@@ -65,8 +69,9 @@ export default function ArchiveEntry({
                 key={label}
                 href={s.href}
                 replace
-                className="block border-b border-rule py-md"
+                className="block border-b border-rule py-md transition-opacity has-[[data-pending]]:opacity-50 has-[[data-pending]]:delay-150"
               >
+                <Pending />
                 <span className={`block text-ink-muted ${META}`}>
                   {label}
                 </span>

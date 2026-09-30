@@ -188,10 +188,12 @@ export default function ArchiveReel({
       return d > 0 ? Math.max(from + 1, Math.round(t)) : Math.min(from - 1, Math.round(t));
     };
     let pull: Glide | null = null;
+    const fine = window.matchMedia("(pointer: fine)");
     const pullTo = (to: number) => {
       pull?.stop();
-      if (still.matches) {
-        window.scrollTo({ top: to, behavior: "instant" });
+      // The spring is desk only: after a touch fling it fights momentum, so touch gets one native scroll.
+      if (still.matches || !fine.matches) {
+        window.scrollTo({ top: to, behavior: still.matches ? "instant" : "smooth" });
         return;
       }
       pull = glide(to);

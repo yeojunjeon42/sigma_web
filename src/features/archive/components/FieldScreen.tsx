@@ -2,14 +2,15 @@
 
 import { useEffect, useRef, type CSSProperties } from "react";
 import { DOT, GROUND, GROUND_INK, SCREEN } from "@/lib/halftone";
+import { useMedia } from "@/lib/media";
 import { printer } from "@/lib/printer";
 import { FIELD_STAGE } from "./fieldPointer";
+import { FEATHER } from "../data/field";
 
 const STEPS = 32;
 const SWELL = 12;
 const SPAN = STEPS + SWELL;
 const BANDS = 10;
-const FEATHER = SCREEN * 9;
 const HAZE = 0.2;
 const WAVE = 1.2;
 const SPEED = 460;
@@ -23,11 +24,13 @@ const cssVar = (n: string, f: string) =>
 
 export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
   const ref = useRef<HTMLCanvasElement>(null);
+  // The field shows from lg only; below it (phones) no WebGL context is made for a hidden canvas.
+  const wide = useMedia("(min-width: 64rem)", false);
 
   useEffect(() => {
     const canvas = ref.current;
     const host = canvas?.closest<HTMLElement>("[data-depth]");
-    if (!canvas || !host) return;
+    if (!canvas || !host || !wide) return;
     const pr = printer(canvas, () => kick());
     if (!pr) return;
     const still = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -309,7 +312,7 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
       host.removeEventListener("field:enter", onEnter);
       pr.dispose();
     };
-  }, []);
+  }, [wide]);
 
   return (
     <div aria-hidden="true" style={edge} className="pointer-events-none absolute inset-y-0 left-[calc(50%-50vw)] z-[2] w-screen">

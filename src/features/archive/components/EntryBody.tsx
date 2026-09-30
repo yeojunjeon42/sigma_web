@@ -53,7 +53,7 @@ export default function EntryBody({
         {b.award ? (
           <Fact label="Result">
             <span className="flex items-baseline gap-x-xs">
-              <span aria-hidden="true" className="relative -top-[calc((1cap-0.34em)/2)] inline-block size-[0.34em] shrink-0 bg-accent" />
+              <span aria-hidden="true" className="relative -top-[0.167em] inline-block size-[0.34em] shrink-0 bg-accent" />
               <span>
                 {b.award}
               </span>

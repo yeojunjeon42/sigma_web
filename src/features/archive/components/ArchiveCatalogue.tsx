@@ -82,7 +82,7 @@ function Row({
         <span className="text-ink-muted">{"\u00a0↗"}</span>
         {project.award ? (
           <>
-            <span aria-hidden="true" className="ml-xs inline-block size-[0.34em] bg-accent align-[calc((1cap-0.34em)/2)]" />
+            <span aria-hidden="true" className="ml-xs inline-block size-[0.34em] bg-accent align-[0.167em]" />
             <span className="sr-only">
               {project.award.en}
             </span>
