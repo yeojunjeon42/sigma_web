@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useSyncExternalStore } from "react";
-import { DOT, GROUND, GROUND_INK, SCREEN } from "@/lib/halftone";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { DOT, GROUND, GROUND_INK, PLATE_KEY, SCREEN } from "@/lib/halftone";
 import { printer, vignette } from "@/lib/printer";
 
 export type HeroBuild = {
@@ -33,7 +33,6 @@ const FEATHER = 12;
 const KNOCK = 0.8;
 const EBB = 0.35;
 const PAPER_INK = "--color-rule-strong";
-const KEY = "sigma_plate";
 
 let shown: HeroBuild | null = null;
 let advance: (() => void) | null = null;
@@ -87,6 +86,8 @@ type Box = { x: number; y: number; w: number; h: number };
 
 export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
   const ref = useRef<HTMLCanvasElement>(null);
+  // Bumped when the screen crosses md (a phone turned sideways): the grid and paper are set at start.
+  const [layout, setLayout] = useState(0);
 
   useEffect(() => {
     const canvas = ref.current;
@@ -122,13 +123,14 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     const held = new Int32Array(SLOTS);
     let mixes: string[] = [];
     let ink = "#0f0d09";
-    let groundKey = "";
+    let pale = "#b0b0b0";
 
     const all = [...builds];
     let curated = 0;
     let hold = false;
     let wave = WAVE;
     const imgs = new Map<number, HTMLImageElement>();
+    const bad = new Set<number>();
     const tones = new Map<number, Tones>();
     let a = -1;
     let b = -1;
@@ -150,6 +152,11 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
 
     const css = (n: string, f: string) =>
       getComputedStyle(document.documentElement).getPropertyValue(n).trim() || f;
+    // Read once: a getComputedStyle per frame forces a style recalc whenever anything else moved.
+    const base = css(GROUND_INK, "#76767a");
+    pale = css(PAPER_INK, "#b0b0b0");
+    mixes = [...ramp([base, css("--color-accent", "#ed2024"), css("--color-accent-deep", "#8e1316")], BANDS), pale];
+    ink = css("--color-ink", "#0f0d09");
 
     const load = (i: number) => {
       let img = imgs.get(i);
@@ -157,6 +164,12 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
         img = new Image();
         img.decoding = "async";
         img.onload = kick;
+        // A failed plate is skipped; waiting on it kept the loop running and the cycle stuck.
+        img.onerror = () => {
+          bad.add(i);
+          if (want?.i === i) want = null;
+          kick();
+        };
         img.src = all[i].src;
         imgs.set(i, img);
       }
@@ -338,15 +351,24 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       t = still || frozen ? 1 : 0;
       if (t >= 1) show(all[b]);
       try {
-        localStorage.setItem(KEY, String(curated));
+        localStorage.setItem(PLATE_KEY, String(curated));
       } catch {}
       load((curated + 1) % builds.length);
       kick();
     };
 
+    const after = (from: number) => {
+      for (let n = 1; n <= builds.length; n++) {
+        const i = (from + n) % builds.length;
+        if (!bad.has(i)) return i;
+      }
+      return -1;
+    };
+
     const next = (at?: { x: number; y: number }) => {
       if (t < 1 || want) return;
-      const i = (curated + 1) % builds.length;
+      const i = after(curated);
+      if (i < 0) return;
       if (load(i)) start(i, at);
       else want = { i, at };
     };
@@ -354,16 +376,6 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     const draw = () => {
       if (!W || !H) return;
       pr.clear();
-
-      const base = css(GROUND_INK, "#76767a");
-      const pale = css(PAPER_INK, "#b0b0b0");
-      const accent = css("--color-accent", "#ed2024");
-      const deep = css("--color-accent-deep", "#8e1316");
-      if (groundKey !== base + pale + accent + deep) {
-        groundKey = base + pale + accent + deep;
-        mixes = [...ramp([base, accent, deep], BANDS), pale];
-        ink = css("--color-ink", "#0f0d09");
-      }
 
       const ox = -par.x * DRIFT[0];
       const oy = -par.y * DRIFT[1];
@@ -503,12 +515,16 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
 
       if (want && t >= 1 && load(want.i)) start(want.i, want.at, want.quick);
       if (b < 0 && !want) {
-        let first = 0;
+        let last = -1;
         try {
-          first = (Number(localStorage.getItem(KEY) ?? -1) + 1) % builds.length || 0;
+          last = Number(localStorage.getItem(PLATE_KEY) ?? -1);
         } catch {}
-        want = { i: first };
-        load(first);
+        if (!Number.isInteger(last)) last = -1;
+        const first = after(((last % builds.length) + builds.length) % builds.length);
+        if (first >= 0) {
+          want = { i: first };
+          load(first);
+        }
       }
       if (t < 1) {
         t = Math.min(1, (now - t0) / wave);
@@ -633,15 +649,19 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       seen = e.isIntersecting;
       if (seen) kick();
     });
+    // The observer's first callback sizes the plate; fonts still loading re-mask the words.
     ro.observe(host);
     io.observe(host);
-    resize();
     let live = true;
-    document.fonts?.ready.then(() => {
-      if (!live) return;
-      hush();
-      kick();
-    });
+    if (document.fonts && document.fonts.status !== "loaded")
+      document.fonts.ready.then(() => {
+        if (!live) return;
+        hush();
+        kick();
+      });
+    const md = window.matchMedia("(min-width: 768px)");
+    const turned = () => setLayout((n) => n + 1);
+    md.addEventListener("change", turned);
 
     let timer = 0;
     if (!frozen) {
@@ -665,6 +685,8 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
 
     return () => {
       live = false;
+      md.removeEventListener("change", turned);
+      for (const img of imgs.values()) img.onload = img.onerror = null;
       if (raf) cancelAnimationFrame(raf);
       window.clearInterval(timer);
       ro.disconnect();
@@ -681,7 +703,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       advance = null;
       pr.dispose();
     };
-  }, [builds]);
+  }, [builds, layout]);
 
   return (
     <canvas
