@@ -37,6 +37,7 @@ export default function RollingDate({ className = "" }: { className?: string }) 
   useEffect(() => {
     const cells = Array.from(box.current?.querySelectorAll<HTMLElement>("[data-fig]") ?? []);
     const shown = cells.map((c) => c.textContent ?? "0");
+    const spun = cells.map((c) => c.dataset.spin ?? "");
     const until = cells.map(() => 0);
     let frame = 0;
     let clock = 0;
@@ -52,7 +53,11 @@ export default function RollingDate({ className = "" }: { className?: string }) 
           c.textContent = next;
           shown[i] = next;
         }
-        c.dataset.spin = locked ? "" : "1";
+        const spin = locked ? "" : "1";
+        if (spun[i] !== spin) {
+          c.dataset.spin = spin;
+          spun[i] = spin;
+        }
       });
       if (busy) frame = window.setTimeout(() => paint(performance.now()), SCRAMBLE);
     };
@@ -71,8 +76,20 @@ export default function RollingDate({ className = "" }: { className?: string }) 
     const start = performance.now();
     if (!still) cells.forEach((_, i) => (until[i] = start + LOCK_START + i * LOCK_STEP));
     paint(start);
-    clock = window.setInterval(tick, 1000);
+    // Ticks only while on screen; coming back, the changed figures roll to the time.
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting && !clock) {
+        tick();
+        clock = window.setInterval(tick, 1000);
+      } else if (!e.isIntersecting && clock) {
+        clearInterval(clock);
+        clearTimeout(frame);
+        clock = 0;
+      }
+    });
+    if (box.current) io.observe(box.current);
     return () => {
+      io.disconnect();
       clearTimeout(frame);
       clearInterval(clock);
     };

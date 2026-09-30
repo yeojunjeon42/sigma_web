@@ -292,7 +292,9 @@ export default function YearRuler({
     let quiet = 0;
     let lost = 0;
     let lastY = window.scrollY;
+    let lastT = performance.now();
     let rest = 0;
+    let fit = 0;
     const held = () => (!!touch && touch.axis !== "y") || !!mouse;
     const busy = () => held() || moving || glideTo !== null;
 
@@ -313,13 +315,26 @@ export default function YearRuler({
       ourAt = performance.now();
       glideTo = null;
     };
-    const glide = (k: number) => {
-      const y = Math.min(bottom(), Math.max(0, from + scrollAt(k) * span));
+    const glideY = (y: number) => {
       if (Math.abs((glideTo ?? window.scrollY) - y) < 0.5) return;
       glideTo = y;
       window.clearTimeout(lost);
       lost = window.setTimeout(landed, LOST);
       window.scrollTo({ top: y, behavior });
+    };
+    const glide = (k: number) => glideY(Math.min(bottom(), Math.max(0, from + scrollAt(k) * span)));
+
+    // The page follows the dial as it turns, not after it rests: each dial scroll places the page
+    // at the matching point of the record (instant, marked as ours so it doesn't hand control back).
+    // A first move from far away (the top of the page to the first entry) glides there instead;
+    // the dial is followed again once it lands, and its rest aims any glide still under way.
+    const follow = (d: number) => {
+      if (glideTo !== null) return;
+      const y = Math.min(bottom(), Math.max(0, from + scrollAt(clamp(d)) * span));
+      if (Math.abs(window.scrollY - y) > window.innerHeight / 2) return glideY(y);
+      ourY = y;
+      ourAt = performance.now();
+      if (Math.abs(window.scrollY - y) >= 0.5) window.scrollTo({ top: y, behavior: "instant" });
     };
 
     const grab = () => {
@@ -343,13 +358,17 @@ export default function YearRuler({
     const choose = (d: number) => {
       const k = Math.round(clamp(d));
       aim = k;
-      scroller.scrollTo({ left: (ROOM + k) * PITCH, behavior });
-      glide(k);
+      const left = (ROOM + k) * PITCH;
+      // The dial's own scroll carries the page (follow); a dial already there moves nothing.
+      if (Math.abs(scroller.scrollLeft - left) < 0.5) glide(k);
+      else scroller.scrollTo({ left, behavior });
     };
 
     const settle = () => {
       window.clearTimeout(quiet);
       moving = false;
+      // A finger resting on the dial: the page would glide under it. Its release settles.
+      if (held()) return;
       aim = -1;
       if (line !== "dial") return;
       if (!mouse) delete bar.dataset.free;
@@ -359,6 +378,7 @@ export default function YearRuler({
       if (line !== "dial") return;
       moving = true;
       read(dialOf());
+      follow(dialOf());
       kick();
       window.clearTimeout(quiet);
       quiet = window.setTimeout(settle, QUIET);
@@ -488,12 +508,16 @@ export default function YearRuler({
         kick();
       }
       judge(ours || busy());
+      const now = performance.now();
+      // Speeds, not distances per event: a 120Hz screen fires twice as many, half as far.
+      const frames = Math.max(1, (now - lastT) / (1000 / 60));
+      lastT = now;
       if (ours) {
         lastY = y;
         return;
       }
-      if (y > lastY + AWAY) show(false);
-      else if (y < lastY - 8) show(true);
+      if (y > lastY + AWAY * frames) show(false);
+      else if (y < lastY - 8 * frames) show(true);
       lastY = y;
       window.clearTimeout(rest);
       rest = window.setTimeout(() => show(true), REST);
@@ -515,20 +539,28 @@ export default function YearRuler({
       paint();
       judge(busy());
     };
-    const ro = new ResizeObserver(refit);
+    // Android and in-app browsers resize as their bars slide: one refit a frame at most.
+    const refitSoon = () => {
+      if (!fit) fit = requestAnimationFrame(() => {
+        fit = 0;
+        refit();
+      });
+    };
+    const ro = new ResizeObserver(refitSoon);
     const lead = document.getElementById(
       marks[0].targetId ?? `e-${marks[0].id}`,
     );
     const host = lead?.closest("main");
     const arrived = (e: AnimationEvent) => {
-      if ((e.target as Element).contains(lead)) refit();
+      // The route's arrival only; scroll-driven animations end each time they are scrolled past.
+      if (e.animationName === "arrive" && (e.target as Element).contains(lead)) refitSoon();
     };
     if (host) ro.observe(host);
     ro.observe(bar);
     host?.addEventListener("animationend", arrived);
 
     refit();
-    window.addEventListener("resize", refit);
+    window.addEventListener("resize", refitSoon);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("wheel", wheel, { passive: true });
     window.addEventListener("touchstart", away, { passive: true });
@@ -548,13 +580,14 @@ export default function YearRuler({
 
     return () => {
       if (frame) cancelAnimationFrame(frame);
+      cancelAnimationFrame(fit);
       [...pageRuns, ...dialRuns].forEach((run) => run.cancel());
       window.clearTimeout(quiet);
       window.clearTimeout(lost);
       window.clearTimeout(rest);
       ro.disconnect();
       host?.removeEventListener("animationend", arrived);
-      window.removeEventListener("resize", refit);
+      window.removeEventListener("resize", refitSoon);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("wheel", wheel);
       window.removeEventListener("touchstart", away);

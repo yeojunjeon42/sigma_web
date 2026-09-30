@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { soleWork } from "../data/works";
 import type { YearNode } from "../types";
+import RuleIn from "./RuleIn";
 
 const META = "text-caption tracking-normal leading-none tabular-nums";
 const DATE =
@@ -26,7 +27,8 @@ export default function Chronology({
   nodes: YearNode[];
 }) {
   return (
-    <div className="border-b border-rule">
+    <div className="-mx-[var(--gutter)] border-b border-rule px-[var(--gutter)] md:-mx-md md:px-md">
+      <RuleIn />
       {nodes.map((node) => {
         return (
         <section
@@ -43,7 +45,8 @@ export default function Chronology({
               const w = when(e.date);
               const title = (
                 <>
-                  {e.title.en}
+                  {/* the dash stays with the word before it: a line breaks after it, not before */}
+                  {e.title.en.replaceAll(" — ", "\u00a0— ")}
                   {e.count && e.count > 1 ? (
                     <span className={`${META} u-cap-centre ml-sm inline-block text-ink-muted`}>
                       ×{e.count}
