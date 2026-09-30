@@ -48,7 +48,7 @@ export function Print({
   sizes?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const st = useRef({ t: 0, goal: 0, last: 0, raf: 0, paint: (() => false) as () => boolean });
+  const st = useRef({ t: 0, goal: 0, last: 0, raf: 0, paint: (() => false) as () => boolean, run: () => {} });
 
   useEffect(() => {
     const box = ref.current;
@@ -147,10 +147,13 @@ export function Print({
     };
     s.paint = paint;
 
+    const ready = () => {
+      if (paint() && s.t !== s.goal) s.run();
+    };
     const redraw = () => {
       sheet = null;
-      if (img.complete && img.naturalWidth) paint();
-      else img.addEventListener("load", paint, { once: true });
+      if (img.complete && img.naturalWidth) ready();
+      else img.addEventListener("load", ready, { once: true });
     };
     const ro = new ResizeObserver(() => {
       cancelAnimationFrame(frame);
@@ -173,23 +176,23 @@ export function Print({
       s.paint();
       return;
     }
-    s.last = 0;
-    const since = performance.now();
     const step = (now: number) => {
       s.raf = 0;
-      if (!s.paint() && now - since < 4000) {
-        s.last = 0;
-        s.raf = requestAnimationFrame(step);
-        return;
+      if (s.last) {
+        const dt = now - s.last;
+        s.t = s.goal > s.t ? Math.min(1, s.t + dt / IN) : Math.max(0, s.t - dt / OUT);
       }
-      const dt = s.last ? now - s.last : 16;
       s.last = now;
-      s.t = s.goal > s.t ? Math.min(1, s.t + dt / IN) : Math.max(0, s.t - dt / OUT);
-      s.paint();
+      // Not printable yet (image loading, no size): stop; the image's load or a resize resumes.
+      if (!s.paint()) return;
       if (s.t !== s.goal) s.raf = requestAnimationFrame(step);
     };
-    cancelAnimationFrame(s.raf);
-    s.raf = requestAnimationFrame(step);
+    s.run = () => {
+      cancelAnimationFrame(s.raf);
+      s.last = 0;
+      s.raf = requestAnimationFrame(step);
+    };
+    s.run();
     return () => {
       cancelAnimationFrame(s.raf);
       s.raf = 0;
@@ -286,14 +289,19 @@ function Toggle({ m, open, controls, onToggle }: { m: CrewMember; open: boolean;
   );
 }
 
+// A hyphenated word stays on one line ("Member-led", never "Member-" / "led").
+function whole(text: string) {
+  return text.split(/(\S*-\S*)/).map((part, i) => (i % 2 ? <span key={i} className="whitespace-nowrap">{part}</span> : part));
+}
+
 function Meta({ m, className = "" }: { m: CrewMember; className?: string }) {
   return (
     <span className={className}>
-      {m.post && m.post.en}
+      {m.post && whole(m.post.en)}
       {m.post && m.duty && <span className="text-ink-muted"> · </span>}
       {m.duty && (
         <span>
-          {m.duty.en}
+          {whole(m.duty.en)}
         </span>
       )}
     </span>
@@ -324,12 +332,14 @@ export default function MemberCrew({ members }: { members: CrewMember[] }) {
           >
             <InView src={m.portrait} />
             <div className="flex min-w-0 flex-col gap-y-sm md:justify-between md:py-xxs">
-              <span className="u-trim text-display-md text-ink">{m.name}</span>
+              {/* Hangul rises ~0.11em above the sans' capitals the trim uses: its top meets the portrait's */}
+              <span className="u-trim mt-[0.11em] text-display-md text-ink md:mt-0">{m.name}</span>
               <p className="text-body-sm text-ink-muted">
                 <Meta m={m} className="block text-ink" />
                 {m.department.en}
               </p>
-              <div className="-mb-xs mt-auto flex flex-wrap items-center md:hidden">
+              {/* Pulled down by the room under a 16px icon in a 44px target: the icons end on the portrait */}
+              <div className="mt-auto -mb-[calc((2.75rem-1rem)/2)] flex flex-wrap items-center md:hidden">
                 <MemberLinks name={m.name} links={m.links} className="-ml-1.5" />
                 <Toggle m={m} open={open === m.id} controls={`crew-m-${m.id}`} onToggle={() => toggle(m.id)} />
               </div>
