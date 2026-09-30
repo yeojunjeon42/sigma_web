@@ -2,7 +2,6 @@ import { Fragment } from "react";
 import Link from "next/link";
 import { SOCIAL } from "@/features/site/data/social";
 import FootGround from "./FootGround";
-import FootMagnet from "./FootMagnet";
 
 const FOUNDED = 1984;
 const EMAIL = "record.snusigma@gmail.com";
@@ -40,7 +39,6 @@ export default function Footer() {
 
   return (
     <div className="overflow-clip">
-      <div aria-hidden="true" data-foot-edge />
       <footer data-band className="u-card-rise overflow-hidden rounded-t-[2.5rem] bg-band text-ink [corner-shape:squircle]">
         <div className="u-gutter mx-auto w-full max-w-wide pt-xxl lg:pt-section">
           <div className="grid grid-cols-2 gap-x-md gap-y-xxxl text-body lg:grid-cols-12 lg:gap-x-lg lg:gap-y-xl">
@@ -133,7 +131,6 @@ export default function Footer() {
         <Wordmark />
       </footer>
       <FootGround />
-      <FootMagnet />
     </div>
   );
 }

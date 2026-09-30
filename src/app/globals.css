@@ -680,6 +680,12 @@ html[data-turn] body > :not(header) {
 html[data-foot] {
   background-color: var(--color-band);
 }
+@media (width < 64rem) {
+  html[data-foot],
+  html[data-foot] body {
+    overscroll-behavior-y: none;
+  }
+}
 
 .nav-sheet {
   animation: sheet-in var(--duration-chrome) cubic-bezier(0.22, 1, 0.36, 1) both;
