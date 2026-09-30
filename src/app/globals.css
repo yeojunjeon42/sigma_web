@@ -677,7 +677,8 @@ html[data-turn] body > :not(header) {
     translate: 0 -6px;
   }
 }
-html[data-foot] {
+html[data-foot],
+html[data-foot] body {
   background-color: var(--color-band);
 }
 @media (width < 64rem) {

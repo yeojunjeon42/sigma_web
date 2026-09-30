@@ -66,7 +66,7 @@ export default async function PostPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }}
       />
       <Navbar />
-      <main id="main" className="pb-section">
+      <main id="main" className="bg-canvas pb-section">
         <GridField>
           <Article
             doc={doc}

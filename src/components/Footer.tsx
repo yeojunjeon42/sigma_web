@@ -38,7 +38,7 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <div className="overflow-clip">
+    <div className="overflow-clip bg-canvas">
       <footer data-band className="u-card-rise overflow-hidden rounded-t-[2.5rem] bg-band text-ink [corner-shape:squircle]">
         <div className="u-gutter mx-auto w-full max-w-wide pt-xxl lg:pt-section">
           <div className="grid grid-cols-2 gap-x-md gap-y-xxxl text-body lg:grid-cols-12 lg:gap-x-lg lg:gap-y-xl">
