@@ -12,7 +12,7 @@ const BIG =
   "u-trim u-lift font-[family-name:var(--f-display)] text-[length:var(--S)] leading-[0.9] font-bold tracking-[-0.02em] text-ink uppercase [font-stretch:125%] md:text-[length:var(--Swide)]";
 
 const STMT =
-  "u-lift max-w-[19ch] text-title max-[359px]:text-[1.125rem] text-ink [word-break:keep-all] md:text-[length:clamp(0.8125rem,1.7vw,2rem)] md:leading-[1.1] md:tracking-[-0.02em]";
+  "u-lift max-w-[19ch] text-[1.125rem] leading-[1.25] tracking-[-0.01em] max-[359px]:text-[1rem] max-md:text-balance text-ink [word-break:keep-all] md:text-[length:clamp(0.8125rem,1.7vw,2rem)] md:leading-[1.1] md:tracking-[-0.02em]";
 
 const META = "font-mono text-[12px] tracking-normal uppercase";
 
@@ -73,7 +73,7 @@ export default function HeroField({
           <Stmt
             className="col-start-2 row-start-2 self-center justify-self-end text-right md:col-span-3 md:col-start-10 md:row-start-2 md:self-end"
           >
-            Room 215-2, Mabang
+            Room 215‑2, Mabang
           </Stmt>
           <Stmt
             className="col-start-1 row-start-3 self-center md:col-span-3 md:col-start-1 md:row-start-3 md:self-end"
