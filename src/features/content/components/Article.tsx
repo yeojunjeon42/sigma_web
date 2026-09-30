@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Container } from "@/components/ui";
+import { Arrow, Container } from "@/components/ui";
 import { displayTags } from "../data/tags";
 import { formatDate } from "@/lib/date";
 import type { Photo } from "@/features/archive/types";
@@ -9,7 +9,6 @@ import { coverFor } from "../data/covers";
 import CodeCopy from "./CodeCopy";
 import PostImage from "./PostImage";
 
-const BACK_ARROW_NUDGE = "-1.31px";
 const LABEL = "text-caption tracking-normal leading-none text-ink-muted";
 
 export default function Article({
@@ -94,7 +93,7 @@ export default function Article({
           )}
           <p className="mt-md text-center text-[0.875rem] text-ink-muted">
             By{" "}
-            <span className="text-ink">{doc.authors.length ? doc.authors.join(", ") : "Sigma Intelligence"}</span>
+            <span className="text-ink">{doc.authors.length ? doc.authors.join(", ") : "SIGMA INTELLIGENCE"}</span>
             {doc.team.length > 0 && (
               <>
                 <span aria-hidden="true" className="mx-xs">·</span>
@@ -167,7 +166,7 @@ export default function Article({
                     <span className={LABEL}>
                       {label}
                     </span>
-                    <span className="text-title text-ink transition-colors group-hover/next:text-ink-muted">
+                    <span className="text-title text-balance text-ink transition-colors group-hover/next:text-ink-muted">
                       {post.title}
                     </span>
                   </Link>
@@ -186,9 +185,7 @@ function Back({ back }: { back: { href: string; label: string } }) {
       href={back.href}
       className="relative -my-sm flex w-fit items-center gap-xs py-sm text-caption text-ink-muted transition-colors before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] hover:text-ink"
     >
-      <span aria-hidden="true" className="u-trim" style={{ transform: `translateY(${BACK_ARROW_NUDGE})` }}>
-        ←
-      </span>
+      <Arrow />
       <span className="u-trim">
         {back.label}
       </span>
