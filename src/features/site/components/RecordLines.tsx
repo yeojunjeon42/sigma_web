@@ -84,6 +84,7 @@ export default function RecordLines({
     let cy = 0;
     let cur: HTMLElement | null = null;
     let lastScroll = window.scrollY;
+    const desk = window.matchMedia("(min-width: 64rem) and (pointer: fine)");
     let onPlate = false;
     const pk = { x: 0, y: 0, tx: 0, ty: 0, id: "", grow: 1 };
 
@@ -328,7 +329,7 @@ export default function RecordLines({
       const dy = window.scrollY - lastScroll;
       lastScroll = window.scrollY;
       const k = clamp(window.innerWidth / 1200, 0.4, 1);
-      if (seen && !press) v = clamp(v - dy * PUSH * k, -PUSH_MAX * k, PUSH_MAX * k);
+      if (seen && !press && desk.matches) v = clamp(v - dy * PUSH * k, -PUSH_MAX * k, PUSH_MAX * k);
     };
     const tab = (e: FocusEvent) => {
       const el = (e.target as HTMLElement).closest<HTMLElement>("[data-id]");

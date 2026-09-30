@@ -40,7 +40,7 @@ export default function HistoryHero({
         </span>
         <span
           aria-hidden="true"
-          className={`${BIG} u-away [--away:-12svh] max-lg:[animation:none]! col-start-1 row-start-1 self-start justify-self-start lg:col-span-2 lg:row-span-2`}
+          className={`${BIG} u-away [--away:-12svh] col-start-1 row-start-1 self-start justify-self-start lg:col-span-2 lg:row-span-2`}
         >
           <span className="hy-in-a block">
             <span className="-ml-[0.022em] block rotate-180">1984</span>
@@ -97,7 +97,7 @@ export default function HistoryHero({
 
       <span
         aria-hidden="true"
-        className={`${BIG} u-away [--away:40svh] [--away-blur:28px] [--away-fade:0] max-lg:[animation:none]! col-start-3 row-start-3 self-end justify-self-end lg:col-span-2 lg:col-start-11 lg:row-span-2 lg:row-start-2 lg:-mr-[0.02em]`}
+        className={`${BIG} u-away [--away:40svh] [--away-blur:28px] [--away-fade:0] col-start-3 row-start-3 self-end justify-self-end lg:col-span-2 lg:col-start-11 lg:row-span-2 lg:row-start-2 lg:-mr-[0.02em]`}
       >
         <span className="hy-in-b block">{latest}</span>
       </span>

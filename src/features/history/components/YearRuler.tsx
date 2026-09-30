@@ -9,7 +9,6 @@ const ROOM = 3;
 const GIVE = 0.42;
 const REST = 280;
 const AWAY = 24;
-const LAND = 140;
 const QUIET = 120;
 const LOST = 1600;
 const FLING = 160;
@@ -294,8 +293,6 @@ export default function YearRuler({
     let lost = 0;
     let lastY = window.scrollY;
     let rest = 0;
-    let nativeRest = 0;
-    let readerHeld = false;
     const held = () => (!!touch && touch.axis !== "y") || !!mouse;
     const busy = () => held() || moving || glideTo !== null;
 
@@ -326,7 +323,6 @@ export default function YearRuler({
     };
 
     const grab = () => {
-      window.clearTimeout(nativeRest);
       show(true);
       if (line === "dial") return;
       scroller.scrollTo({ left: (ROOM + here()) * PITCH, behavior: "instant" });
@@ -371,29 +367,6 @@ export default function YearRuler({
       if (line === "dial" && !held()) settle();
     };
 
-    const settleNative = () => {
-      nativeRest = 0;
-      if (
-        readerHeld ||
-        touch ||
-        mouse ||
-        glideTo !== null ||
-        line === "dial" ||
-        !bar.clientWidth
-      )
-        return;
-      const f = (window.scrollY - from) / span;
-      if (f < 0 || f > 1) return;
-      const d = here();
-      const target = Math.round(clamp(d));
-      if (Math.abs(target - d) < 0.002) return;
-      show(true);
-      glide(target);
-    };
-    const scheduleNative = () => {
-      window.clearTimeout(nativeRest);
-      nativeRest = window.setTimeout(settleNative, LAND);
-    };
     const touchDown = (e: TouchEvent) => {
       const t = e.changedTouches[0];
       if (touch || !t) return;
@@ -429,8 +402,7 @@ export default function YearRuler({
       touch = null;
       delete bar.dataset.pressed;
       delete bar.dataset.dragging;
-      if (axis === "y") scheduleNative();
-      else if (line === "dial" && !moving) settle();
+      if (axis !== "y" && line === "dial" && !moving) settle();
     };
 
     const down = (e: PointerEvent) => {
@@ -525,26 +497,14 @@ export default function YearRuler({
       lastY = y;
       window.clearTimeout(rest);
       rest = window.setTimeout(() => show(true), REST);
-      scheduleNative();
     };
     const away = (e: Event) => {
       if (bar.contains(e.target as Node)) return;
       drop();
-      window.clearTimeout(nativeRest);
     };
     const wheel = (e: WheelEvent) => {
       if (!bar.contains(e.target as Node)) return away(e);
       if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) grab();
-    };
-    const holdPage = (e: TouchEvent) => {
-      if (bar.contains(e.target as Node)) return;
-      readerHeld = true;
-      away(e);
-    };
-    const freePage = () => {
-      if (!readerHeld) return;
-      readerHeld = false;
-      scheduleNative();
     };
 
     const refit = () => {
@@ -571,9 +531,7 @@ export default function YearRuler({
     window.addEventListener("resize", refit);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("wheel", wheel, { passive: true });
-    window.addEventListener("touchstart", holdPage, { passive: true });
-    window.addEventListener("touchend", freePage, { passive: true });
-    window.addEventListener("touchcancel", freePage, { passive: true });
+    window.addEventListener("touchstart", away, { passive: true });
     window.addEventListener("keydown", away);
     scroller.addEventListener("scroll", onDial, { passive: true });
     scroller.addEventListener("scrollend", dialEnd);
@@ -594,15 +552,12 @@ export default function YearRuler({
       window.clearTimeout(quiet);
       window.clearTimeout(lost);
       window.clearTimeout(rest);
-      window.clearTimeout(nativeRest);
       ro.disconnect();
       host?.removeEventListener("animationend", arrived);
       window.removeEventListener("resize", refit);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("wheel", wheel);
-      window.removeEventListener("touchstart", holdPage);
-      window.removeEventListener("touchend", freePage);
-      window.removeEventListener("touchcancel", freePage);
+      window.removeEventListener("touchstart", away);
       window.removeEventListener("keydown", away);
       scroller.removeEventListener("scroll", onDial);
       scroller.removeEventListener("scrollend", dialEnd);

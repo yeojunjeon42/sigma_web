@@ -1091,6 +1091,18 @@ html:has([data-drawer]) {
       animation-timeline: scroll(root);
       animation-range: 0 100svh;
     }
+    /* Touch scrolls off the main thread, so a translate or scale on a scroll timeline trails the
+       page and shakes (the footer did on phones): off the desk the scroll moves nothing. */
+    @media (width < 64rem), (pointer: coarse) {
+      .u-scroll-in,
+      .u-card-rise,
+      .u-settle,
+      .u-develop,
+      .u-drift,
+      .u-away {
+        animation: none;
+      }
+    }
   }
 }
 
