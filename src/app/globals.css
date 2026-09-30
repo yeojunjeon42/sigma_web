@@ -687,10 +687,7 @@ html[data-foot] body {
     overscroll-behavior-y: none;
   }
   body::after {
-    transition: opacity 0.4s ease;
-  }
-  html[data-foot] body::after {
-    opacity: 0;
+    display: none;
   }
 }
 
