@@ -158,7 +158,9 @@ export default function Navbar({
           <nav aria-label="Primary" className="hidden md:block">
             <ul className="flex items-center gap-md lg:gap-lg">
               {NAV.map((item) => (
-                <li key={item.href}>
+                // The chip reaches past the label (xs − inset): the last one steps in by that much so,
+                // like the site's pills, its box ends on the gutter.
+                <li key={item.href} className="md:last:pr-[4px] lg:last:pr-[calc(var(--spacing-xs)+2px)]">
                   <Link
                     href={item.href}
                     aria-current={isCurrent(item.href) ? "page" : undefined}

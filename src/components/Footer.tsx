@@ -42,13 +42,17 @@ export default function Footer() {
       <footer data-band className="u-card-rise overflow-hidden rounded-t-[2.5rem] bg-band text-ink [corner-shape:squircle]">
         <div className="u-gutter mx-auto w-full max-w-wide pt-xxl lg:pt-section">
           <div className="grid grid-cols-2 gap-x-md gap-y-xxxl text-body lg:grid-cols-12 lg:gap-x-lg lg:gap-y-xl">
+            {/* The tagline sits in a label's line box (its own line height 0), so it shares the labels'
+                baseline; the email takes a link's line box, so it shares the first links'. */}
             <div className="hidden lg:col-span-4 lg:block">
-              <p>
-                Where Imagination Meets Reality
+              <p className="mb-sm text-caption">
+                <span className="text-body leading-[0]">Where Imagination Meets Reality</span>
               </p>
-              <a href={`mailto:${EMAIL}`} className={`mt-xs inline-block ${LINK}`}>
-                {EMAIL}&nbsp;↗
-              </a>
+              <p>
+                <a href={`mailto:${EMAIL}`} className={LINK}>
+                  {EMAIL}&nbsp;↗
+                </a>
+              </p>
             </div>
 
             <nav aria-label="Footer" className="lg:col-span-2 lg:col-start-6">
@@ -101,11 +105,11 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="mt-xxxl flex flex-col gap-y-xxs text-body text-ink-muted lg:mt-section lg:text-caption lg:flex-row lg:justify-between lg:gap-x-lg">
-            <p>
+          <div className="mt-xxxl flex flex-col gap-y-xxs text-body text-ink-muted lg:mt-section lg:grid lg:grid-cols-12 lg:gap-x-lg lg:text-caption">
+            <p className="lg:col-span-5">
               © {year} SIGMA INTELLIGENCE · {`EST. ${FOUNDED}`}
             </p>
-            <p className="max-lg:hidden">
+            <p className="max-lg:hidden lg:col-span-4 lg:col-start-6">
               {LEGAL.map((l, i) => (
                 <Fragment key={l.href}>
                   {i > 0 && " · "}
@@ -115,7 +119,7 @@ export default function Footer() {
                 </Fragment>
               ))}
             </p>
-            <p>
+            <p className="lg:col-span-3 lg:col-start-10 lg:justify-self-end">
               Made by{" "}
               <a href="https://github.com/yeojunjeon42" target="_blank" rel="noopener noreferrer" className={LINK}>
                 Yeojun Jeon
