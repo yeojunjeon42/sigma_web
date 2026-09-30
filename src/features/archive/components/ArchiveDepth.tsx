@@ -40,12 +40,14 @@ export default function ArchiveDepth({
   tags,
   teamSize,
   look,
+  eager = true,
   reelHref,
 }: {
   groups: DepthGroup[];
   tags: Map<string, string[]>;
   teamSize: Map<string, number>;
   look: Look;
+  eager?: boolean;
   reelHref: (id: string) => string;
 }) {
   const layer = new Map<string, Layer>();
@@ -141,7 +143,7 @@ export default function ArchiveDepth({
                     <PlateArt
                       tile={tile}
                       sizes={`${Math.ceil((w / SHEET) * 100)}vw`}
-                      eager={y < FIRST_SCREEN}
+                      eager={eager && y < FIRST_SCREEN}
                       className={`w-full opacity-0 transition-opacity duration-300 ease-out group-hover/plate:opacity-100 group-focus-visible/plate:opacity-100 motion-reduce:transition-none`}
                     />
                     <p className="u-knock mt-xs line-clamp-2 text-body-sm leading-[1.35] text-ink">

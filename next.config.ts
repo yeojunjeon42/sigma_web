@@ -1,6 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: "/archive",
+          missing: ["era", "view", "sort", "look", "at"].map((key) => ({ type: "query" as const, key })),
+          destination: "/archive/all",
+        },
+      ],
+    };
+  },
   async redirects() {
     return [
       { source: "/about", destination: "/", permanent: true },
