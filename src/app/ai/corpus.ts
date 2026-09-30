@@ -258,7 +258,7 @@ async function mdIndex(): Promise<string> {
   const [history, cohorts] = await Promise.all([getHistory(), getCohorts()]);
   const entries = history.reduce((n, y) => n + y.entries.reduce((m, e) => m + e.count, 0), 0);
   return [
-    heading("Sigma Intelligence — machine-readable index", "index"),
+    heading("SIGMA INTELLIGENCE — machine-readable index", "index"),
     "",
     "## Identity",
     "",
@@ -288,7 +288,7 @@ async function mdIndex(): Promise<string> {
 
 function mdAbout(): string {
   return [
-    heading("About Sigma Intelligence", "about"),
+    heading("About SIGMA INTELLIGENCE", "about"),
     "",
     "## Identity",
     "",
@@ -481,7 +481,7 @@ export async function mdPage(key: PageKey, full = false): Promise<string> {
 
 export function llmsTxt(): string {
   return [
-    "# Sigma Intelligence",
+    "# SIGMA INTELLIGENCE",
     "",
     `> ${ORG.summary} This site is its archive of builds, its dated record, its members, its writing and how to reach it. Every page has a plain Markdown twin listed below.`,
     "",
@@ -505,7 +505,7 @@ export function llmsTxt(): string {
 export async function llmsFull(): Promise<string> {
   const parts = await Promise.all(PAGES.map((p) => mdPage(p.key, true)));
   return [
-    `# Sigma Intelligence — complete corpus`,
+    `# SIGMA INTELLIGENCE — complete corpus`,
     "",
     `> ${ORG.summary}`,
     "",

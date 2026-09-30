@@ -14,8 +14,8 @@ export const metadata: Metadata = {
 export default function MachineAbout() {
   return (
     <>
-      <Ld data={page("/ai/about", "About Sigma Intelligence", DESCRIPTION)} />
-      <Head title="About Sigma Intelligence" lede={ORG.summary} md="/ai/about.md" human="/" />
+      <Ld data={page("/ai/about", "About SIGMA INTELLIGENCE", DESCRIPTION)} />
+      <Head title="About SIGMA INTELLIGENCE" lede={ORG.summary} md="/ai/about.md" human="/" />
 
       <Section id="operations" title="Operations">
         <Facts rows={FACTS.map((f) => ({ k: f.label.en, v: <Bil v={f.value} /> }))} />
