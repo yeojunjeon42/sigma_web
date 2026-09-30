@@ -34,12 +34,14 @@ export default function Arcade({ word, label, extra }: { word: string; label: st
   const livesRef = useRef<HTMLSpanElement>(null);
   const [state, setState] = useState<State>("idle");
   const still = useMedia("(prefers-reduced-motion: reduce)", false);
+  // The game is from md only; phones get LostPage's plain page and no loop, canvas or listeners.
+  const wide = useMedia("(min-width: 768px)", false);
 
   useEffect(() => {
     const board = boardRef.current;
     const canvas = canvasRef.current;
     const pad = padRef.current;
-    if (!board || !canvas) return;
+    if (!board || !canvas || !wide) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -106,11 +108,14 @@ export default function Arcade({ word, label, extra }: { word: string; label: st
       dpr = Math.min(window.devicePixelRatio || 1, 3);
       canvas.width = W * dpr;
       canvas.height = H * dpr;
-      cell = W < 640 ? 18 : W < 1100 ? 22 : 26;
-      cols = Math.floor(W / cell);
-      rows = Math.floor(H / cell);
-      ox = (W - cols * cell) / 2;
-      oy = (H - rows * cell) / 2;
+      // The frame is drawn on the outer cells' centre lines: size the cells so those lines are the
+      // board's own edges (the gutter), not a few pixels inside it.
+      const step = W < 640 ? 18 : W < 1100 ? 22 : 26;
+      cols = Math.max(3, Math.round(W / step) + 1);
+      cell = (W - 1) / (cols - 1);
+      rows = Math.max(3, Math.floor((H - 1) / cell) + 1);
+      ox = -cell / 2;
+      oy = (H - 1 - (rows - 1) * cell) / 2 - cell / 2;
 
       const family = getComputedStyle(document.documentElement).getPropertyValue("--f-display").trim() || "sans-serif";
       try {
@@ -120,7 +125,8 @@ export default function Arcade({ word, label, extra }: { word: string; label: st
 
       base.width = W * dpr;
       base.height = H * dpr;
-      const g = base.getContext("2d", { willReadFrequently: true });
+      // Read once per build but drawn every frame: keep it on the GPU (no willReadFrequently).
+      const g = base.getContext("2d");
       if (!g) return;
       g.setTransform(dpr, 0, 0, dpr, 0, 0);
       g.clearRect(0, 0, W, H);
@@ -611,7 +617,7 @@ export default function Arcade({ word, label, extra }: { word: string; label: st
       board.removeEventListener("touchend", onTouchEnd);
       document.removeEventListener("visibilitychange", onVis);
     };
-  }, [word]);
+  }, [word, wide]);
 
   const prompt =
     state === "over" ? "Game over. Press an arrow or click to play again" : state === "idle" ? "Press an arrow or click to play" : null;
@@ -620,14 +626,14 @@ export default function Arcade({ word, label, extra }: { word: string; label: st
     <>
       <div
         ref={boardRef}
-        className={`relative h-[calc(var(--screen)-var(--masthead)-6.5rem)] min-h-[20rem] w-full cursor-pointer select-none ${
+        className={`relative h-[calc(var(--screen)-var(--masthead)-6.5rem)] min-h-[20rem] w-full cursor-pointer select-none max-md:hidden ${
           state === "play" || state === "caught" ? "touch-none" : "touch-pan-y"
         }`}
       >
         <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 size-full" />
         <p className="sr-only">{label}</p>
       </div>
-      {still ? null : (
+      {still || !wide ? null : (
         <div data-overlay className="fixed bottom-4 left-[var(--gutter)] z-40 flex items-center gap-x-xs">
           <button
             ref={padRef}
