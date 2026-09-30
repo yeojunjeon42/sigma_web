@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Archivo, Caveat, Geist_Mono, Newsreader, Noto_Serif_KR } from "next/font/google";
 import { MachineToggle } from "@/components/MachineToggle";
 import { JsonLd } from "@/components/JsonLd";
@@ -24,6 +25,25 @@ const sans = localFont({
     { prop: "line-gap-override", value: "0%" },
   ],
   fallback: ["ui-sans-serif", "system-ui", "sans-serif"],
+});
+
+// ↗ ← → · ×: the sans has none, and its generated Arial fallback drew them unlike the letters
+// (scripts/fonts/marks.py draws them to the sans). First in the stack, limited to these characters,
+// with the sans' metrics so a line holding one doesn't grow.
+const marks = localFont({
+  src: [
+    { path: "../fonts/marks-400.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/marks-700.woff2", weight: "700", style: "normal" },
+  ],
+  variable: "--f-marks",
+  display: "swap",
+  adjustFontFallback: false,
+  declarations: [
+    { prop: "unicode-range", value: "U+00B7, U+00D7, U+2190-2193, U+2196-2199" },
+    { prop: "ascent-override", value: "97.6%" },
+    { prop: "descent-override", value: "22.4%" },
+    { prop: "line-gap-override", value: "0%" },
+  ],
 });
 
 const kr = localFont({
@@ -141,7 +161,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${sans.variable} ${kr.variable} ${machine.variable} ${display.variable} ${hand.variable} ${serif.variable} ${serifKr.variable}`}
+      className={`${marks.variable} ${sans.variable} ${kr.variable} ${machine.variable} ${display.variable} ${hand.variable} ${serif.variable} ${serifKr.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: SCREEN }} />
@@ -160,6 +180,7 @@ export default function RootLayout({
         <PageTurn />
         <MachineToggle />
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { SIGMA_ASCII } from "@/app/ai/ascii";
 import { Ld } from "@/app/ai/machine";
 import { organization } from "@/app/ai/ld";
@@ -7,6 +8,9 @@ import { MachineNav } from "./MachineNav";
 import { MachineReveal } from "./MachineReveal";
 
 const mono = Geist_Mono({ weight: ["400", "500"], subsets: ["latin"], display: "swap" });
+// The wordmark's box-drawing in 0.6em cells that meet exactly (scripts/fonts/marks.py); it used
+// whatever the device's monospace had.
+const box = localFont({ src: "../../fonts/sigma-box.woff2", display: "block", adjustFontFallback: false });
 
 export const metadata: Metadata = {
   title: { default: "Machine", template: "%s \\ Machine" },
@@ -30,8 +34,7 @@ export default function MachineLayout({
         <pre
           aria-hidden="true"
           style={{
-            fontFamily:
-              'Menlo, Consolas, "DejaVu Sans Mono", "Liberation Mono", "Courier New", monospace',
+            fontFamily: `${box.style.fontFamily}, Menlo, Consolas, "DejaVu Sans Mono", monospace`,
           }}
           className="w-full text-[min(16px,calc((100vw-2rem)/24))] leading-[1]"
         >
