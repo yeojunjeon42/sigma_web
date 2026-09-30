@@ -3,11 +3,17 @@
 import { useEffect, useRef, type CSSProperties } from "react";
 import { DOT, GROUND, GROUND_INK, SCREEN } from "@/lib/halftone";
 import { printer } from "@/lib/printer";
-import { FIELD_POINTER, WARM } from "./fieldPointer";
+import { FIELD_STAGE } from "./fieldPointer";
 
 const STEPS = 32;
+const SWELL = 12;
+const SPAN = STEPS + SWELL;
 const BANDS = 10;
 const FEATHER = SCREEN * 9;
+const HAZE = 0.2;
+const WAVE = 1.2;
+const SPEED = 460;
+const RING = 32;
 
 type Plate = { el: HTMLElement; img: HTMLImageElement };
 type Tones = { key: string; cols: number; rows: number; tone: Float32Array };
@@ -24,11 +30,12 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
     if (!canvas || !host) return;
     const pr = printer(canvas, () => kick());
     if (!pr) return;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     let plates: Plate[] = [];
     const measured = new WeakMap<HTMLElement, Tones>();
     const max = SCREEN * DOT;
-    const SLOTS = STEPS * BANDS;
+    const SLOTS = SPAN * BANDS;
     let cap = 1 << 11;
     let bx = new Float32Array(SLOTS * cap);
     let by = new Float32Array(SLOTS * cap);
@@ -39,6 +46,7 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
     let seen = false;
     let retry = 0;
     let moved = -1;
+    let wave: { el: HTMLElement; x: number; y: number; t0: number } | null = null;
 
     const collect = () => {
       const links = host.querySelectorAll<HTMLElement>("[data-plate-link]");
@@ -116,7 +124,7 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
       const sheet = host.getBoundingClientRect();
       const y = Math.min(Math.max(-sheet.top, 0), Math.max(0, sheet.height - h));
       canvas.style.transform = `translate3d(0,${y.toFixed(2)}px,0)`;
-      const fx = sheet.left;
+      const fx = canvas.parentElement?.getBoundingClientRect().left ?? sheet.left;
       const fy = sheet.top + y;
 
       pr.size(w, h, Math.min(window.devicePixelRatio || 1, 3));
@@ -141,40 +149,8 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
 
       let pending = false;
       let grew = false;
-
-      const pk = FIELD_POINTER.k;
-      const warmth = (x: number, y: number) => {
-        if (pk <= 0) return 0;
-        const d = Math.hypot(x - FIELD_POINTER.x, y - FIELD_POINTER.y);
-        return d < WARM ? pk * (1 - d / WARM) ** 2 : 0;
-      };
-
-      if (pk > 0) {
-        const cx = FIELD_POINTER.x - fx;
-        const cy = FIELD_POINTER.y - fy;
-        const i0 = Math.ceil((cx - WARM - gx) / SCREEN);
-        const i1 = Math.floor((cx + WARM - gx) / SCREEN);
-        const j0 = Math.ceil((cy - WARM - gy) / SCREEN);
-        const j1 = Math.floor((cy + WARM - gy) / SCREEN);
-        for (let j = j0; j <= j1; j++) {
-          const py = gy + j * SCREEN;
-          if (py < -SCREEN || py > h + SCREEN) continue;
-          for (let i = i0; i <= i1; i++) {
-            const px = gx + i * SCREEN;
-            const near = warmth(px + fx, py + fy);
-            if (near < 0.04) continue;
-            const level = GROUND * (1 - near * 0.16);
-            const step = Math.max(floor - 1, Math.min(STEPS - 1, Math.round((1 - level) * STEPS) - 1));
-            const slot = Math.min(BANDS - 1, Math.round(near * 0.55 * (BANDS - 1))) * STEPS + step;
-            const n = held[slot];
-            if (n < cap) {
-              bx[slot * cap + n] = px;
-              by[slot * cap + n] = py;
-              held[slot] = n + 1;
-            } else grew = true;
-          }
-        }
-      }
+      const tw = wave && !still.matches ? (performance.now() - wave.t0) / 1000 : WAVE;
+      if (tw >= WAVE) wave = null;
 
       for (const { el, img } of plates) {
         const r = el.getBoundingClientRect();
@@ -197,6 +173,8 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
         const bb = bt + box.height;
         const sx = grid.cols / box.width;
         const sy = grid.rows / box.height;
+        const haze = Number(el.dataset.sp) < 1 ? HAZE : 0;
+        const ring = wave && wave.el === el ? wave : null;
 
         const i0 = Math.ceil((Math.max(bl, -SCREEN) - gx) / SCREEN);
         const i1 = Math.floor((Math.min(br, w + SCREEN) - gx) / SCREEN);
@@ -225,13 +203,20 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
             const d = grid.tone[v1 * grid.cols + u1];
             const tone = (a + (b - a) * uf) * (1 - vf) + (c + (d - c) * uf) * vf;
 
-            const near = warmth(px + fx, py + fy);
-            const lit = Math.max(0, 1 - (1 - tone) * m - near * 0.1 * m);
+            const lit = Math.max(0, 1 - (1 - tone) * m * (1 - haze));
             const level = GROUND * (0.12 + 0.88 * lit);
-            const step = Math.min(STEPS - 1, Math.round((1 - level) * STEPS) - 1);
+            let step = Math.min(STEPS - 1, Math.round((1 - level) * STEPS) - 1);
+            let band = Math.min(BANDS - 1, Math.round((1 - lit) * m * (BANDS - 1)));
+            if (ring) {
+              const d = Math.hypot(px + fx - ring.x, py + fy - ring.y);
+              const k = Math.exp(-(((d - tw * SPEED) / RING) ** 2)) * (1 - tw / WAVE) * m;
+              if (k > 0.03) {
+                step = Math.max(step, floor) + Math.round(k * SWELL);
+                band = Math.min(BANDS - 1, band + Math.round(k * 3));
+              }
+            }
             if (step < floor) continue;
-            const slot =
-              Math.min(BANDS - 1, Math.round(((1 - lit) * m + near * 0.35 * m) * (BANDS - 1))) * STEPS + step;
+            const slot = band * SPAN + Math.min(SPAN - 1, step);
             const n = held[slot];
             if (n < cap) {
               bx[slot * cap + n] = px;
@@ -248,8 +233,8 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
           y: by,
           held,
           cap,
-          radius: (slot) => (max * ((slot % STEPS) + 1)) / STEPS,
-          ink: (slot) => Math.floor(slot / STEPS),
+          radius: (slot) => (max * ((slot % SPAN) + 1)) / STEPS,
+          ink: (slot) => Math.floor(slot / SPAN),
         },
         0,
         SLOTS,
@@ -267,6 +252,7 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
         window.clearTimeout(retry);
         retry = window.setTimeout(kick, 120);
       }
+      if (wave) kick();
     };
 
     const kick = () => {
@@ -278,7 +264,12 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
     };
 
     const onScroll = () => {
-      if (seen && !FIELD_POINTER.staged) kick();
+      if (seen && !FIELD_STAGE.staged) kick();
+    };
+    const onEnter = (e: Event) => {
+      const d = (e as CustomEvent<{ el: HTMLElement; x: number; y: number }>).detail;
+      wave = { ...d, t0: performance.now() };
+      kick();
     };
     const onLoad = (e: Event) => {
       if ((e.target as HTMLElement).tagName === "IMG") kick();
@@ -304,6 +295,7 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
     window.addEventListener("scroll", onScroll, { passive: true });
     host.addEventListener("load", onLoad, true);
     host.addEventListener("field:moved", now);
+    host.addEventListener("field:enter", onEnter);
 
     return () => {
       if (raf) cancelAnimationFrame(raf);
@@ -314,12 +306,13 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
       window.removeEventListener("scroll", onScroll);
       host.removeEventListener("load", onLoad, true);
       host.removeEventListener("field:moved", now);
+      host.removeEventListener("field:enter", onEnter);
       pr.dispose();
     };
   }, []);
 
   return (
-    <div aria-hidden="true" style={edge} className="pointer-events-none absolute inset-0 z-[2]">
+    <div aria-hidden="true" style={edge} className="pointer-events-none absolute inset-y-0 left-[calc(50%-50vw)] z-[2] w-screen">
       <canvas ref={ref} className="absolute inset-x-0 top-0 h-svh w-full" />
     </div>
   );

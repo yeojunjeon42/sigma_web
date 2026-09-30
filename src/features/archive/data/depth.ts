@@ -7,7 +7,7 @@ export type Layer = 0 | 1 | 2;
 export const LAYERS: { size: number; speed: number }[] = [
   { size: 128, speed: 0.8 },
   { size: 176, speed: 1 },
-  { size: 236, speed: 1.24 },
+  { size: 236, speed: 1.36 },
 ];
 
 const MARGIN = 28;

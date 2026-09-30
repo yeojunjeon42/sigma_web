@@ -28,6 +28,12 @@ const CHIP_AT: CSSProperties = {
 
 const pct = (n: number) => `${n * 100}%`;
 
+// The photograph waits for the dots' wave (FieldScreen) to cross the plate, then fades in; it
+// leaves quickly. Reduced motion shows it at once.
+const REVEAL =
+  "opacity-0 transition-opacity duration-150 ease-out group-hover/plate:opacity-100 group-hover/plate:duration-500 group-hover/plate:delay-500 group-focus-visible/plate:opacity-100 group-focus-visible/plate:duration-500 motion-reduce:transition-none";
+
+
 const FIRST_SCREEN = SHEET * 0.7;
 
 const EDGE: CSSProperties = {
@@ -79,7 +85,7 @@ export default function ArchiveDepth({
   );
 
   return (
-    <section>
+    <section className="overflow-x-clip">
       <Container>
         <div
           data-depth
@@ -144,7 +150,7 @@ export default function ArchiveDepth({
                       tile={tile}
                       sizes={`${Math.ceil((w / SHEET) * 100)}vw`}
                       eager={eager && y < FIRST_SCREEN}
-                      className={`w-full opacity-0 transition-opacity duration-300 ease-out group-hover/plate:opacity-100 group-focus-visible/plate:opacity-100 motion-reduce:transition-none`}
+                      className={`w-full ${REVEAL}`}
                     />
                     <p className="u-knock mt-xs line-clamp-2 text-body-sm leading-[1.35] text-ink">
                       {name.en}
