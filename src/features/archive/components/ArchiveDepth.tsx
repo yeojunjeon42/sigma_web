@@ -4,7 +4,7 @@ import { Container } from "@/components/ui";
 import { displayTags } from "@/features/content/data/tags";
 import type { ArchiveProject } from "../types";
 import { COVERS, type Look } from "../data/covers";
-import { tileFor } from "../data/field";
+import { FEATHER, tileFor } from "../data/field";
 import { LAYERS, SHEET, layoutDepth, type Layer } from "../data/depth";
 
 import { splitTitle } from "./splitTitle";
@@ -14,6 +14,11 @@ import DepthStage from "./DepthStage";
 import FieldScreen from "./FieldScreen";
 import PlateHandoff from "./PlateHandoff";
 import { GROUND_DOT, GROUND_INK, SCREEN } from "@/lib/halftone";
+
+const CAPTION: CSSProperties = {
+  marginLeft: FEATHER / 2,
+  marginTop: `calc(var(--spacing-xs) - ${FEATHER / 2}px)`,
+};
 
 interface DepthGroup {
   era: string | null;
@@ -152,7 +157,12 @@ export default function ArchiveDepth({
                       eager={eager && y < FIRST_SCREEN}
                       className={`w-full ${REVEAL}`}
                     />
-                    <p className="u-knock mt-xs line-clamp-2 text-body-sm leading-[1.35] text-ink">
+                    {/* On the printed picture's edge (half the feather in from the box), not the box; it
+                        gives way on hover, when the photo fills the box and the chip carries the name. */}
+                    <p
+                      style={CAPTION}
+                      className="u-knock line-clamp-2 text-body-sm leading-[1.35] text-ink transition-opacity duration-150 group-hover/plate:opacity-0 group-focus-visible/plate:opacity-0 motion-reduce:transition-none"
+                    >
                       {name.en}
                       <span data-arrow={"\u00a0↗"} className="after:content-[attr(data-arrow)/'']" />
                     </p>
@@ -162,7 +172,7 @@ export default function ArchiveDepth({
                     aria-hidden="true"
                     data-chip
                     style={CHIP_AT}
-                    className={`pointer-events-none fixed top-0 left-0 z-30 hidden max-w-[18rem] bg-canvas-inverse px-sm pt-[0.55rem] pb-sm text-ink-inverse peer-hover:block peer-focus-visible:block ${META}`}
+                    className={`pointer-events-none fixed top-0 left-0 z-30 hidden max-w-[18rem] rounded-[var(--radius-photo)] bg-canvas-inverse p-sm text-ink-inverse peer-hover:block peer-focus-visible:block ${META} [&>:first-child]:[text-box:trim-start_cap_alphabetic] [&>:last-child]:[text-box:trim-end_cap_alphabetic] [&>:last-child>*]:[text-box:trim-end_cap_alphabetic]`}
                   >
                     <span className="block text-body-sm leading-[1.3] text-ink-inverse">
                       {name.en}
@@ -176,11 +186,9 @@ export default function ArchiveDepth({
                       ))}
                     </span>
                     {p.award ? (
-                      <span className="mt-xxs flex gap-x-xs text-ink-inverse-muted">
-                        <span className="text-accent">•</span>
-                        <span>
-                          {p.award.en}
-                        </span>
+                      <span className="mt-xxs block text-ink-inverse-muted">
+                        <span aria-hidden="true" className="mr-xs inline-block size-[0.34em] bg-accent align-[0.167em]" />
+                        {p.award.en}
                       </span>
                     ) : null}
                   </span>

@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
+import Pending from "./Pending";
 import PlateArt from "./PlateArt";
 import type { ReelBuild, ReelGroup } from "./ArchiveReel";
 
@@ -36,7 +37,8 @@ export default function ArchiveGrid({
           >
             {builds.slice(g.from, g.to).map((b, i) => (
               <li key={b.id} id={`b-${b.id}`} style={MARGIN}>
-                <Link href={open(b.id)} prefetch={false} className="group block">
+                <Link href={open(b.id)} prefetch={false} className="group block transition-opacity has-[[data-pending]]:opacity-50 has-[[data-pending]]:delay-150">
+                  <Pending />
                   <PlateArt
                     tile={b.tile}
                     sizes="(min-width: 768px) 23vw, (min-width: 640px) 31vw, 46vw"
@@ -50,7 +52,7 @@ export default function ArchiveGrid({
                     </span>
                     {b.award ? (
                       <span className="md:hidden">
-                        <span aria-hidden="true" className="ml-xs inline-block size-[0.34em] bg-accent align-[calc((1cap-0.34em)/2)]" />
+                        <span aria-hidden="true" className="ml-xs inline-block size-[0.34em] bg-accent align-[0.167em]" />
                         <span className="sr-only">{b.award}</span>
                       </span>
                     ) : null}

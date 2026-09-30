@@ -30,7 +30,7 @@ import { ERAS, type ArchiveProject, type Era } from "@/features/archive/types";
 import { getEntries } from "@/features/archive/api/getEntries";
 import { getIndex } from "@/features/content/api/getContent";
 import YearRuler, { type Mark } from "@/features/history/components/YearRuler";
-import AddBuild from "@/features/archive/components/AddBuild";
+import AddBuild, { AddBuildRow } from "@/features/archive/components/AddBuild";
 
 const DESCRIPTION = "Every machine SIGMA INTELLIGENCE has built, 2007–2025.";
 
@@ -237,7 +237,7 @@ export default async function ArchiveView({
 
                 <nav
                   aria-label="Era"
-                  className={`max-lg:order-last max-lg:w-full max-lg:min-w-0 lg:flex-1 ${feedWalk ? "max-lg:hidden" : ""}`}
+                  className={`max-lg:order-last max-lg:w-full max-lg:min-w-0 lg:flex-1 ${feedWalk ? "max-md:hidden" : ""}`}
                 >
                   <ul className="u-scroll-x flex items-baseline gap-x-md whitespace-nowrap lg:gap-x-sm xl:gap-x-md max-lg:overflow-x-auto max-lg:pr-10 max-lg:[mask-image:linear-gradient(to_right,#000_calc(100%-2.5rem),transparent)] lg:flex-wrap">
                     <li className="shrink-0">
@@ -359,6 +359,11 @@ export default async function ArchiveView({
                 </>
               )}
             </div>
+            {!entryOpen ? (
+              <Container className="md:hidden">
+                <AddBuildRow className="mt-xxl" />
+              </Container>
+            ) : null}
           </GridField>
 
           {!entryOpen ? <AddBuild /> : null}

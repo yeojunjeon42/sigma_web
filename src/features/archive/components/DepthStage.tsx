@@ -11,6 +11,8 @@ export default function DepthStage() {
     if (!host) return;
 
     const still = window.matchMedia("(prefers-reduced-motion: reduce)");
+    // Touch scrolls off the main thread; planes moved from JS would trail it (iPad landscape).
+    const fine = window.matchMedia("(pointer: fine)");
     const layers = [...host.querySelectorAll<HTMLElement>("[data-sp]")];
     const speed = layers.map((el) => Number(el.dataset.sp) || 1);
     const tops: number[] = [];
@@ -30,7 +32,7 @@ export default function DepthStage() {
 
     const frame = () => {
       raf = 0;
-      if (still.matches || !host.offsetParent) {
+      if (still.matches || !fine.matches || !host.offsetParent) {
         FIELD_STAGE.staged = false;
         return;
       }
