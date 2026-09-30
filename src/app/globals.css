@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--f-sans), var(--f-kr), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--f-marks), var(--f-sans), var(--f-kr), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--f-machine), var(--f-kr), ui-monospace, SFMono-Regular, monospace;
   --font-serif: var(--f-serif), var(--f-serif-kr), ui-serif, Georgia, "Times New Roman", serif;
   --default-font-family: var(--font-sans);
@@ -325,7 +325,8 @@
   }
 
   .year-ruler {
-    --ruler-paper: color-mix(in srgb, var(--color-canvas) 96%, white);
+    /* The canvas itself: iOS 26 Safari paints the dial's background under its tab bar. */
+    --ruler-paper: var(--color-canvas);
     --ruler-station: 96px;
     --ruler-edge: calc(var(--ruler-station) / 2);
     --ruler-magnet: calc(var(--ruler-edge) + 2 * var(--ruler-pitch));
@@ -530,6 +531,8 @@
     overflow: hidden;
     pointer-events: none;
     background: var(--ruler-paper);
+    /* the dial's own top highlight, carried across the box that covers it */
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.45) inset;
   }
   .year-ruler__value {
     position: absolute;
@@ -540,7 +543,8 @@
     margin: 0;
     pointer-events: none;
     text-align: center;
-    font-family: var(--font-mono);
+    /* the sans, like every other year on the page */
+    font-family: var(--font-sans);
     font-size: var(--text-display-lg);
     line-height: 1;
     font-variant-numeric: tabular-nums;
@@ -676,10 +680,6 @@ html[data-turn] body > :not(header) {
     opacity: 0;
     translate: 0 -6px;
   }
-}
-html[data-foot],
-html[data-foot] body {
-  background-color: var(--color-band);
 }
 html:has([data-drawer]) {
   overflow-anchor: none;
@@ -886,11 +886,15 @@ html:has([data-drawer]) {
 .prose li + li {
   margin-top: 0.4rem;
 }
+/* A square on the first line's cap centre (a centred line box is centred on the sans' capitals). */
 .prose ul > li::before {
-  content: "-";
+  content: "";
   position: absolute;
   left: calc(var(--post-list-marker-width) * -1);
-  color: var(--color-ink-muted);
+  top: calc(0.5lh - 0.15em);
+  width: 0.3em;
+  height: 0.3em;
+  background: var(--color-ink-muted);
 }
 .prose ol > li {
   counter-increment: post-ordered-list;
@@ -995,11 +999,30 @@ html:has([data-drawer]) {
     opacity: 0.08;
   }
 }
-@keyframes scroll-draw {
-  from {
-    scale: 0 1;
-  }
+/* History's year rules: drawn once as each row comes in (RuleIn sets html[data-rules] and a row's
+   data-in). Without script, or with reduced motion, they are plain borders. */
+.u-rule-in {
+  position: relative;
 }
+html[data-rules] .u-rule-in {
+  border-top-color: transparent;
+}
+html[data-rules] .u-rule-in::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--color-rule);
+  transform-origin: 0 50%;
+  scale: 0 1;
+  transition: scale 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+html[data-rules] .u-rule-in[data-in]::before {
+  scale: 1 1;
+}
+
 @keyframes scroll-card {
   from {
     translate: 0 calc(var(--screen) * 0.14);
@@ -1048,23 +1071,6 @@ html:has([data-drawer]) {
       animation: scroll-fade linear both;
       animation-timeline: view();
       animation-range: entry 0% entry 70%;
-    }
-    .u-rule-in {
-      position: relative;
-      border-top-color: transparent;
-    }
-    .u-rule-in::before {
-      content: "";
-      position: absolute;
-      top: -1px;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: var(--color-rule);
-      transform-origin: 0 50%;
-      animation: scroll-draw linear both;
-      animation-timeline: view();
-      animation-range: entry 0% cover 30%;
     }
     .u-card-rise {
       animation: scroll-card linear both;
@@ -1261,23 +1267,6 @@ html:has([data-drawer]) {
 }
 .prose.flow.flow-panel blockquote {
   font-size: 1rem;
-}
-
-.pill-above {
-  transition: bottom 480ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-@media (max-width: 1023.98px) {
-  body:has(.year-ruler) .pill-above {
-    bottom: calc(max(var(--gutter), env(safe-area-inset-bottom)) + 76px + var(--spacing-sm));
-  }
-  body:has(.year-ruler[data-on=""]) .pill-above {
-    bottom: max(var(--gutter), env(safe-area-inset-bottom));
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .pill-above {
-    transition: none;
-  }
 }
 
 .u-swipe,

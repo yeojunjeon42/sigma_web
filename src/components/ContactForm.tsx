@@ -69,7 +69,8 @@ export function ContactForm() {
     data.append("from_name", "snusigma.net");
     setStatus("sending");
     try {
-      const res = await fetch(ENDPOINT, { method: "POST", body: data });
+      // A stalled phone connection would otherwise leave it "sending" with no mailto fallback.
+      const res = await fetch(ENDPOINT, { method: "POST", body: data, signal: AbortSignal.timeout?.(20000) });
       const json = await res.json();
       if (!json.success) throw new Error();
       const now = new Date();

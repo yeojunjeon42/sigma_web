@@ -20,7 +20,7 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
             </Link>
           </p>
         </main>
-        <footer style={{ background: "#f0d8d1", padding: "2rem clamp(16px, 4vw, 48px)", fontSize: "0.8125rem", color: "#4d514a" }}>© Sigma Intelligence · EST. 1984</footer>
+        <footer style={{ background: "#f0d8d1", padding: "2rem clamp(16px, 4vw, 48px)", fontSize: "0.8125rem", color: "#4d514a" }}>© SIGMA INTELLIGENCE · EST. 1984</footer>
       </body>
     </html>
   );

@@ -8,7 +8,8 @@ export function MachineToggle() {
   const machine = pathname.startsWith("/ai");
 
 
-  const base = "rounded-pill px-2 py-1 text-[0.6875rem] uppercase tracking-[0.02em] transition-colors";
+  // The same type and height as the contact pill on the other corner (ContactPill): a pair.
+  const base = "flex h-full items-center rounded-pill px-2 text-[0.75rem] transition-colors";
 
   return (
     <div
@@ -18,7 +19,7 @@ export function MachineToggle() {
       <div
         role="group"
         aria-label="Reading mode"
-        className={`pointer-events-auto flex items-center rounded-pill border p-0.5 backdrop-blur ${
+        className={`pointer-events-auto flex h-[30px] items-center rounded-pill border p-0.5 backdrop-blur ${
           machine
             ? "border-overlay-ink/20 bg-canvas-inverse/80"
             : "border-ink/15 bg-canvas/90"
