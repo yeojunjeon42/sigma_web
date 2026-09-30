@@ -1,14 +1,13 @@
-// The site's scroll magnets: once native momentum has stopped, the page is pulled to `to`, by a
-// spring (the reel) or by the desktop smooth scroll's ease-out (`ease`, Lenis at lerp 0.1). Any
-// scroll the pull did not make itself (a finger, a wheel) ends it at once.
+// The reel's magnet: once native momentum has stopped, the page is pulled to `to` by a spring.
+// Any scroll the pull did not make itself (a finger, a wheel) ends it at once, and so does a
+// target the page cannot reach.
 
 const STIFF = 250;
 const DAMP = 32;
-const EASE = 6;
 
 export type Glide = { settling: boolean; stop: () => void };
 
-export function glide(to: number, ease = false): Glide {
+export function glide(to: number): Glide {
   let raf = 0;
   let y0 = NaN;
   let then = 0;
@@ -16,7 +15,6 @@ export function glide(to: number, ease = false): Glide {
   let prev = NaN;
   let stuck = 0;
   let velocity = 0;
-  let pos = NaN;
   const g: Glide = {
     settling: false,
     stop: () => {
@@ -36,24 +34,17 @@ export function glide(to: number, ease = false): Glide {
     const dt = Math.min(0.032, Math.max(0.008, (now - then) / 1000));
     then = now;
     const y = window.scrollY;
-    let next: number;
-    if (ease) {
-      if (Number.isNaN(pos)) pos = y;
-      pos += (to - pos) * (1 - Math.exp(-EASE * dt));
-      next = pos;
-    } else {
-      stuck = Math.abs(y - prev) < 0.01 && Math.abs(last - y) > 0.1 ? stuck + 1 : 0;
-      prev = y;
-      if (stuck > 2) {
-        g.settling = false;
-        return;
-      }
-      const acceleration = (to - y) * STIFF - velocity * DAMP;
-      velocity += acceleration * dt;
-      next = y + velocity * dt;
+    stuck = Math.abs(y - prev) < 0.01 && Math.abs(last - y) > 0.1 ? stuck + 1 : 0;
+    prev = y;
+    if (stuck > 2) {
+      g.settling = false;
+      return;
     }
+    const acceleration = (to - y) * STIFF - velocity * DAMP;
+    velocity += acceleration * dt;
+    const next = y + velocity * dt;
     g.settling = true;
-    if (Math.abs(to - next) < (ease ? 0.5 : 0.35) && Math.abs(velocity) < 5) {
+    if (Math.abs(to - next) < 0.35 && Math.abs(velocity) < 5) {
       last = to;
       window.scrollTo({ top: to, behavior: "instant" });
       g.settling = false;
