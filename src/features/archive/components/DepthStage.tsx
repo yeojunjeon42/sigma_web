@@ -1,11 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { FIELD_POINTER } from "./fieldPointer";
-
-const TILT = 18;
-const REACH = 280;
-const LEAN = 11;
+import { FIELD_STAGE } from "./fieldPointer";
 
 export default function DepthStage() {
   const ref = useRef<HTMLSpanElement>(null);
@@ -19,74 +15,34 @@ export default function DepthStage() {
     const speed = layers.map((el) => Number(el.dataset.sp) || 1);
     const tops: number[] = [];
     const heights: number[] = [];
-    const lefts: number[] = [];
-    const widths: number[] = [];
-    const lx = layers.map(() => 0);
-    const ly = layers.map(() => 0);
     const probe = ref.current!;
     let px = -1e4;
     let py = -1e4;
     let raf = 0;
     let visible = false;
-    let tx = 0.5;
-    let ty = 0.5;
-    let mx = 0.5;
-    let my = 0.5;
 
     const measure = () => {
       layers.forEach((el, i) => {
         tops[i] = el.offsetTop;
         heights[i] = el.offsetHeight;
-        lefts[i] = el.offsetLeft;
-        widths[i] = el.offsetWidth;
       });
     };
 
     const frame = () => {
       raf = 0;
       if (still.matches || !host.offsetParent) {
-        FIELD_POINTER.k = 0;
-        FIELD_POINTER.staged = false;
+        FIELD_STAGE.staged = false;
         return;
-      }
-      mx += (tx - mx) * 0.08;
-      my += (ty - my) * 0.08;
-      let settled = Math.abs(tx - mx) < 0.001 && Math.abs(ty - my) < 0.001;
-      const warm = px > -1e4 ? 1 : 0;
-      FIELD_POINTER.k += (warm - FIELD_POINTER.k) * 0.12;
-      if (Math.abs(warm - FIELD_POINTER.k) < 0.01) FIELD_POINTER.k = warm;
-      else settled = false;
-      if (px > -1e4) {
-        FIELD_POINTER.x = px;
-        FIELD_POINTER.y = py;
-      }
-      if (settled) {
-        mx = tx;
-        my = ty;
       }
       const r = host.getBoundingClientRect();
       const vh = window.innerHeight;
       layers.forEach((el, i) => {
         const centre = r.top + tops[i] + heights[i] / 2;
         if (centre < -vh || centre > 2 * vh) return;
-        const s = speed[i];
-        const dy = (centre - vh / 2) * (s - 1);
-        const dx = (0.5 - mx) * TILT * (s - 0.6);
-        const tilt = (0.5 - my) * TILT * 0.5 * (s - 0.6);
-        const cx = r.left + lefts[i] + widths[i] / 2 + dx;
-        const cy = centre + dy + tilt;
-        const d = Math.hypot(px - cx, py - cy);
-        const k = d < REACH ? (1 - d / REACH) ** 2 : 0;
-        const gx = d ? ((px - cx) / d) * LEAN * k : 0;
-        const gy = d ? ((py - cy) / d) * LEAN * k : 0;
-        lx[i] += (gx - lx[i]) * 0.1;
-        ly[i] += (gy - ly[i]) * 0.1;
-        if (Math.abs(gx - lx[i]) > 0.05 || Math.abs(gy - ly[i]) > 0.05) settled = false;
-        el.style.translate = `${(dx + lx[i]).toFixed(1)}px ${(dy + tilt + ly[i]).toFixed(1)}px`;
+        el.style.translate = `0px ${((centre - vh / 2) * (speed[i] - 1)).toFixed(1)}px`;
       });
-      FIELD_POINTER.staged = true;
+      FIELD_STAGE.staged = true;
       host.dispatchEvent(new Event("field:moved"));
-      if (!settled && visible) raf = requestAnimationFrame(frame);
     };
     const kick = () => {
       if (!raf && visible) raf = requestAnimationFrame(frame);
@@ -107,19 +63,21 @@ export default function DepthStage() {
       chip.style.setProperty("--mx", `${x - o.left}px`);
       chip.style.setProperty("--my", `${y - o.top}px`);
     };
+    let lit: HTMLElement | null = null;
     const onOver = (e: PointerEvent) => {
       if (e.pointerType !== "mouse") return;
       chip = chipOf(e.target);
       place(e.clientX, e.clientY);
+      const link = (e.target as HTMLElement).closest?.<HTMLElement>("[data-plate-link]") ?? null;
+      if (link === lit) return;
+      lit = link;
+      if (link) host.dispatchEvent(new CustomEvent("field:enter", { detail: { el: link, x: e.clientX, y: e.clientY } }));
     };
     const onPointer = (e: PointerEvent) => {
       if (e.pointerType !== "mouse") return;
       place(e.clientX, e.clientY);
       px = e.clientX;
       py = e.clientY;
-      tx = e.clientX / window.innerWidth;
-      ty = e.clientY / window.innerHeight;
-      kick();
     };
     let pressing = false;
     const onDown = () => (pressing = true);
@@ -135,7 +93,7 @@ export default function DepthStage() {
     const onOut = (e: PointerEvent) => {
       if (e.relatedTarget) return;
       px = py = -1e4;
-      kick();
+      lit = null;
     };
     const onResize = () => {
       measure();
