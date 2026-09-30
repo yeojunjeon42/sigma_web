@@ -140,7 +140,12 @@ export default function RecordLines({
         tones.set(id, { tone, cols, rows });
         done();
       };
-      img.src = `/_next/image?url=${encodeURIComponent(src)}&w=256&q=70`;
+      // q must be one of `images.qualities` (Next 16 default: 75 only); any other is a 400.
+      img.onerror = () => {
+        img.onerror = null;
+        img.src = src;
+      };
+      img.src = `/_next/image?url=${encodeURIComponent(src)}&w=256&q=75`;
     };
 
     const print = () => {
@@ -224,7 +229,7 @@ export default function RecordLines({
       }
       pk.x += (pk.tx - pk.x) * (1 - Math.exp(-dt * 14));
       pk.y += (pk.ty - pk.y) * (1 - Math.exp(-dt * 14));
-      peek.style.transform = `translate3d(${pk.x.toFixed(1)}px,${pk.y.toFixed(1)}px,0)`;
+      if (inside) peek.style.transform = `translate3d(${pk.x.toFixed(1)}px,${pk.y.toFixed(1)}px,0)`;
       if (tones.has(pk.id) && pk.grow < 1) {
         pk.grow = Math.min(1, pk.grow + dt / 0.35);
         print();
@@ -314,6 +319,8 @@ export default function RecordLines({
       if (g.el && (e.target as Element).closest("[data-id]") === g.el) return;
       e.preventDefault();
       e.stopPropagation();
+      // PageTurn (document, capture) already faded the page for this click; nothing navigates.
+      delete document.documentElement.dataset.turn;
       if (g.el?.isConnected && !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)) g.el.click();
     };
     const key = (e: KeyboardEvent) => {
@@ -408,8 +415,12 @@ export default function RecordLines({
           >
             {b.name}
             {b.year ? (
-              <span className="ml-[0.5em] inline-block -translate-y-[2em] font-mono text-[12px] tracking-normal text-ink tabular-nums">
-                {b.year}
+              // A box one cap tall standing on the baseline (no line box: its only child is absolute),
+              // with the year hung from its top: the year's capitals start on the name's cap line.
+              <span className="relative ml-[0.5em] inline-block h-[1cap] w-[calc(12px*2.4)] align-baseline">
+                <span className="u-trim absolute top-0 left-0 font-mono text-[12px] tracking-normal text-ink tabular-nums">
+                  {b.year}
+                </span>
               </span>
             ) : null}
           </Link>
@@ -444,7 +455,7 @@ export default function RecordLines({
   return (
     <div
       ref={root}
-      className="group/lines relative touch-pan-y select-none data-[live]:cursor-grab data-[drag]:!cursor-grabbing"
+      className="group/lines relative touch-pan-y touch-pinch-zoom select-none data-[live]:cursor-grab data-[drag]:!cursor-grabbing"
     >
       <div className="flex items-baseline justify-between gap-x-lg">
         <h2 className={`${META} text-ink`}>

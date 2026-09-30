@@ -1,7 +1,7 @@
 import Image from "next/image";
-import { preload } from "react-dom";
 import HeroPlate, { HeroCaption, type HeroBuild } from "./HeroPlate";
 import type { Sponsor } from "@/features/sponsors/api/getSponsors";
+import { PLATE_KEY } from "@/lib/halftone";
 
 const FRAME = {
   "--S": "min(calc((100vw - 2 * var(--gutter)) / 9.8), 4rem)",
@@ -27,14 +27,21 @@ export default function HeroField({
   sponsors: Sponsor[];
   builds: HeroBuild[];
 }) {
-  if (builds[0]) preload(builds[0].src, { as: "image", fetchPriority: "high" });
 
   return (
-    <section style={FRAME} className="relative isolate touch-pan-y overflow-hidden bg-canvas">
+    <section style={FRAME} className="relative isolate touch-pan-y touch-pinch-zoom overflow-hidden bg-canvas">
       <h1 className="sr-only">
         Sigma Intelligence — the robotics club of Seoul National University
       </h1>
 
+      {builds.length > 0 && (
+        // Preload the plate this visit opens on: the one after the last shown (HeroPlate's rule).
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(()=>{try{const s=${JSON.stringify(builds.map((b) => b.src))};let l=Number(localStorage.getItem("${PLATE_KEY}")??-1);if(!Number.isInteger(l))l=-1;const k=document.createElement("link");k.rel="preload";k.as="image";k.fetchPriority="high";k.href=s[((l%s.length)+s.length+1)%s.length];document.head.append(k)}catch{}})()`,
+          }}
+        />
+      )}
       <HeroPlate builds={builds} />
 
       <div className="relative z-10 flex min-h-[var(--screen)] flex-col px-[var(--gutter)] pt-[var(--masthead)] md:grid md:min-h-[max(var(--screen),38rem)] md:grid-cols-12 md:grid-rows-[auto_repeat(4,minmax(min-content,1fr))_auto] md:gap-x-[var(--gutter)] md:pt-[calc(var(--masthead)+1.5rem)] md:pb-lg lg:pb-16">
@@ -46,7 +53,7 @@ export default function HeroField({
             Sigma
           </span>
           <p
-            className={`${META} u-lift leading-none text-ink md:col-span-3 md:col-start-10 md:row-start-1 md:self-start md:justify-self-end`}
+            className={`${META} u-lift u-trim leading-none text-ink md:col-span-3 md:col-start-10 md:row-start-1 md:self-start md:justify-self-end`}
           >
             Est. 1984
           </p>
@@ -66,7 +73,7 @@ export default function HeroField({
 
         <div className="mt-md grid min-h-[13rem] flex-1 [contain:size] grid-cols-2 grid-rows-5 gap-x-md md:mt-0 md:contents">
           <Stmt
-            className="col-start-1 row-start-1 self-start md:col-span-3 md:col-start-7 md:row-start-1"
+            className="col-start-1 row-start-1 self-start md:col-span-3 md:col-start-7 md:row-start-1 md:[text-box:trim-both_cap_alphabetic]"
           >
             Seoul National University
           </Stmt>
