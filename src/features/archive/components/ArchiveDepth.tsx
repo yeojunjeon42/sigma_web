@@ -33,8 +33,7 @@ const CHIP_AT: CSSProperties = {
 
 const pct = (n: number) => `${n * 100}%`;
 
-// The photograph waits for the dots' wave (FieldScreen) to cross the plate, then fades in; it
-// leaves quickly. Reduced motion shows it at once.
+// Start the photo reveal after FieldScreen's wave crosses the plate.
 const REVEAL =
   "opacity-0 transition-opacity duration-150 ease-out group-hover/plate:opacity-100 group-hover/plate:duration-500 group-hover/plate:delay-500 group-focus-visible/plate:opacity-100 group-focus-visible/plate:duration-500 motion-reduce:transition-none";
 
@@ -157,8 +156,7 @@ export default function ArchiveDepth({
                       eager={eager && y < FIRST_SCREEN}
                       className={`w-full ${REVEAL}`}
                     />
-                    {/* On the printed picture's edge (half the feather in from the box), not the box; it
-                        gives way on hover, when the photo fills the box and the chip carries the name. */}
+                    {/* Align captions with the visible edge of the feathered image. */}
                     <p
                       style={CAPTION}
                       className="u-knock line-clamp-2 text-body-sm leading-[1.35] text-ink transition-opacity duration-150 group-hover/plate:opacity-0 group-focus-visible/plate:opacity-0 motion-reduce:transition-none"

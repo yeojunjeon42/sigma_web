@@ -1034,7 +1034,7 @@ html:has([data-terminal]) {
 .prose li + li {
   margin-top: 0.4rem;
 }
-/* A square on the first line's cap centre (a centred line box is centred on the sans' capitals). */
+/* Align list markers with the first line's cap centre. */
 .prose ul > li::before {
   content: "";
   position: absolute;
@@ -1147,8 +1147,7 @@ html:has([data-terminal]) {
     opacity: 0.08;
   }
 }
-/* History's year rules: drawn once as each row comes in (RuleIn sets html[data-rules] and a row's
-   data-in). Without script, or with reduced motion, they are plain borders. */
+/* RuleIn sets data-in for a one-time reveal; plain borders are the no-script fallback. */
 .u-rule-in {
   position: relative;
 }
@@ -1245,8 +1244,7 @@ html[data-rules] .u-rule-in[data-in]::before {
       animation-timeline: scroll(root);
       animation-range: 0 100svh;
     }
-    /* Touch scrolls off the main thread, so a translate or scale on a scroll timeline trails the
-       page and shakes (the footer did on phones): off the desk the scroll moves nothing. */
+    /* Disable scroll transforms on touch devices to avoid trailing compositor scroll. */
     @media (width < 64rem), (pointer: coarse) {
       .u-scroll-in,
       .u-card-rise,

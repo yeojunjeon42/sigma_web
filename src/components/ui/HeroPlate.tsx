@@ -86,7 +86,7 @@ type Box = { x: number; y: number; w: number; h: number };
 
 export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  // Bumped when the screen crosses md (a phone turned sideways): the grid and paper are set at start.
+  // Rebuild on md crossings: grid and paper dimensions are captured at setup.
   const [layout, setLayout] = useState(0);
 
   useEffect(() => {
@@ -152,7 +152,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
 
     const css = (n: string, f: string) =>
       getComputedStyle(document.documentElement).getPropertyValue(n).trim() || f;
-    // Read once: a getComputedStyle per frame forces a style recalc whenever anything else moved.
+    // Cache styles to avoid per-frame recalculation.
     const base = css(GROUND_INK, "#76767a");
     pale = css(PAPER_INK, "#b0b0b0");
     mixes = [...ramp([base, css("--color-accent", "#ed2024"), css("--color-accent-deep", "#8e1316")], BANDS), pale];
@@ -164,7 +164,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
         img = new Image();
         img.decoding = "async";
         img.onload = kick;
-        // A failed plate is skipped; waiting on it kept the loop running and the cycle stuck.
+        // Skip failed images so the cycle cannot stall.
         img.onerror = () => {
           bad.add(i);
           if (want?.i === i) want = null;
@@ -649,7 +649,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       seen = e.isIntersecting;
       if (seen) kick();
     });
-    // The observer's first callback sizes the plate; fonts still loading re-mask the words.
+    // ResizeObserver handles initial sizing; font loads require remasking.
     ro.observe(host);
     io.observe(host);
     let live = true;

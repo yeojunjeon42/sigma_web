@@ -25,8 +25,7 @@ const META = "text-caption tracking-normal";
 const HIT = "relative before:absolute before:inset-x-[-0.25rem] before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] lg:before:hidden";
 const COLS = "md:grid md:grid-cols-12 md:gap-x-lg";
 
-// Topic and view live in the address (?topic=, ?view=list), so Back from a post returns to them.
-// The page is prerendered: the server sees no query, the browser reads it once hydrated.
+// Read query state after hydration; prerendering has no query, and Back must restore filters.
 const MOVED = "blog:query";
 const subscribe = (fn: () => void) => {
   window.addEventListener("popstate", fn);

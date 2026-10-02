@@ -4,7 +4,7 @@ export const GROUND = 0.63;
 export const DOT = 0.42;
 export const GROUND_INK = "--color-rule-field";
 export const GROUND_DOT = (1 - GROUND) * SCREEN * DOT;
-// The hero plate last shown (its index in the home builds); the next visit starts after it.
+// Persist the last hero index so the next visit starts with another build.
 export const PLATE_KEY = "sigma_plate";
 
 export function halftone(

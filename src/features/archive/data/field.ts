@@ -2,8 +2,7 @@ import type { ArchiveProject } from "../types";
 import { LIFTED, type Look } from "./covers";
 import { SCREEN } from "@/lib/halftone";
 
-// The printed plate fades in over this many px from each edge of its box (FieldScreen's mask);
-// half of it is where the picture reads as starting, so captions sit there.
+// Edge fade in px; captions align halfway into FieldScreen's mask.
 export const FEATHER = SCREEN * 9;
 
 export type Shape = "port" | "sq" | "land";

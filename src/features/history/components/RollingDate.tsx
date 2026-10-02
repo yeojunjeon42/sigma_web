@@ -76,7 +76,6 @@ export default function RollingDate({ className = "" }: { className?: string }) 
     const start = performance.now();
     if (!still) cells.forEach((_, i) => (until[i] = start + LOCK_START + i * LOCK_STEP));
     paint(start);
-    // Ticks only while on screen; coming back, the changed figures roll to the time.
     const io = new IntersectionObserver(([e]) => {
       if (e.isIntersecting && !clock) {
         tick();

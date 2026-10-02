@@ -17,7 +17,6 @@ export default function LostPage({ word, heading, extra }: { word: string; headi
             extra={extra}
             label={`A playable Pac-Man maze drawn around the word ${word}. Arrow keys, W A S D or the pointer steer.`}
           />
-          {/* Phones: no game, the word and the way back. */}
           <div className="@container flex flex-col gap-y-xl pt-lg pb-xl md:hidden">
             <p
               aria-hidden="true"
