@@ -1,6 +1,21 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Allow LAN devices to connect to the dev HMR socket.
+  allowedDevOrigins: [
+    "10.*.*.*",
+    "192.168.*.*",
+    ...Array.from({ length: 16 }, (_, i) => `172.${16 + i}.*.*`),
+  ],
+  // Photos use new filenames when replaced; a long TTL avoids repeated image transformations.
+  images: {
+    minimumCacheTTL: 2678400, // 31 days
+    // No source is wider than 1600px; a wider request is the same picture under another key.
+    deviceSizes: [640, 828, 1200, 1600],
+    imageSizes: [128, 256, 384],
+    qualities: [75],
+    formats: ["image/webp"],
+  },
   async rewrites() {
     return {
       beforeFiles: [
@@ -19,8 +34,7 @@ const nextConfig: NextConfig = {
       { source: "/mabang", destination: "/archive", permanent: true },
       { source: "/club-life", destination: "/history", permanent: true },
       { source: "/record", destination: "/history", permanent: true },
-      // The entries had their own pages once. They are read in the reel now, so both the old
-      // archive paths and the entry paths land on the reel opened at that build.
+      // Redirect legacy entry URLs to the corresponding build in the reel.
       { source: "/archive/:slug", destination: "/archive?view=reel&at=:slug", permanent: true },
       { source: "/mabang/:slug", destination: "/archive?view=reel&at=:slug", permanent: true },
       { source: "/projects", destination: "/archive", permanent: true },
