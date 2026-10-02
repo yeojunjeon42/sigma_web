@@ -694,6 +694,19 @@ html:has([data-drawer]) {
   }
 }
 
+.navbar-chrome {
+  backface-visibility: hidden;
+}
+@media (width >= 48rem) {
+  .navbar-chrome {
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+}
+.navbar-chrome[data-away] {
+  transform: translate3d(0, -100%, 0);
+}
+
 .nav-sheet {
   animation: sheet-in var(--duration-chrome) cubic-bezier(0.22, 1, 0.36, 1) both;
 }

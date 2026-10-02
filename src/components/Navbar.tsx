@@ -16,6 +16,220 @@ const NAV = [
 
 const INVERT = "text-white before:bg-white/[0.14]";
 
+// Desktop scroll thresholds (px).
+const STEP = 6;
+const TOP = 96;
+// Scroll-timeline direction threshold (px), progress threshold and idle delay (ms).
+const TURN = 8;
+const NUDGE = 0.16;
+const QUIET = 100;
+const SETTLE = "cubic-bezier(0.32, 0.72, 0, 1)";
+
+type Timeline = new (options: { source: Element; axis: "block" }) => AnimationTimeline;
+
+const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
+
+// p: 0 = visible, 1 = hidden.
+const look = (p: number, h: number): Keyframe => ({
+  transform: `translate3d(0, ${(-p * h).toFixed(2)}px, 0)`,
+});
+
+const flip = (bar: HTMLElement, top: number) => {
+  let last = window.scrollY;
+  const onScroll = () => {
+    const y = window.scrollY;
+    if (Math.abs(y - last) <= STEP) return;
+    if (y > last && y > top) bar.dataset.away = "";
+    else delete bar.dataset.away;
+    last = y;
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  return () => window.removeEventListener("scroll", onScroll);
+};
+
+const follow = (bar: HTMLElement, Scroll: Timeline) => {
+  const line = new Scroll({ source: document.documentElement, axis: "block" });
+  const percent = (window.CSS as { percent?: (n: number) => CSSNumberish } | undefined)?.percent;
+  const limit = () => Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  const now = () => {
+    const t = line.currentTime;
+    if (typeof CSSUnitValue !== "undefined" && t instanceof CSSUnitValue && t.unit === "percent") {
+      return clamp01(t.value / 100);
+    }
+    const end = limit();
+    return end > 0 ? clamp01(window.scrollY / end) : 0;
+  };
+
+  let run: Animation | null = null;
+  let kind: "ramp" | "settle" | null = null;
+  let aim = 0;
+  let away = false;
+  let h = bar.offsetHeight || 56;
+  let end = limit();
+  // Normalized timeline bounds for the visible and hidden states.
+  let shown = 0;
+  let gone = 1;
+  let heading = 0;
+  let lastY = Math.min(end, Math.max(0, window.scrollY));
+  let edge = lastY;
+  let touching = false;
+  let quiet = 0;
+
+  const progress = () => {
+    if (!run) return away ? 1 : 0;
+    const transform = getComputedStyle(bar).transform;
+    const y = transform === "none" ? 0 : new DOMMatrixReadOnly(transform).m42;
+    return clamp01(-y / h);
+  };
+  // Suppress transitions while committing the animation's final state.
+  const commit = (state: number) => {
+    const next = state >= 1;
+    if (!run && away === next) return;
+    run?.cancel();
+    run = null;
+    kind = null;
+    away = next;
+    bar.style.transition = "none";
+    if (next) bar.dataset.away = "";
+    else delete bar.dataset.away;
+    void getComputedStyle(bar).transform;
+    bar.style.transition = "";
+  };
+  const ramp = () => {
+    run?.cancel();
+    const span = gone - shown;
+    const at = (f: number) => clamp01((f - shown) / span);
+    const fs = [0, shown, gone, 1]
+      .map(clamp01)
+      .sort((a, b) => a - b)
+      .filter((f, i, all) => i === 0 || f > all[i - 1]);
+    run = bar.animate(
+      fs.map((f) => ({ ...look(at(f), h), offset: f })),
+      { timeline: line, fill: "both" },
+    );
+    // Start this frame instead of waiting for the timeline's next update.
+    if (percent) run.startTime = percent(0);
+    kind = "ramp";
+  };
+  const track = (dir: number) => {
+    heading = dir;
+    const p = progress();
+    if (dir > 0 ? p >= 1 : p <= 0) return commit(dir > 0 ? 1 : 0);
+    end = limit();
+    if (end <= 0) return commit(0);
+    h = bar.offsetHeight || h;
+    const f = now();
+    const d = h / end;
+    shown = f - p * d;
+    gone = shown + d;
+    if (dir < 0 && shown < 0) {
+      if (f <= 0) return commit(0);
+      shown = 0;
+      gone = f / p;
+    }
+    ramp();
+    settle(dir > 0 ? 1 : 0);
+  };
+  const settle = (state: number) => {
+    if (kind === "settle" && aim === state) return;
+    const p = progress();
+    if (Math.abs(p - state) < 0.01) return commit(state);
+    run?.cancel();
+    const mine = bar.animate([look(p, h), look(state, h)], {
+      duration: 180 + 220 * Math.abs(state - p),
+      easing: SETTLE,
+      fill: "forwards",
+    });
+    run = mine;
+    kind = "settle";
+    aim = state;
+    mine.finished.then(
+      () => {
+        if (run === mine) commit(state);
+      },
+      () => {},
+    );
+  };
+  // Use an idle timer: scripted glides can fire scrollend every frame.
+  const rested = () => {
+    window.clearTimeout(quiet);
+    if (touching || kind !== "ramp") return;
+    const p = progress();
+    if (heading > 0) settle(p < NUDGE ? 0 : 1);
+    else settle(p > 1 - NUDGE ? 1 : 0);
+  };
+
+  const onScroll = () => {
+    window.clearTimeout(quiet);
+    quiet = window.setTimeout(rested, QUIET);
+    const y = Math.min(limit(), Math.max(0, window.scrollY));
+    if (y <= 0) {
+      heading = 0;
+      lastY = edge = 0;
+      return settle(0);
+    }
+    const dir = Math.sign(y - lastY);
+    const jump = Math.abs(y - lastY) > h;
+    lastY = y;
+    if (!dir) return;
+    if (dir === heading) edge = dir > 0 ? Math.max(edge, y) : Math.min(edge, y);
+    const ahead = dir > 0 ? 1 : 0;
+    if (kind === "settle" && aim === ahead) {
+      if (dir !== heading) edge = y;
+      heading = dir;
+      return;
+    }
+    // Ease across anchor jumps rather than tracking their full distance.
+    if (!kind && jump) {
+      heading = dir;
+      edge = y;
+      return settle(ahead);
+    }
+    // Require TURN px before reversing direction, except when recovering from a nudge.
+    const turned = dir !== heading && (!heading || Math.abs(y - edge) >= TURN);
+    const short = !kind && dir === heading && (dir > 0) !== away;
+    if (kind === "settle" || turned || short) {
+      edge = y;
+      return track(dir);
+    }
+    if (kind !== "ramp") return;
+    const f = now();
+    if (heading > 0 ? f >= gone : f <= shown) commit(heading > 0 ? 1 : 0);
+  };
+  // Timeline fractions become stale when the page or viewport resizes.
+  const refit = () => {
+    if (kind !== "ramp" || (Math.abs(limit() - end) < 1 && bar.offsetHeight === h)) return;
+    settle(heading > 0 ? 1 : 0);
+  };
+  const down = () => {
+    touching = true;
+  };
+  const up = (e: TouchEvent) => {
+    touching = e.touches.length > 0;
+    if (touching) return;
+    window.clearTimeout(quiet);
+    quiet = window.setTimeout(rested, QUIET);
+  };
+
+  const ro = new ResizeObserver(refit);
+  ro.observe(document.body);
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", refit);
+  window.addEventListener("touchstart", down, { passive: true });
+  window.addEventListener("touchend", up, { passive: true });
+  window.addEventListener("touchcancel", up, { passive: true });
+  return () => {
+    window.clearTimeout(quiet);
+    ro.disconnect();
+    window.removeEventListener("scroll", onScroll);
+    window.removeEventListener("resize", refit);
+    window.removeEventListener("touchstart", down);
+    window.removeEventListener("touchend", up);
+    window.removeEventListener("touchcancel", up);
+    run?.cancel();
+  };
+};
+
 const BOX =
   "relative isolate before:absolute before:inset-x-[4px] lg:before:inset-x-[-2px] before:top-1/2 before:-z-10 before:h-[30px] before:-translate-y-1/2 before:rounded-[2px] before:opacity-0 before:transition-opacity before:duration-250 before:ease-[ease] before:content-[''] hover:before:opacity-100 focus-visible:before:opacity-100 aria-[current=page]:before:opacity-100 motion-reduce:before:transition-none";
 
@@ -47,7 +261,6 @@ export default function Navbar({
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const bar = useRef<HTMLElement>(null);
-  const [hidden, setHidden] = useState(false);
   const [onDark, setOnDark] = useState(tone === "overlay");
   const t = TONE[onDark ? "overlay" : "solid"];
 
@@ -79,18 +292,39 @@ export default function Navbar({
     };
   }, [open, onDark]);
 
+  // Keep the mobile navbar fixed; reset scroll hiding on route/menu changes.
   useEffect(() => {
-    let last = window.scrollY;
-    const onScroll = () => {
-      const y = window.scrollY;
-      if (Math.abs(y - last) > 6) {
-        setHidden(y > last && y > 96);
-        last = y;
+    const el = bar.current;
+    if (!el || open) return;
+    const mobile = window.matchMedia("(max-width: 47.999rem)");
+    const desk = window.matchMedia("(min-width: 64rem) and (pointer: fine)");
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const Scroll = (window as unknown as { ScrollTimeline?: Timeline }).ScrollTimeline;
+    let stop = () => {};
+    const start = () => {
+      stop();
+      delete el.dataset.away;
+      if (mobile.matches) {
+        stop = () => {};
+        return;
       }
+      stop =
+        desk.matches || still.matches || !Scroll
+          ? flip(el, desk.matches ? TOP : el.offsetHeight)
+          : follow(el, Scroll);
     };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    start();
+    mobile.addEventListener("change", start);
+    desk.addEventListener("change", start);
+    still.addEventListener("change", start);
+    return () => {
+      mobile.removeEventListener("change", start);
+      desk.removeEventListener("change", start);
+      still.removeEventListener("change", start);
+      stop();
+      delete el.dataset.away;
+    };
+  }, [open, pathname]);
 
   useEffect(() => {
     const regions = [...document.querySelectorAll<HTMLElement>("[data-nav-dark]")];
@@ -134,9 +368,9 @@ export default function Navbar({
     <>
       <header
         ref={bar}
-        className={`fixed inset-x-0 top-0 z-40 w-full transition-[translate,opacity] duration-300 ease-out motion-reduce:transition-none ${
-          hidden && !open ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"
-        } ${open ? t.bar : "mix-blend-difference"}`}
+        className={`navbar-chrome fixed inset-x-0 top-0 z-40 w-full transition-transform duration-300 ease-out max-lg:duration-[420ms] max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none ${
+          open ? t.bar : "mix-blend-difference"
+        }`}
       >
 
         <div className="u-gutter relative mx-auto flex h-14 max-w-wide items-center justify-between gap-lg md:h-16">
@@ -149,6 +383,7 @@ export default function Navbar({
               alt=""
               width={22}
               height={24}
+              loading="eager"
               style={{ height: "auto" }}
               className={open && !onDark ? "" : "brightness-0 invert"}
             />
@@ -158,8 +393,7 @@ export default function Navbar({
           <nav aria-label="Primary" className="hidden md:block">
             <ul className="flex items-center gap-md lg:gap-lg">
               {NAV.map((item) => (
-                // The chip reaches past the label (xs − inset): the last one steps in by that much so,
-                // like the site's pills, its box ends on the gutter.
+                // Inset the last label so its hover background ends at the gutter.
                 <li key={item.href} className="md:last:pr-[4px] lg:last:pr-[calc(var(--spacing-xs)+2px)]">
                   <Link
                     href={item.href}
