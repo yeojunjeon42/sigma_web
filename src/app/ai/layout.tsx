@@ -1,22 +1,21 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist_Mono } from "next/font/google";
-import localFont from "next/font/local";
-import { SIGMA_ASCII } from "@/app/ai/ascii";
-import { Ld } from "@/app/ai/machine";
+import { Ld } from "@/app/ai/terminal";
 import { organization } from "@/app/ai/ld";
-import { MachineNav } from "./MachineNav";
-import { MachineReveal } from "./MachineReveal";
+import { TerminalNav, Prompt } from "./TerminalNav";
 
 const mono = Geist_Mono({ weight: ["400", "500"], subsets: ["latin"], display: "swap" });
-// The wordmark's box-drawing in 0.6em cells that meet exactly (scripts/fonts/marks.py); it used
-// whatever the device's monospace had.
-const box = localFont({ src: "../../fonts/sigma-box.woff2", display: "block", adjustFontFallback: false });
 
 export const metadata: Metadata = {
-  title: { default: "Machine", template: "%s \\ Machine" },
+  title: { default: "Terminal", template: "%s \\ Terminal" },
 };
 
-export default function MachineLayout({
+export const viewport: Viewport = {
+  themeColor: "#0a0907",
+};
+
+// data-terminal also darkens the root for overscroll and browser chrome.
+export default function TerminalLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -24,47 +23,38 @@ export default function MachineLayout({
   return (
     <main
       id="main"
+      data-terminal=""
       style={{ fontFamily: `${mono.style.fontFamily}, var(--f-kr), ui-monospace, monospace` }}
-      className={`min-h-screen bg-machine-bg px-4 pt-12 pb-32 text-[13px] leading-5 font-medium [overflow-wrap:anywhere] text-machine-base [text-shadow:0_0_8px_#ED202473] selection:bg-machine-base selection:text-machine-bg`}
+      className="min-h-screen bg-canvas-inverse px-4 pt-10 pb-32 text-[13px] leading-5 text-ink-inverse [overflow-wrap:anywhere] selection:bg-ink-inverse selection:text-canvas-inverse"
     >
       <link rel="describedby" type="text/markdown" href="/llms.txt" />
       <Ld data={organization} />
 
-      <div className="mx-auto flex max-w-3xl flex-col gap-10">
-        <pre
-          aria-hidden="true"
-          style={{
-            fontFamily: `${box.style.fontFamily}, Menlo, Consolas, "DejaVu Sans Mono", monospace`,
-          }}
-          className="w-full text-[min(16px,calc((100vw-2rem)/24))] leading-[1]"
-        >
-          {SIGMA_ASCII}
-        </pre>
-
-        <MachineNav />
+      <div className="mx-auto flex max-w-4xl flex-col gap-10">
+        <TerminalNav />
 
         <article className="flex flex-col gap-10">{children}</article>
 
-        <footer className="flex flex-col gap-2 text-machine-dim">
+        <footer className="flex flex-col text-ink-inverse-muted">
           <p>
-            Plain-text index:{" "}
+            # plain-text index:{" "}
             <a href="/llms.txt" className="relative underline underline-offset-4 before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] lg:before:hidden">
               /llms.txt
-            </a>{" "}
-            · Full corpus:{" "}
+            </a>
+          </p>
+          <p>
+            # full corpus:{" "}
             <a href="/llms-full.txt" className="relative underline underline-offset-4 before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] lg:before:hidden">
               /llms-full.txt
             </a>
           </p>
-          <p>Generated from the same data as the rendered site.</p>
+          <p># built from the same data as the site.</p>
+          <p aria-hidden="true" className="mt-6">
+            <Prompt />
+            <span className="term-cursor ml-[1ch] inline-block h-[1.15em] w-[1ch] translate-y-[0.2em] bg-ink-inverse" />
+          </p>
         </footer>
       </div>
-
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 z-[1200] [background:repeating-linear-gradient(#0000001f_0_1px,#0000_1px_3px)]"
-      />
-      <MachineReveal />
     </main>
   );
 }

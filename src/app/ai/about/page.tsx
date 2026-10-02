@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { CURRICULUM, EQUIPMENT, FACTS, ORG, PARTNERS, VOICE } from "@/app/ai/corpus";
+import { CURRICULUM, EQUIPMENT } from "@/app/ai/corpus";
 import { page } from "@/app/ai/ld";
-import { Bil, Ext, Facts, Head, Ld, Section, Table } from "@/app/ai/machine";
+import { DIM, Ext, Head, Ld, Section } from "@/app/ai/terminal";
 
-const DESCRIPTION = "How Sigma Intelligence runs: operations, curriculum, equipment, partners and quotes.";
+const DESCRIPTION = "What Sigma Intelligence learns and builds with: the curriculum and the equipment in the club room.";
 
 export const metadata: Metadata = {
   title: "About",
@@ -11,64 +11,34 @@ export const metadata: Metadata = {
   alternates: { canonical: "/ai/about", types: { "text/markdown": "/ai/about.md" } },
 };
 
-export default function MachineAbout() {
+export default function TerminalAbout() {
   return (
     <>
       <Ld data={page("/ai/about", "About SIGMA INTELLIGENCE", DESCRIPTION)} />
-      <Head title="About SIGMA INTELLIGENCE" lede={ORG.summary} md="/ai/about.md" human="/" />
-
-      <Section id="operations" title="Operations">
-        <Facts rows={FACTS.map((f) => ({ k: f.label.en, v: <Bil v={f.value} /> }))} />
-      </Section>
+      <Head name="about" notes={["what the club learns, and what it builds with."]} md="/ai/about.md" human="/" />
 
       <Section id="curriculum" title="Curriculum">
-        <ul className="flex flex-col gap-1">
+        <p className="flex flex-wrap gap-x-[1ch]">
           {CURRICULUM.map((c) => (
-            <li key={c.en}>
-              {c.href ? <Ext href={c.href}>{c.en}</Ext> : c.en}
-              {c.ko !== c.en && (
-                <span lang="ko" className="text-machine-dim">
-                  {" "}
-                  ({c.ko})
-                </span>
-              )}
-            </li>
+            <span key={c.en}>
+              [{c.href ? <Ext href={c.href}>{c.en}</Ext> : c.en}]
+            </span>
           ))}
-        </ul>
+        </p>
+        <p lang="ko" className={DIM}>
+          {CURRICULUM.filter((c) => c.ko !== c.en).map((c) => c.ko).join(", ")}
+        </p>
       </Section>
 
-      <Section id="equipment" title="Equipment in the club room">
-        <ul className="flex flex-col gap-1">
+      <Section id="equipment" title="Equipment">
+        <p className="flex flex-wrap gap-x-[1ch]">
           {EQUIPMENT.map((e) => (
-            <li key={e.en}>
-              <Bil v={e} />
-            </li>
+            <span key={e.en}>[{e.en}]</span>
           ))}
-        </ul>
-      </Section>
-
-      <Section id="partners" title="Partners and programmes">
-        <Table
-          caption="Partners and programmes"
-          head={["Name", "Relationship"]}
-          wrap={[1]}
-          rows={PARTNERS.map((p) => ({ cells: [p.name, <Bil key="n" v={p.note} />] }))}
-        />
-      </Section>
-
-      <Section id="voice" title="Quotes">
-        {VOICE.map((v) => (
-          <figure key={v.quote.ko} className="flex flex-col gap-1">
-            <blockquote>
-              <p lang="en">{v.quote.en}</p>
-              {v.quote.ko !== v.quote.en && (
-                <p lang="ko" className="text-machine-dim">
-                  {v.quote.ko}
-                </p>
-              )}
-            </blockquote>
-          </figure>
-        ))}
+        </p>
+        <p lang="ko" className={DIM}>
+          {EQUIPMENT.map((e) => e.ko).join(", ")}
+        </p>
       </Section>
     </>
   );

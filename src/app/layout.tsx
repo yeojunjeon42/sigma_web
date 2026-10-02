@@ -3,7 +3,6 @@ import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Archivo, Caveat, Geist_Mono, Newsreader, Noto_Serif_KR } from "next/font/google";
-import { MachineToggle } from "@/components/MachineToggle";
 import { JsonLd } from "@/components/JsonLd";
 import { ScrollRail } from "@/components/ScrollRail";
 import SmoothScroll from "@/components/SmoothScroll";
@@ -27,9 +26,7 @@ const sans = localFont({
   fallback: ["ui-sans-serif", "system-ui", "sans-serif"],
 });
 
-// ↗ ← → · ×: the sans has none, and its generated Arial fallback drew them unlike the letters
-// (scripts/fonts/marks.py draws them to the sans). First in the stack, limited to these characters,
-// with the sans' metrics so a line holding one doesn't grow.
+// Custom glyphs replace missing sans symbols; matching metrics preserve line height.
 const marks = localFont({
   src: [
     { path: "../fonts/marks-400.woff2", weight: "400", style: "normal" },
@@ -92,10 +89,10 @@ const hand = Caveat({
   preload: false,
 });
 
-const machine = Geist_Mono({
+const mono = Geist_Mono({
   weight: ["400", "500"],
   subsets: ["latin"],
-  variable: "--f-machine",
+  variable: "--f-mono",
   display: "swap",
   preload: false,
 });
@@ -161,7 +158,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${marks.variable} ${sans.variable} ${kr.variable} ${machine.variable} ${display.variable} ${hand.variable} ${serif.variable} ${serifKr.variable}`}
+      className={`${marks.variable} ${sans.variable} ${kr.variable} ${mono.variable} ${display.variable} ${hand.variable} ${serif.variable} ${serifKr.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: SCREEN }} />
@@ -178,7 +175,6 @@ export default function RootLayout({
         <ScrollRail />
         <SmoothScroll />
         <PageTurn />
-        <MachineToggle />
         <Analytics />
         <SpeedInsights />
       </body>

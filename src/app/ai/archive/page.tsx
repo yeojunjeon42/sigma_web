@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getBuilds } from "@/app/ai/corpus";
 import { buildsList, page } from "@/app/ai/ld";
-import { Bil, Ext, Head, Ld, Section, Table } from "@/app/ai/machine";
+import { Chips, DIM, Ext, Head, Items, Ld, Section } from "@/app/ai/terminal";
 
 const DESCRIPTION = "Every build, 2007–2025: year, bilingual title, award, tags and team.";
 
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/ai/archive", types: { "text/markdown": "/ai/archive.md" } },
 };
 
-export default function MachineArchive() {
+export default function TerminalArchive() {
   const builds = getBuilds();
   const years = [...new Set(builds.map((b) => b.year ?? 0))].sort((a, b) => b - a);
 
@@ -20,36 +20,35 @@ export default function MachineArchive() {
       <Ld data={page("/ai/archive", "Archive — builds 2007–2025", DESCRIPTION)} />
       <Ld data={buildsList(builds)} />
       <Head
-        title="Archive — builds 2007–2025"
-        lede={`${builds.length} builds, newest first. Each row's id is its anchor here and its address in the archive. The full Korean entry texts are in /llms-full.txt.`}
+        name="archive"
+        notes={["every build since 2007, newest first.", "full entry texts, in Korean: /llms-full.txt"]}
+        facts={[{ k: "Builds", v: String(builds.length) }]}
         md="/ai/archive.md"
         human="/archive"
       />
 
-      {years.map((y) => {
-        const group = builds.filter((b) => (b.year ?? 0) === y);
-        return (
-          <Section key={y} id={`y${y || "unknown"}`} title={y ? String(y) : "Year unknown"}>
-            <Table
-              caption={`Builds from ${y || "an unknown year"}`}
-              head={["Title", "Award", "Tags", "Team", "Page"]}
-              wrap={[0, 1, 2, 3]}
-              rows={group.map((b) => ({
-                id: b.id,
-                cells: [
-                  <Bil key="t" v={b.title} />,
-                  b.award ? <Bil key="a" v={b.award} /> : "",
-                  b.tags.map((t) => t.en).join(", "),
-                  b.team.length ? b.team.join(", ") : "",
-                  <Ext key="u" href={`/archive?view=reel&at=${b.id}`}>
-                    {b.id}
-                  </Ext>,
-                ],
-              }))}
-            />
-          </Section>
-        );
-      })}
+      {years.map((y) => (
+        <Section key={y} id={`y${y || "unknown"}`} title={y ? String(y) : "Year unknown"}>
+          <Items mark="*">
+            {builds
+              .filter((b) => (b.year ?? 0) === y)
+              .map((b) => (
+                <li key={b.id} id={b.id} className="scroll-mt-6">
+                  <Ext href={`/archive?view=reel&at=${b.id}`}>{b.title.en}</Ext>
+                  {b.title.ko && b.title.ko !== b.title.en && (
+                    <span lang="ko" className={DIM}>
+                      {" "}
+                      {b.title.ko}
+                    </span>
+                  )}
+                  {b.award && <span className="block">{b.award.en}</span>}
+                  <Chips items={b.tags.map((t) => t.en)} />
+                  {b.team.length > 0 && <span className={`block ${DIM}`}>team: {b.team.join(", ")}</span>}
+                </li>
+              ))}
+          </Items>
+        </Section>
+      ))}
     </>
   );
 }

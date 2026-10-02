@@ -12,6 +12,7 @@ const PAGES = [
   { label: "Members", href: "/members" },
   { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/contact" },
+  { label: "Terminal", href: "/ai" },
 ];
 
 const LEGAL = [
@@ -42,8 +43,7 @@ export default function Footer() {
       <footer data-band className="u-card-rise overflow-hidden rounded-t-[2.5rem] bg-band text-ink [corner-shape:squircle]">
         <div className="u-gutter mx-auto w-full max-w-wide pt-xxl lg:pt-section">
           <div className="grid grid-cols-2 gap-x-md gap-y-xxxl text-body lg:grid-cols-12 lg:gap-x-lg lg:gap-y-xl">
-            {/* The tagline sits in a label's line box (its own line height 0), so it shares the labels'
-                baseline; the email takes a link's line box, so it shares the first links'. */}
+            {/* Match the tagline/email line boxes to the adjacent labels/links. */}
             <div className="hidden lg:col-span-4 lg:block">
               <p className="mb-sm text-caption">
                 <span className="text-body leading-[0]">Where Imagination Meets Reality</span>
@@ -70,7 +70,8 @@ export default function Footer() {
               </ul>
             </nav>
 
-            <div className="max-lg:mt-[calc(4*(1lh+var(--spacing-xxs)))] max-lg:text-right lg:col-span-2">
+            {/* Below lg, align the list with the last page link. */}
+            <div className="max-lg:mt-[calc(5*(1lh+var(--spacing-xxs)))] max-lg:text-right lg:col-span-2">
               <p className={`${LABEL} max-lg:hidden`}>
                 Follow
               </p>

@@ -1,29 +1,35 @@
 import type { Metadata } from "next";
 import { ARCHIVE } from "@/features/archive/data/projects";
-import { AWARDS, ORG, PAGES, SITE, SOCIAL, getCohorts, getHistory, getPosts } from "@/app/ai/corpus";
+import { AWARDS, ORG, PAGES, SITE, SOCIAL, getHistory, getPosts, ALUMNI_TOTAL, COHORT_COUNT, FIRST_INTAKE, LAST_INTAKE } from "@/app/ai/corpus";
 import { page } from "@/app/ai/ld";
-import { Bil, Ext, Facts, Head, Ld, Section, Table } from "@/app/ai/machine";
+import { Bil, DIM, Ext, Facts, Head, Items, Ld, Section } from "@/app/ai/terminal";
 
 const DESCRIPTION =
-  `Machine-readable index of ${new URL(SITE).host}: identity, key facts and every machine page, with Markdown twins.`;
+  `Terminal view of ${new URL(SITE).host}: identity, key facts and every page, with Markdown twins.`;
 
 export const metadata: Metadata = {
-  title: { absolute: "Index \\ Machine" },
+  title: { absolute: "Index \\ Terminal" },
   description: DESCRIPTION,
   alternates: { canonical: "/ai", types: { "text/markdown": "/ai/index.md" } },
 };
 
-export default async function MachineHome() {
-  const [history, cohorts] = await Promise.all([getHistory(), getCohorts()]);
+export default async function TerminalHome() {
+  const history = await getHistory();
   const entries = history.reduce((n, y) => n + y.entries.reduce((m, e) => m + e.count, 0), 0);
   const years = AWARDS.map((a) => a.year);
+  const [first, last] = [Math.min(...years), Math.max(...years)];
 
   return (
     <>
-      <Ld data={page("/ai", "SIGMA INTELLIGENCE — machine-readable index", DESCRIPTION)} />
-      <Head title="SIGMA INTELLIGENCE — machine-readable index" lede={ORG.summary} md="/ai/index.md" human="/" />
+      <Ld data={page("/ai", "SIGMA INTELLIGENCE — terminal", DESCRIPTION)} />
+      <Head
+        name="index"
+        notes={["snusigma.net in plain text, for AI agents, search engines and anyone who wants just the facts."]}
+        md="/ai/index.md"
+        human="/"
+      />
 
-      <Section id="identity" title="Identity">
+      <Section id="about" title="About">
         <Facts
           rows={[
             { k: "Name", v: <Bil v={{ en: ORG.name, ko: ORG.nameKo }} /> },
@@ -38,51 +44,41 @@ export default async function MachineHome() {
               k: "Channels",
               v: SOCIAL.map((s, i) => (
                 <span key={s.name}>
-                  {i > 0 && " · "}
+                  {i > 0 && ", "}
                   <Ext href={s.href}>{s.name}</Ext>
                 </span>
               )),
             },
           ]}
         />
+        <p className="mt-2">{ORG.summary}</p>
+        <p>
+          Its archive holds {ARCHIVE.length} builds from 2007 to 2025. Recognition includes {AWARDS.length} awards from {first}{" "}
+          to {last}.
+        </p>
       </Section>
 
-      <Section id="record" title="Record at a glance">
+      <Section id="record" title="Record">
         <Facts
           rows={[
             { k: "Builds", v: `${ARCHIVE.length} (2007–2025)` },
-            { k: "Awards", v: `${AWARDS.length} (${Math.min(...years)}–${Math.max(...years)})` },
+            { k: "Awards", v: `${AWARDS.length} (${first}–${last})` },
             { k: "Timeline entries", v: String(entries) },
-            {
-              k: "Cohorts (기수)",
-              v: `${cohorts.length} (entry years ${cohorts[0].entryYear}–${cohorts[cohorts.length - 1].entryYear})`,
-            },
-            { k: "Published posts", v: String(getPosts().length) },
+            { k: "Cohorts", v: `${COHORT_COUNT} (${FIRST_INTAKE}–${LAST_INTAKE})` },
+            { k: "Members and alumni", v: String(ALUMNI_TOTAL) },
+            { k: "Posts", v: String(getPosts().length) },
           ]}
         />
       </Section>
 
       <Section id="pages" title="Pages">
-        <Table
-          caption="Machine pages, their Markdown twins and the human pages they mirror"
-          head={["Page", "Contents", "Markdown", "Human page"]}
-          wrap={[1]}
-          rows={PAGES.map((p) => ({
-            id: `page-${p.key}`,
-            cells: [
-              <Ext key="a" href={p.ai}>
-                {p.title}
-              </Ext>,
-              p.note,
-              <Ext key="m" href={p.md}>
-                {p.md}
-              </Ext>,
-              <Ext key="h" href={p.human}>
-                {p.human}
-              </Ext>,
-            ],
-          }))}
-        />
+        <Items>
+          {PAGES.map((p) => (
+            <li key={p.key} id={`page-${p.key}`} className="scroll-mt-6">
+              <Ext href={p.ai}>{p.title.toLowerCase()}</Ext> — {p.note} <span className={DIM}>({p.md})</span>
+            </li>
+          ))}
+        </Items>
       </Section>
     </>
   );

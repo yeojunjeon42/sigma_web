@@ -12,7 +12,7 @@ import looks from "@/features/archive/data/looks.json";
 import RecordLines from "@/features/site/components/RecordLines";
 import { CountUp } from "@/components/ui/CountUp";
 import { getAwards } from "@/features/awards/api/getAwards";
-import { ALUMNI_TOTAL, getCohorts } from "@/features/alumni/api/getCohorts";
+import { ALUMNI_TOTAL, COHORT_COUNT } from "@/features/alumni/data/cohorts";
 import { CURRICULUM, EQUIPMENT } from "@/features/site/data/about";
 
 const FOUNDED = 1984;
@@ -29,11 +29,10 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const [sponsors, builds, awards, cohorts] = await Promise.all([
+  const [sponsors, builds, awards] = await Promise.all([
     getSponsors(),
     getArchiveWithMedia(),
     getAwards(),
-    getCohorts(),
   ]);
 
   const years = new Date().getFullYear() - FOUNDED;
@@ -105,7 +104,7 @@ export default async function Home() {
               builds={line}
               results={results}
               total={awards.length}
-              cohorts={cohorts.length}
+              cohorts={COHORT_COUNT}
               people={ALUMNI_TOTAL}
             />
 

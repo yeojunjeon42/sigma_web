@@ -4,12 +4,12 @@ import { ARCHIVE } from "@/features/archive/data/projects";
 import { ERAS } from "@/features/archive/types";
 import { splitTitle } from "@/features/archive/components/splitTitle";
 import { AWARDS } from "@/features/awards/data/awards";
-import { getCohorts } from "@/features/alumni/api/getCohorts";
+import { ALUMNI_TOTAL, COHORT_COUNT, FIRST_INTAKE, LAST_INTAKE } from "@/features/alumni/data/cohorts";
 import { getTimeline } from "@/features/history/api/getTimeline";
 import { soleWork } from "@/features/history/data/works";
 import { getTeam } from "@/features/members/api/getMembers";
-import { generationOf, INCOMING } from "@/features/members/data/roster";
-import { CURRICULUM, EQUIPMENT, FACTS, PARTNERS, VOICE } from "@/features/site/data/about";
+import { INCOMING } from "@/features/members/data/roster";
+import { CURRICULUM, EQUIPMENT, FACTS } from "@/features/site/data/about";
 import { EMAIL, MAPS } from "@/features/site/data/contact";
 import { SOCIAL } from "@/features/site/data/social";
 import { SITE_URL } from "@/features/site/data/site";
@@ -36,13 +36,13 @@ export const ORG = {
 };
 
 export const PAGES = [
-  { key: "index", title: "Index", ai: "/ai", md: "/ai/index.md", human: "/", note: "Identity, key facts and a map of every machine page" },
-  { key: "about", title: "About", ai: "/ai/about", md: "/ai/about.md", human: "/", note: "Operations, curriculum, equipment, partners and quotes" },
-  { key: "archive", title: "Archive", ai: "/ai/archive", md: "/ai/archive.md", human: "/archive", note: "Every build 2007–2025: year, bilingual title, award, tags, team; entry texts are in the full corpus" },
-  { key: "history", title: "History", ai: "/ai/history", md: "/ai/history.md", human: "/history", note: "Dated timeline 1984–2026, awards, and cohort counts" },
-  { key: "members", title: "Members", ai: "/ai/members", md: "/ai/members.md", human: "/members", note: "The current executive team" },
-  { key: "blog", title: "Blog", ai: "/ai/blog", md: "/ai/blog.md", human: "/blog", note: "Published posts with dates, tags and sources" },
-  { key: "contact", title: "Contact", ai: "/ai/contact", md: "/ai/contact.md", human: "/contact", note: "Email, club room address, maps and channels" },
+  { key: "index", title: "Index", ai: "/ai", md: "/ai/index.md", human: "/", note: "identity, facts, every page" },
+  { key: "about", title: "About", ai: "/ai/about", md: "/ai/about.md", human: "/", note: "curriculum, equipment" },
+  { key: "archive", title: "Archive", ai: "/ai/archive", md: "/ai/archive.md", human: "/archive", note: "every build, 2007–2025; entry texts in the full corpus" },
+  { key: "history", title: "History", ai: "/ai/history", md: "/ai/history.md", human: "/history", note: "events and awards by year, 1984–2026" },
+  { key: "members", title: "Members", ai: "/ai/members", md: "/ai/members.md", human: "/members", note: "the executive team" },
+  { key: "blog", title: "Blog", ai: "/ai/blog", md: "/ai/blog.md", human: "/blog", note: "published posts" },
+  { key: "contact", title: "Contact", ai: "/ai/contact", md: "/ai/contact.md", human: "/contact", note: "email, club room, maps, channels" },
 ] as const;
 
 type PageKey = (typeof PAGES)[number]["key"];
@@ -100,7 +100,6 @@ export interface Build {
   award?: Bi;
   tags: Bi[];
   team: string[];
-  source?: string;
   body: string;
   url: string;
 }
@@ -119,8 +118,7 @@ export function getBuilds(): Build[] {
         era: ERAS.find((e) => e.key === p.era)?.label ?? p.era,
         award: p.award,
         tags: tagsOf(list(doc?.data.tags)),
-        team: list(doc?.data.team).map((m) => m.replace(/\s*\([^)]*\)\s*$/, "").trim()),
-        source: doc?.data.source || undefined,
+        team: list(doc?.data.team).map((m) => m.replace(/\s*\([^)]*\)/g, "").trim()),
         body: doc?.body ?? "",
         url: `${SITE}/archive?view=reel&at=${p.id}`,
       };
@@ -134,7 +132,6 @@ export interface Post {
   summary?: Bi;
   tags: Bi[];
   team: string[];
-  source?: string;
   body: string;
   url: string;
 }
@@ -157,7 +154,6 @@ export function getPosts(): Post[] {
         summary: d.summary ? { en: d.summary, ko: d.summaryKo || undefined } : undefined,
         tags: tagsOf(list(d.tags)),
         team: list(d.team),
-        source: d.source || undefined,
         body: doc.body,
         url: `${SITE}/blog/${slug}`,
       };
@@ -205,14 +201,13 @@ export async function getMembers() {
     name: m.name,
     role: m.role ?? m.duty ?? INCOMING,
     duty: m.role ? m.duty : undefined,
-    generation: generationOf(m),
-    cohort: String(m.cohort).padStart(2, "0"),
     department: m.department,
+    bio: m.bio,
     links: m.links ? Object.entries(m.links).filter(([, v]) => v) : [],
   }));
 }
 
-export { getCohorts, AWARDS, CURRICULUM, EQUIPMENT, FACTS, PARTNERS, VOICE, MAPS, SOCIAL };
+export { ALUMNI_TOTAL, COHORT_COUNT, FIRST_INTAKE, LAST_INTAKE, AWARDS, CURRICULUM, EQUIPMENT, FACTS, MAPS, SOCIAL };
 
 const bi = (b: Bi) => (b.ko && b.ko !== b.en ? `${b.en} (${b.ko})` : b.en);
 const abs = (p: string) => (p.startsWith("http") ? p : `${SITE}${p}`);
@@ -233,7 +228,7 @@ function heading(title: string, key: PageKey): string {
     "",
     `> ${ORG.summary}`,
     "",
-    `Human page: ${abs(page.human)} · Machine page: ${abs(page.ai)} · Index: ${SITE}/llms.txt`,
+    `Site page: ${abs(page.human)} · Terminal: ${abs(page.ai)} · Index: ${SITE}/llms.txt`,
   ].join("\n");
 }
 
@@ -255,16 +250,16 @@ function mdIdentity(): string {
 }
 
 async function mdIndex(): Promise<string> {
-  const [history, cohorts] = await Promise.all([getHistory(), getCohorts()]);
+  const history = await getHistory();
   const entries = history.reduce((n, y) => n + y.entries.reduce((m, e) => m + e.count, 0), 0);
   return [
-    heading("SIGMA INTELLIGENCE — machine-readable index", "index"),
+    heading("SIGMA INTELLIGENCE — terminal", "index"),
     "",
-    "## Identity",
+    "## About",
     "",
     mdIdentity(),
     "",
-    "## Record at a glance",
+    "## Record",
     "",
     table(
       ["Measure", "Value"],
@@ -272,7 +267,7 @@ async function mdIndex(): Promise<string> {
         ["Builds in the archive", `${ARCHIVE.length} (2007–2025)`],
         ["Awards", `${AWARDS.length} (${Math.min(...AWARDS.map((a) => a.year))}–${Math.max(...AWARDS.map((a) => a.year))})`],
         ["Timeline entries", String(entries)],
-        ["Cohorts (기수)", `${cohorts.length} (entry years ${cohorts[0].entryYear}–${cohorts[cohorts.length - 1].entryYear})`],
+        ["Cohorts", `${COHORT_COUNT} (${FIRST_INTAKE}–${LAST_INTAKE}), ${ALUMNI_TOTAL} members and alumni`],
         ["Published posts", String(getPosts().length)],
       ],
     ),
@@ -280,7 +275,7 @@ async function mdIndex(): Promise<string> {
     "## Pages",
     "",
     table(
-      ["Page", "Contents", "Machine", "Markdown", "Human"],
+      ["Page", "Contents", "Terminal", "Markdown", "Site"],
       PAGES.map((p) => [p.title, p.note, abs(p.ai), abs(p.md), abs(p.human)]),
     ),
   ].join("\n");
@@ -290,29 +285,17 @@ function mdAbout(): string {
   return [
     heading("About SIGMA INTELLIGENCE", "about"),
     "",
-    "## Identity",
+    "## About",
     "",
     mdIdentity(),
-    "",
-    "## Operations",
-    "",
-    table(["Field", "English", "Korean"], FACTS.map((f) => [f.label.en, f.value.en, f.value.ko])),
     "",
     "## Curriculum",
     "",
     ...CURRICULUM.map((c) => `- ${c.href ? `[${c.en}](${c.href})` : c.en}${c.ko !== c.en ? ` (${c.ko})` : ""}`),
     "",
-    "## Equipment in the club room",
+    "## Equipment",
     "",
     ...EQUIPMENT.map((e) => `- ${bi(e)}`),
-    "",
-    "## Partners and programmes",
-    "",
-    table(["Name", "Relationship", "Korean"], PARTNERS.map((p) => [p.name, p.note.en, p.note.ko])),
-    "",
-    "## Quotes",
-    "",
-    ...VOICE.flatMap((v) => [`> ${v.quote.en}`, `> (${v.quote.ko})`, ""]),
   ].join("\n");
 }
 
@@ -321,7 +304,7 @@ function mdArchive(full = false): string {
   const out = [
     heading("Archive — builds 2007–2025", "archive"),
     "",
-    `${builds.length} builds, newest first. Each has its own section below; its human page opens the build in the archive reel.`,
+    `${builds.length} builds, newest first. Each has its own section below; its site page opens the build in the archive reel.`,
     "",
     table(
       ["ID", "Year", "Title", "Korean title", "Award", "Tags", "Team size"],
@@ -356,7 +339,7 @@ function mdArchive(full = false): string {
 }
 
 async function mdHistory(): Promise<string> {
-  const [history, cohorts] = await Promise.all([getHistory(), getCohorts()]);
+  const history = await getHistory();
   const out = [
     heading("History — 1984 to 2026", "history"),
     "",
@@ -381,16 +364,6 @@ async function mdHistory(): Promise<string> {
       "",
     );
   }
-  out.push(
-    "## Cohorts",
-    "",
-    "기수 is the club's cohort number, counted from 1984. Entry year is the matriculation year (학번). Members is the number of names in that cohort.",
-    "",
-    table(
-      ["기수", "Entry year", "Members"],
-      cohorts.map((c) => [String(c.generation), String(c.entryYear), String(c.count)]),
-    ),
-  );
   return out.join("\n");
 }
 
@@ -399,18 +372,17 @@ async function mdMembers(): Promise<string> {
   return [
     heading("Members — executive team", "members"),
     "",
-    "The current executive team. Names are given in Korean, as the members write them; they are not romanised. 기수 is the cohort number counted from 1984; 학번 is the two-digit matriculation year. Only the executive team is published.",
+    "The current executive team. Names are given in Korean, as the members write them; they are not romanised. Only the executive team is published.",
     "",
     table(
-      ["Name", "Role", "Role (Korean)", "Also", "기수", "학번", "Department", "Links"],
+      ["Name", "Role", "Role (Korean)", "Also", "Department", "Bio", "Links"],
       members.map((m) => [
         m.name,
         m.role.en,
         m.role.ko,
         m.duty ? `${m.duty.en} (${m.duty.ko})` : "",
-        String(m.generation),
-        m.cohort,
         m.department.en,
+        m.bio ?? "",
         m.links.map(([k, v]) => `${k}: ${v}`).join("; "),
       ]),
     ),
@@ -485,7 +457,7 @@ export function llmsTxt(): string {
     "",
     `> ${ORG.summary} This site is its archive of builds, its dated record, its members, its writing and how to reach it. Every page has a plain Markdown twin listed below.`,
     "",
-    `Korean name: ${ORG.nameKo}. Founded ${ORG.founded} at ${ORG.institution} (${ORG.department.en}). Club room: ${ORG.room.en}. Email: ${ORG.email}. Dates in these files are ISO 8601. 기수 means cohort number (1 = 1984); 학번 means matriculation year.`,
+    `Korean name: ${ORG.nameKo}. Founded ${ORG.founded} at ${ORG.institution} (${ORG.department.en}). Club room: ${ORG.room.en}. Email: ${ORG.email}. Dates in these files are ISO 8601.`,
     "",
     "## Pages",
     "",
@@ -497,8 +469,8 @@ export function llmsTxt(): string {
     "",
     "## Optional",
     "",
-    `- [Machine pages (HTML)](${SITE}/ai): The same content as semantic HTML with schema.org JSON-LD`,
-    `- [Sitemap](${SITE}/sitemap.xml): Every human page, including one address per build`,
+    `- [Terminal (HTML)](${SITE}/ai): The same content as semantic HTML with schema.org JSON-LD`,
+    `- [Sitemap](${SITE}/sitemap.xml): Every site page, including one address per build`,
   ].join("\n");
 }
 
