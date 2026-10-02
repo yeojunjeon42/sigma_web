@@ -24,7 +24,7 @@ const cssVar = (n: string, f: string) =>
 
 export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  // The field shows from lg only; below it (phones) no WebGL context is made for a hidden canvas.
+  // Do not allocate WebGL for the hidden mobile canvas.
   const wide = useMedia("(min-width: 64rem)", false);
 
   useEffect(() => {

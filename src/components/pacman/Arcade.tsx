@@ -34,7 +34,7 @@ export default function Arcade({ word, label, extra }: { word: string; label: st
   const livesRef = useRef<HTMLSpanElement>(null);
   const [state, setState] = useState<State>("idle");
   const still = useMedia("(prefers-reduced-motion: reduce)", false);
-  // The game is from md only; phones get LostPage's plain page and no loop, canvas or listeners.
+  // Skip the game loop, canvas and listeners on phones.
   const wide = useMedia("(min-width: 768px)", false);
 
   useEffect(() => {
@@ -108,8 +108,7 @@ export default function Arcade({ word, label, extra }: { word: string; label: st
       dpr = Math.min(window.devicePixelRatio || 1, 3);
       canvas.width = W * dpr;
       canvas.height = H * dpr;
-      // The frame is drawn on the outer cells' centre lines: size the cells so those lines are the
-      // board's own edges (the gutter), not a few pixels inside it.
+      // Align the outer cells' centre lines with the board edges.
       const step = W < 640 ? 18 : W < 1100 ? 22 : 26;
       cols = Math.max(3, Math.round(W / step) + 1);
       cell = (W - 1) / (cols - 1);
@@ -125,7 +124,7 @@ export default function Arcade({ word, label, extra }: { word: string; label: st
 
       base.width = W * dpr;
       base.height = H * dpr;
-      // Read once per build but drawn every frame: keep it on the GPU (no willReadFrequently).
+      // Avoid willReadFrequently: the cached board is drawn on every frame.
       const g = base.getContext("2d");
       if (!g) return;
       g.setTransform(dpr, 0, 0, dpr, 0, 0);

@@ -140,7 +140,7 @@ export default function RecordLines({
         tones.set(id, { tone, cols, rows });
         done();
       };
-      // q must be one of `images.qualities` (Next 16 default: 75 only); any other is a 400.
+      // q must match images.qualities or Next returns 400.
       img.onerror = () => {
         img.onerror = null;
         img.src = src;
@@ -319,7 +319,7 @@ export default function RecordLines({
       if (g.el && (e.target as Element).closest("[data-id]") === g.el) return;
       e.preventDefault();
       e.stopPropagation();
-      // PageTurn (document, capture) already faded the page for this click; nothing navigates.
+      // Undo PageTurn's capture-phase fade because this click does not navigate.
       delete document.documentElement.dataset.turn;
       if (g.el?.isConnected && !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)) g.el.click();
     };
@@ -415,8 +415,7 @@ export default function RecordLines({
           >
             {b.name}
             {b.year ? (
-              // A box one cap tall standing on the baseline (no line box: its only child is absolute),
-              // with the year hung from its top: the year's capitals start on the name's cap line.
+              // Align the year's capitals with the name's cap line.
               <span className="relative ml-[0.5em] inline-block h-[1cap] w-[calc(12px*2.4)] align-baseline">
                 <span className="u-trim absolute top-0 left-0 font-mono text-[12px] tracking-normal text-ink tabular-nums">
                   {b.year}

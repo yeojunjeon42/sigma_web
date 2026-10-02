@@ -2,9 +2,7 @@
 
 import { useLayoutEffect } from "react";
 
-// Draws the chronology's rules (`.u-rule-in`) once each, as its row comes in: in time, not with the
-// scroll (a scroll-drawn rule resting near the bottom of the screen stayed half-drawn). Rows already
-// on screen are marked before the first paint, so nothing on the first screen redraws.
+// Reveal rules once on entry; mark visible rows before paint to avoid replaying their reveal.
 export default function RuleIn() {
   useLayoutEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;

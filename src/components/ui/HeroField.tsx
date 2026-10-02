@@ -35,7 +35,7 @@ export default function HeroField({
       </h1>
 
       {builds.length > 0 && (
-        // Preload the plate this visit opens on: the one after the last shown (HeroPlate's rule).
+        // Preload the next plate using HeroPlate's persisted index.
         <script
           dangerouslySetInnerHTML={{
             __html: `(()=>{try{const s=${JSON.stringify(builds.map((b) => b.src))};let l=Number(localStorage.getItem("${PLATE_KEY}")??-1);if(!Number.isInteger(l))l=-1;const k=document.createElement("link");k.rel="preload";k.as="image";k.fetchPriority="high";k.href=s[((l%s.length)+s.length+1)%s.length];document.head.append(k)}catch{}})()`,

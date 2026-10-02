@@ -1,6 +1,4 @@
-// The halftone canvases (HeroPlate, FieldScreen) print through this: WebGL where the browser has
-// it, canvas 2D otherwise. Dots arrive bucketed by slot, and both printers lay them down in slot
-// order, so overlaps resolve the same way.
+// WebGL and Canvas 2D renderers preserve slot order so overlaps match.
 
 export type Box = { x: number; y: number; w: number; h: number };
 export type Hole = { x: number; y: number; r: number } | null;

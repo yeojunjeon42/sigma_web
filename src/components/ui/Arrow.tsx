@@ -1,8 +1,4 @@
-// The site's arrow, drawn: neither font carries ← or →, so the characters fell back to whatever
-// the device had (Arial on a Mac, other faces elsewhere) and never matched the type. Units are
-// hundredths of an em: the stroke is the sans' stem (0.085em), the head spans a little under the
-// x-height, and in a centred flex row the box sits on the cap centre (the sans' metrics are set
-// so a centred line box is centred on its capitals).
+// Draw arrows to avoid font fallback. Units are 1/100 em, matched to the sans metrics.
 export function Arrow({ dir = "left", className = "" }: { dir?: "left" | "right"; className?: string }) {
   return (
     <svg

@@ -45,7 +45,7 @@ export default function Chronology({
               const w = when(e.date);
               const title = (
                 <>
-                  {/* the dash stays with the word before it: a line breaks after it, not before */}
+                  {/* Keep the dash with the preceding word. */}
                   {e.title.en.replaceAll(" — ", "\u00a0— ")}
                   {e.count && e.count > 1 ? (
                     <span className={`${META} u-cap-centre ml-sm inline-block text-ink-muted`}>
