@@ -3,9 +3,8 @@ title: Walk
 titleKo: 산책
 year: 2017
 date: 2017
-tags: [2017, 자유연구, 소프트웨어, 음악]
-source: 2017 작품집 SigmaWorks 44p · 2017 리플렛
-team: 유용재 (전기정보 14), 박재연 (전기정보 15), 최가람 (전기정보 16)
+tags: [2017, Independent research, Software, Music]
+team: 유용재, 박재연, 최가람
 ---
 
 ## Concept과 개발 목표

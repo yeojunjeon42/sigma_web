@@ -2,8 +2,7 @@
 title: Tachikoma
 year: 2011
 date: 2011
-tags: [2007-2014, 보행로봇, 창의설계]
-source: 구작품 해설 Tachikoma.txt · Tachikoma 전시 포스터
+tags: [2007-2014, Walking robot, Creative design]
 ---
 
 2011년 창의적 종합설계 경진대회에 출품했던 작품. 사진에서 보이듯이 매우 크고 무거우며,

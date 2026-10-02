@@ -3,9 +3,8 @@ title: iDEN
 titleKo: 아이덴
 year: 2011
 date: 2011
-tags: [2007-2014, 국제대회, 플랫폼]
-source: 2015 30주년 작품집 3p · 구작품 해설 iDen.txt
-team: 유성근 (팀장), 김현진, 이상일, 이승원, 김한울, 박주형
+tags: [2007-2014, International competition, Platform]
+team: 유성근, 김현진, 이상일, 이승원, 김한울, 박주형
 ---
 
 2011년 창의적 공학설계 경진대회에 출품했던 작품. 시그마를 대표하는 작품들 중 하나이다.

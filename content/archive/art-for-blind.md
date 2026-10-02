@@ -3,8 +3,7 @@ title: Assistive System for Pictorial Art for the Visually Impaired
 titleKo: 시각장애인 미술 감상 보조 시스템
 year: 2020
 date: 2020
-tags: [2020, 창의설계축전, 접근성, 딥러닝]
-source: 2020 창의설계축전 과제보고서 · PRJ_Report_2020_Project-Report-Blind-Accessibility-Art.hwp
+tags: [2020, Creative Design Festival, Accessibility, Deep learning]
 team: 이훈로, 최정민, 이지원
 ---
 

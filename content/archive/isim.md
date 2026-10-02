@@ -2,9 +2,8 @@
 title: ISIM
 year: 2015
 date: 2015
-tags: [2015, 군집로봇, URP, 창의설계축전]
-source: 2015 30주년 작품집 20p
-team: 김용혁 (기계항공 14), 박유진 (기계항공 10), 박동훈 (전기정보 13), 양준모 (전기정보 12)
+tags: [2015, Swarm robotics, URP, Creative Design Festival]
+team: 김용혁, 박유진, 박동훈, 양준모
 ---
 
 Intelligent Social Insect-like Module

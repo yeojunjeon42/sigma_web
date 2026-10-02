@@ -2,9 +2,8 @@
 title: ATLAS 2016
 year: 2016
 date: 2016
-tags: [2016, URP, 재난구조]
-source: 2016 작품집 원고
-team: 박성현 (전기정보공학부), 이건준 (전기정보공학부), 이규원 (기계항공공학부), 지경준 (기계항공공학부)
+tags: [2016, URP, Disaster rescue]
+team: 박성현, 이건준, 이규원, 지경준
 ---
 
 ## Concept과 개발목표

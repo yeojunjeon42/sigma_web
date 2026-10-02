@@ -3,8 +3,7 @@ title: School Zone Safety Device
 titleKo: 스쿨존 안전장치
 year: 2020
 date: 2020
-tags: [2020, 창의설계축전, 안전, 사회문제]
-source: 2020 창의설계축전 과제보고서 · PRJ_Report_2020_Project-Report-School-Zone-Safety.hwp
+tags: [2020, Creative Design Festival, Safety, Social problem]
 team: 이수미, 윤진희, 안서인, 김민권
 ---
 

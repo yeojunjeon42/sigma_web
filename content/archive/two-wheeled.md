@@ -2,9 +2,8 @@
 title: Two-Wheeled Self Balancing Robot
 year: 2017
 date: 2017
-tags: [2017, 신입생프로젝트, 제어]
-source: 2017 리플렛 · 2017 도록 텍스트 완성본
-team: 신지원 (전기정보 17), 장서윤 (전기정보 17), 고영훈 (전기정보 17)
+tags: [2017, First-year project, Control]
+team: 신지원, 장서윤, 고영훈
 ---
 
 ## Concept과 개발목표

@@ -2,9 +2,8 @@
 title: HEXAPOD
 year: 2014
 date: 2014
-tags: [2007-2014, 보행로봇, 3D프린팅]
-source: 2015 30주년 작품집 9p
-team: 박동훈 (전기 13)
+tags: [2007-2014, Walking robot, 3D printing]
+team: 박동훈
 ---
 
 전기적인 구동을 위한 파트를 제외하고는 전부 3D 프린터를 이용해 만들어졌다. HEXAPOD의

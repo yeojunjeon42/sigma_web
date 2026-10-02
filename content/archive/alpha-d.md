@@ -2,9 +2,8 @@
 title: Alpha-D
 year: 2016
 date: 2016
-tags: [2016, URP, 머신러닝, 드론]
-source: 2016 작품집 원고
-team: 정재영 (전기정보공학부), 장준영 (화학부), 김용재 (조선해양공학과), 권창영 (전기정보공학부), 정찬영 (기계항공공학부)
+tags: [2016, URP, Machine learning, Drone]
+team: 정재영, 장준영, 김용재, 권창영, 정찬영
 ---
 
 ## Concept과 개발목표

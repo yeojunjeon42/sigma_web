@@ -2,8 +2,7 @@
 title: Speech Bot
 year: 2025
 date: 2025
-tags: [2025, 메이킹, AI]
-source: 2025 2학기 메이킹 팀 발표자료
+tags: [2025, Making, AI]
 team: 이건희, 임정수, 전현태, 최원진
 ---
 

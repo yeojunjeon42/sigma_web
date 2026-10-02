@@ -2,9 +2,8 @@
 title: SNUEWheel
 year: 2015
 date: 2015
-tags: [2015, 전기자전거, URP, 창의설계축전]
-source: 2015 30주년 작품집 22p
-team: 김태형 (전기 13), 정재영 (전기 13), 김지강 (기계 14), 최혜린 (기계 14), 남기빈 (전기 14)
+tags: [2015, Electric bicycle, URP, Creative Design Festival]
+team: 김태형, 정재영, 김지강, 최혜린, 남기빈
 ---
 
 기존의 자전거 프레임에 쉽게 장착할 수 있는 전자식 구동 시스템이 내장된 자전거 앞바퀴

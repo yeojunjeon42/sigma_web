@@ -3,9 +3,8 @@ title: Crystal
 titleKo: 크리스탈
 year: 2013
 date: 2013
-tags: [2007-2014, 디스플레이, LED]
-source: 2015 30주년 작품집 4p · 구작품 해설 크리스탈.txt
-team: 김현준 (10) 외 4명
+tags: [2007-2014, Display, LED]
+team: 김현준 외 4명
 ---
 
 디스플레이가 항상 직사각형이라는 고정관념을 깨기 위해 만들어진, 모듈형 LED 큐브이다.

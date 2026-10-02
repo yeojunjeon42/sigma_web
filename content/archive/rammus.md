@@ -2,9 +2,8 @@
 title: Rammus
 year: 2016
 date: 2016
-tags: [2016, URP, 구형바퀴, 창의설계축전]
-source: 2016 작품집 원고
-team: 유용재 (전기정보공학부), 김지강 (기계항공공학부), 박재연 (전기정보공학부)
+tags: [2016, URP, Spherical wheel, Creative Design Festival]
+team: 유용재, 김지강, 박재연
 ---
 
 ## Concept과 개발목표

@@ -3,8 +3,7 @@ title: POV Display
 titleKo: LED 잔상기
 year: 2011
 date: 2011
-tags: [2007-2014, 디스플레이, LED]
-source: 구작품 해설 LED 잔상기.txt
+tags: [2007-2014, Display, LED]
 ---
 
 회전하는 LED의 잔상을 이용해 이미지를 표시하는 작품. 시그마에서 자주 만들어지는 로봇들과는

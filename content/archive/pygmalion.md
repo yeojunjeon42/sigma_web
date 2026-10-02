@@ -3,9 +3,8 @@ title: Pygmalion
 titleKo: 피그말리온
 year: 2017
 date: 2017
-tags: [2017, URP, 창의설계축전, 문화재복원]
-source: 2017 작품집 SigmaWorks 34p · 2017 리플렛 · 2017 URP 연구계획서
-team: 권창영 (전기정보 12), 박성현 (전기정보 15), 이건준 (전기정보 15), 이혜건 (조소 15)
+tags: [2017, URP, Creative Design Festival, Cultural heritage restoration]
+team: 권창영, 박성현, 이건준, 이혜건
 ---
 
 ## Concept과 개발목표

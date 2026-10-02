@@ -2,9 +2,8 @@
 title: AIR
 year: 2017
 date: 2017
-tags: [2017, 자유연구, 소프트웨어]
-source: 2017 작품집 SigmaWorks 52p · 2017 리플렛
-team: 윤종훈 (전기정보 14), 김정환 (전기정보 14), 이혜건 (조소 15)
+tags: [2017, Independent research, Software]
+team: 윤종훈, 김정환, 이혜건
 ---
 
 ## Concept과 개발목표

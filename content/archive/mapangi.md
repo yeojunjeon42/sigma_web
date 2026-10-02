@@ -3,9 +3,8 @@ title: mOm
 titleKo: 마팡이
 year: 2017
 date: 2017
-tags: [2017, 자유연구, 머신러닝]
-source: 2017 작품집 SigmaWorks 48p · 2017 도록 텍스트(마팡이)
-team: 김정환 (전기정보 14), 김정훈 (전기정보 16), 신호원 (전기정보 16)
+tags: [2017, Independent research, Machine learning]
+team: 김정환, 김정훈, 신호원
 ---
 
 ## Concept과 개발목표

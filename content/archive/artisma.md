@@ -3,8 +3,7 @@ title: Artisma
 titleKo: 아티스마
 year: 2012
 date: 2012
-tags: [2007-2014, 플로터, 창의설계]
-source: 구작품 해설 아티스마.txt
+tags: [2007-2014, Plotter, Creative design]
 ---
 
 2012년 창의적 공학설계 경진대회에 출품했던 작품. 헤나를 그려준다는 컨셉으로 시작했지만...

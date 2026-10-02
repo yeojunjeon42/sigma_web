@@ -3,8 +3,7 @@ title: Automatic Book Cart
 titleKo: 자동 책 수레
 year: 2020
 date: 2020
-tags: [2020, 창의설계축전, 자동화, 로봇]
-source: 2020 창의설계축전 과제보고서 · PRJ_Report_2020_Project-Report-Auto-Book-Cart.hwp
+tags: [2020, Creative Design Festival, Automation, Robot]
 team: 차민호, 김현서, 장성민, 황창환
 ---
 

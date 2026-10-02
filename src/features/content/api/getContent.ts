@@ -44,7 +44,6 @@ function toMeta(collection: Collection, slug: string, data: Record<string, strin
     year: data.year ? Number(data.year) : undefined,
     summary: data.summary || undefined,
     summaryKo: data.summaryKo || undefined,
-    source: data.source || undefined,
     tags,
     team: list(data.team),
     authors: list(data.author),

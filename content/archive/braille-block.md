@@ -3,8 +3,7 @@ title: Mechanical Braille Blocks and Application for the Visually Impaired
 titleKo: 기계식 점자블록
 year: 2020
 date: 2020
-tags: [2020, 창의설계축전, 접근성, 사회문제]
-source: 2020 창의설계축전 과제보고서 · PRJ_Report_2020_Project-Report-Blind-Accessibility-Signal.hwp
+tags: [2020, Creative Design Festival, Accessibility, Social problem]
 team: 이현우, 김산, 신창민, 임유리
 ---
 

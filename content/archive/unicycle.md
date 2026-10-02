@@ -3,9 +3,8 @@ title: Unicycle Robot
 titleKo: 외발자전거
 year: 2017
 date: 2017
-tags: [2017, 신입생프로젝트, 제어]
-source: 2017 작품집 SigmaWorks 18p · 2017 리플렛
-team: 서태우 (전기정보 17), 이용희 (전기정보 17), 최재우 (전기정보 17), 문영민 (전기정보 17)
+tags: [2017, First-year project, Control]
+team: 서태우, 이용희, 최재우, 문영민
 ---
 
 ## Concept과 개발목표

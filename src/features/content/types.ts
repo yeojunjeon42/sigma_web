@@ -12,7 +12,6 @@ export interface DocMeta {
   tags: string[];
   team: string[];
   authors: string[];
-  source?: string;
   sample?: boolean;
 }
 
