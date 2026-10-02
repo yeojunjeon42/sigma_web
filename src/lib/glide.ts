@@ -1,13 +1,13 @@
-// The reel's magnet: once native momentum has stopped, the page is pulled to `to` by a spring.
-// Any scroll the pull did not make itself (a finger, a wheel) ends it at once, and so does a
-// target the page cannot reach.
+// Spring toward a fixed or per-frame target after native momentum stops.
+// Cancel on external scroll or an unreachable target.
 
 const STIFF = 250;
 const DAMP = 32;
 
 export type Glide = { settling: boolean; stop: () => void };
 
-export function glide(to: number): Glide {
+export function glide(to: number | (() => number)): Glide {
+  const goal = typeof to === "function" ? to : () => to;
   let raf = 0;
   let y0 = NaN;
   let then = 0;
@@ -16,16 +16,20 @@ export function glide(to: number): Glide {
   let stuck = 0;
   let velocity = 0;
   const g: Glide = {
-    settling: false,
+    settling: true,
     stop: () => {
       cancelAnimationFrame(raf);
       g.settling = false;
     },
   };
   const frame = (now: number) => {
+    const to = goal();
     if (Number.isNaN(y0)) {
       y0 = window.scrollY;
-      if (Math.abs(to - y0) < 1) return;
+      if (Math.abs(to - y0) < 1) {
+        g.settling = false;
+        return;
+      }
       then = now;
     } else if (Math.abs(window.scrollY - last) > 2) {
       g.settling = false;
@@ -43,7 +47,6 @@ export function glide(to: number): Glide {
     const acceleration = (to - y) * STIFF - velocity * DAMP;
     velocity += acceleration * dt;
     const next = y + velocity * dt;
-    g.settling = true;
     if (Math.abs(to - next) < 0.35 && Math.abs(velocity) < 5) {
       last = to;
       window.scrollTo({ top: to, behavior: "instant" });
