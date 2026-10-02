@@ -733,13 +733,25 @@ html:has([data-drawer]) {
 
 .article-prose {
   --prose-gap: 1.35rem;
-  max-width: 40rem;
-}
-.article-prose > * {
-  max-width: none;
+  width: min(100%, 42.25rem);
+  margin-inline: auto;
 }
 .prose > * {
   max-width: var(--container-content);
+}
+.article-prose > * {
+  max-width: 100%;
+}
+.prose.flow.article-prose > :is(figure, p:has(img), img) {
+  margin-block: var(--spacing-xxl);
+}
+.prose.flow.article-prose img {
+  width: 100%;
+  height: auto;
+  border: 0;
+}
+.prose.flow.article-prose :is(figure, p) img {
+  margin-block: 0;
 }
 .prose > :first-child {
   margin-top: 0;
