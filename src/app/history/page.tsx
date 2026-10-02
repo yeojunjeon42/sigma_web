@@ -9,7 +9,7 @@ import YearRuler, { type Mark } from "@/features/history/components/YearRuler";
 import HistoryHero from "@/features/history/components/HistoryHero";
 import Collage from "@/features/history/components/Collage";
 import { CLUB_EVENTS, HERO_PHOTO } from "@/features/history/data/photos";
-import { ALUMNI_TOTAL, COHORTS } from "@/features/alumni/data/cohorts";
+import { ALUMNI_TOTAL, COHORT_COUNT } from "@/features/alumni/data/cohorts";
 
 const DESCRIPTION = "Events and competition results of SIGMA INTELLIGENCE at Seoul National University, year by year.";
 
@@ -33,7 +33,7 @@ export default async function ClubLifePage() {
   const latest = nodes[0];
   const now = [...latest.events].reverse().slice(0, 3);
   const facts = [
-    { label: "Cohorts", value: String(COHORTS.length) },
+    { label: "Cohorts", value: String(COHORT_COUNT) },
     { label: "Members and alumni", value: String(ALUMNI_TOTAL) },
   ];
 

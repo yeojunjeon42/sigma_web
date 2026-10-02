@@ -1,17 +1,21 @@
 import type { Metadata } from "next";
 import { share } from "@/app/share";
+import ContactPill from "@/components/ContactPill";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Container, GridField } from "@/components/ui";
-import { generationLabel } from "@/features/alumni/api/getCohorts";
-import { ALUMNI, alumnusGeneration } from "@/features/alumni/data/people";
+import { ALUMNI } from "@/features/alumni/data/people";
 import { getTeam } from "@/features/members/api/getMembers";
-import AlumniList, { type Alumnus } from "@/features/members/components/AlumniList";
 import MemberCrew, { type CrewMember } from "@/features/members/components/MemberCrew";
-import { INCOMING, generationOf } from "@/features/members/data/roster";
+import { INCOMING } from "@/features/members/data/roster";
+import { CREW_SAMPLES } from "@/features/members/data/samples";
+import { SHOW_SAMPLES } from "@/features/content/data/samples";
 
+const PLACEHOLDER_BIO = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
 
-const DESCRIPTION = "The students of SIGMA INTELLIGENCE today.";
+const DESCRIPTION = "The members and alumni of SIGMA INTELLIGENCE.";
+const MEMBER_FORM = "https://forms.gle/o3uj9VwncYV3in9r6";
+const PILL = "Update your member profile";
 
 export const metadata: Metadata = {
   title: "Members",
@@ -20,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default async function MembersPage() {
-  const team = await getTeam();
+  const team = [...(await getTeam()), ...CREW_SAMPLES.map((m) => ({ ...m, portrait: null }))];
 
   const ranked = team.filter((m) => m.role || m.incoming);
   const rest = team
@@ -29,27 +33,28 @@ export default async function MembersPage() {
   const members: CrewMember[] = [...ranked, ...rest].map((m) => ({
     id: m.id,
     name: m.name,
-    nameEn: m.nameEn,
-    post: m.role ?? (m.duty ? undefined : INCOMING),
+    group: m.role || m.incoming ? "executives" : "members",
+    post: m.role ?? (m.incoming && !m.duty ? INCOMING : undefined),
     duty: m.duty,
     department: m.department,
-    gen: generationLabel(generationOf(m)),
+    bio: m.bio ?? (SHOW_SAMPLES ? PLACEHOLDER_BIO : undefined),
     portrait: m.portrait,
     links: m.links,
   }));
 
-  const alumni: Alumnus[] = [...ALUMNI]
+  const alumni: CrewMember[] = [...ALUMNI]
     .sort((a, b) => a.entryYear - b.entryYear)
     .map((a) => ({
       id: a.id,
+      group: "alumni",
       name: a.name,
-      field: a.field,
-      gen: generationLabel(alumnusGeneration(a)),
+      department: a.field,
       year: a.entryYear,
       portrait: null,
-      quote: a.quote,
+      bio: a.quote,
       links: a.links,
     }));
+  const crew = [...alumni, ...members];
 
   return (
     <>
@@ -60,41 +65,19 @@ export default async function MembersPage() {
           <GridField>
             <h1 className="sr-only">Members</h1>
             <Container className="page-opening pb-section">
-              <section aria-labelledby="alumni">
-                <div className="u-scroll-in flex items-baseline pt-xl pb-sm text-body md:pt-xxl xl:text-title">
-                  <h2 id="alumni" className="flex items-baseline gap-x-sm text-ink">
-                    Alumni
-                    {alumni.length > 0 ? (
-                      <span className="tabular-nums text-ink-muted">
-                        {alumni[0].year}–{alumni[alumni.length - 1].year}
-                      </span>
-                    ) : null}
-                  </h2>
-                </div>
-                {alumni.length > 0 ? (
-                  <AlumniList alumni={alumni} />
-                ) : (
-                  <ul aria-hidden="true" className="grid grid-cols-2 gap-lg md:grid-cols-4">
-                    {[0, 1, 2, 3].map((i) => (
-                      <li key={i} className={`aspect-square bg-surface-sunken ${i > 1 ? "max-md:hidden" : ""}`} />
-                    ))}
-                  </ul>
-                )}
-              </section>
-            </Container>
-
-            <Container className="pb-section">
               <section aria-labelledby="crew">
-                <div className="u-scroll-in flex items-baseline pb-sm text-body xl:text-title">
+                <div className="u-scroll-in flex items-baseline pt-xl pb-sm text-body md:pt-xxl xl:text-title">
                   <h2 id="crew" className="flex items-baseline gap-x-sm text-ink">
                     Members
                     <span className="tabular-nums text-ink-muted">{new Date().getFullYear()}</span>
                   </h2>
+                  <span className="ml-auto tabular-nums text-ink-muted">{crew.length}</span>
                 </div>
-                {members.length > 0 && <MemberCrew members={members} />}
+                {crew.length > 0 && <MemberCrew members={crew} />}
               </section>
             </Container>
           </GridField>
+          <ContactPill href={MEMBER_FORM} pill={PILL} showOnMobile />
         </main>
 
         <Footer />

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { getCohorts, getHistory } from "@/app/ai/corpus";
+import { getHistory } from "@/app/ai/corpus";
 import { awardsOf, eventsList, page } from "@/app/ai/ld";
-import { Bil, Ext, Head, Ld, Section, Table } from "@/app/ai/machine";
+import { DIM, Ext, Head, Items, Ld, Section } from "@/app/ai/terminal";
 
-const DESCRIPTION = "The club's dated record, 1984–2026: events and awards by year, and cohort counts.";
+const DESCRIPTION = "The club's dated record, 1984–2026: events and awards by year.";
 
 export const metadata: Metadata = {
   title: "History",
@@ -11,8 +11,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/ai/history", types: { "text/markdown": "/ai/history.md" } },
 };
 
-export default async function MachineHistory() {
-  const [history, cohorts] = await Promise.all([getHistory(), getCohorts()]);
+export default async function TerminalHistory() {
+  const history = await getHistory();
+  const entries = history.reduce((n, y) => n + y.entries.length, 0);
 
   return (
     <>
@@ -20,54 +21,44 @@ export default async function MachineHistory() {
       <Ld data={eventsList(history)} />
       <Ld data={awardsOf(history)} />
       <Head
-        title="History — 1984 to 2026"
-        lede="Dates are ISO 8601. Where the record gives only a year, Period says which part of it. An award won more than once in a year appears once with its count."
+        name="history"
+        notes={[
+          "the club's record by year, 1984–2026.",
+          "dates in ISO 8601. where only the year is known, the part of it follows in brackets. an award won more than once in a year is listed once, with its count.",
+        ]}
+        facts={[{ k: "Entries", v: String(entries) }]}
         md="/ai/history.md"
         human="/history"
       />
 
       {history.map((y) => (
         <Section key={y.year} id={`y${y.year}`} title={String(y.year)}>
-          <Table
-            caption={`Entries for ${y.year}`}
-            head={["Date", "Period", "Kind", "Entry", "Build"]}
-            wrap={[3]}
-            rows={y.entries.map((e) => ({
-              id: e.id,
-              cells: [
-                <time key="d" dateTime={e.iso}>
+          <Items>
+            {y.entries.map((e) => (
+              <li key={e.id} id={e.id} className="scroll-mt-6">
+                <time dateTime={e.iso} className={DIM}>
                   {e.iso}
-                </time>,
-                e.period ?? "",
-                e.kind === "award" ? `award${e.count > 1 ? ` ×${e.count}` : ""}` : "event",
-                <Bil key="t" v={e.title} />,
-                e.build ? (
-                  <Ext key="b" href={`/archive?view=reel&at=${e.build.id}`}>
-                    {e.build.id}
-                  </Ext>
-                ) : (
-                  e.work ?? ""
-                ),
-              ],
-            }))}
-          />
+                </time>
+                {e.period && <span className={DIM}> ({e.period})</span>}{" "}
+                {e.kind === "award" && `Award${e.count > 1 ? ` ×${e.count}` : ""} — `}
+                {e.title.en}
+                {e.title.ko && e.title.ko !== e.title.en && (
+                  <span lang="ko" className={`block ${DIM}`}>
+                    {e.title.ko}
+                  </span>
+                )}
+                {e.build ? (
+                  <span className={`block ${DIM}`}>
+                    build: <Ext href={`/archive?view=reel&at=${e.build.id}`}>{e.build.id}</Ext>
+                  </span>
+                ) : e.work ? (
+                  <span className={`block ${DIM}`}>{e.work}</span>
+                ) : null}
+              </li>
+            ))}
+          </Items>
         </Section>
       ))}
-
-      <Section id="cohorts" title="Cohorts">
-        <p className="text-machine-dim">
-          기수 is the club&apos;s cohort number, counted from 1984. Entry year is the matriculation year (학번). Members is the number of
-          names in that cohort.
-        </p>
-        <Table
-          caption="Cohorts"
-          head={["기수", "Entry year", "Members"]}
-          rows={cohorts.map((c) => ({
-            id: `g${c.generation}`,
-            cells: [String(c.generation), String(c.entryYear), String(c.count)],
-          }))}
-        />
-      </Section>
     </>
   );
 }

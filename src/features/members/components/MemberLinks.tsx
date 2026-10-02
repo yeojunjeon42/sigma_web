@@ -62,10 +62,12 @@ const ICONS: { key: keyof Links; label: string; path: ReactNode }[] = [
 export default function MemberLinks({
   name,
   links,
+  dense = false,
   className = "-ml-xs",
 }: {
   name: string;
   links?: Links;
+  dense?: boolean;
   className?: string;
 }) {
   const present = ICONS.filter((i) => links?.[i.key]);
@@ -81,7 +83,7 @@ export default function MemberLinks({
             rel="noopener noreferrer"
             aria-label={`${name} on ${i.label}`}
             title={i.label}
-            className="relative grid h-11 w-7 place-items-center text-ink-muted transition-colors before:absolute before:top-1/2 before:left-1/2 before:size-11 before:-translate-1/2 before:content-[''] hover:text-ink focus-visible:text-ink lg:size-8 lg:before:hidden"
+            className={`relative grid h-11 w-7 place-items-center text-ink-muted transition-colors before:absolute before:top-1/2 before:left-1/2 before:size-11 before:-translate-1/2 before:content-[''] hover:text-ink focus-visible:text-ink lg:h-8 lg:before:hidden ${dense ? "lg:w-6" : "lg:w-8"}`}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4">
               {i.path}

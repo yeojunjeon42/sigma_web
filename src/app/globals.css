@@ -2,7 +2,7 @@
 
 @theme {
   --font-sans: var(--f-marks), var(--f-sans), var(--f-kr), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--f-machine), var(--f-kr), ui-monospace, SFMono-Regular, monospace;
+  --font-mono: var(--f-mono), var(--f-kr), ui-monospace, SFMono-Regular, monospace;
   --font-serif: var(--f-serif), var(--f-serif-kr), ui-serif, Georgia, "Times New Roman", serif;
   --default-font-family: var(--font-sans);
 
@@ -28,11 +28,6 @@
 
   --color-accent: #ed2024;
   --color-accent-deep: #8e1316;
-
-  --color-machine-bg: #000000;
-  --color-machine-dim: #c0575a;
-  --color-machine-base: #ff4448;
-  --color-machine-bright: #ffb0b2;
 
   --text-display-lg: clamp(2rem, 1.3rem + 3.4vw, 3.25rem);
   --text-display-lg--line-height: 1;
@@ -166,9 +161,10 @@
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   }
 
+  /* Scale photo corners with the box; cap their radius so small images keep their shape. */
   main img:not(.u-corner img),
   .u-corner {
-    border-radius: var(--radius-photo);
+    border-radius: min(var(--radius-photo), 4.7%);
   }
   .u-corner img,
   .u-corner canvas,
@@ -180,7 +176,7 @@
     main img:not(.u-corner img),
     .u-corner {
       corner-shape: squircle;
-      border-radius: calc(var(--radius-photo) * 1.7);
+      border-radius: min(var(--radius-photo) * 1.7, 8%);
     }
   }
   main [data-print] img {
@@ -225,7 +221,6 @@
     ::-webkit-scrollbar-corner {
       background: transparent;
     }
-    [data-machine] *,
     .bg-canvas-inverse * {
       scrollbar-color: var(--color-rule-inverse) transparent;
     }
@@ -810,9 +805,6 @@ html[data-turn] body > :not(header) {
     translate: 0 -6px;
   }
 }
-html:has([data-drawer]) {
-  overflow-anchor: none;
-}
 @media (width < 64rem) {
   html[data-foot],
   html[data-foot] body {
@@ -850,22 +842,24 @@ html:has([data-drawer]) {
   }
 }
 
-@keyframes machine-reveal {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(100%);
+/* Darken the root too, including overscroll and browser bars. */
+html:has([data-terminal]) {
+  background-color: var(--color-canvas-inverse);
+}
+@keyframes term-blink {
+  50% {
+    opacity: 0;
   }
 }
-.machine-reveal {
-  animation: 1.4s steps(32, end) forwards machine-reveal;
+.term-cursor {
+  animation: term-blink 1.06s steps(1, end) infinite;
 }
 @media (prefers-reduced-motion: reduce) {
-  .machine-reveal {
-    display: none;
+  .term-cursor {
+    animation: none;
   }
 }
+
 .prose {
   --prose-gap: 1.15rem;
 

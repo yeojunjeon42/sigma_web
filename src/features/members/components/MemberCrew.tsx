@@ -7,19 +7,26 @@ import type { MemberLinks as Links } from "../data/roster";
 import MemberLinks from "./MemberLinks";
 import { DOT, SCREEN } from "@/lib/halftone";
 
+type CrewGroup = "alumni" | "executives" | "members";
+
+const GROUPS: { key: CrewGroup; label: string }[] = [
+  { key: "alumni", label: "Alumni" },
+  { key: "executives", label: "Executives" },
+  { key: "members", label: "Members" },
+];
+
 export interface CrewMember {
   id: string;
+  group: CrewGroup;
   name: string;
-  nameEn?: string;
   post?: Bilingual;
   duty?: Bilingual;
   department: Bilingual;
-  gen: string;
+  year?: number;
+  bio?: string;
   portrait: string | null;
   links?: Links;
 }
-
-const SUB = "lg:col-span-full lg:grid lg:grid-cols-subgrid";
 
 const IN = 700;
 const OUT = 400;
@@ -40,11 +47,15 @@ export function Print({
   src,
   className = "",
   live = false,
+  lazy = false,
+  portrait = false,
   sizes = "(min-width: 1024px) 34vw, 8rem",
 }: {
   src: string | null;
   className?: string;
   live?: boolean;
+  lazy?: boolean;
+  portrait?: boolean;
   sizes?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -117,6 +128,8 @@ export function Print({
       g.setTransform(dpr, 0, 0, dpr, 0, 0);
       const t = s.t;
       if (t >= 1 || t <= 0) sheet.dots = null;
+      // Use high-quality resampling when shrinking portraits.
+      g.imageSmoothingQuality = "high";
       if (t >= 1) {
         g.imageSmoothingEnabled = true;
         g.drawImage(bmp, crop[0], crop[1], w * crop[2], h * crop[2], 0, 0, w, h);
@@ -183,7 +196,7 @@ export function Print({
         s.t = s.goal > s.t ? Math.min(1, s.t + dt / IN) : Math.max(0, s.t - dt / OUT);
       }
       s.last = now;
-      // Not printable yet (image loading, no size): stop; the image's load or a resize resumes.
+      // Image load or resize resumes painting when dimensions are available.
       if (!s.paint()) return;
       if (s.t !== s.goal) s.raf = requestAnimationFrame(step);
     };
@@ -200,14 +213,17 @@ export function Print({
   }, [live]);
 
   return (
-    <div ref={ref} aria-hidden="true" className={`relative aspect-square overflow-hidden u-corner ${className}`}>
+    // Keep print corners square to preserve the halftone dots.
+    <div ref={ref} aria-hidden="true" data-print className={`relative ${portrait ? "aspect-[4/5]" : "aspect-square"} overflow-hidden ${className}`}>
       {src ? (
         <>
-          <Image src={src} alt="" fill sizes={sizes} loading="eager" className="object-cover opacity-0" />
+          <Image src={src} alt="" fill sizes={sizes} loading={lazy ? "lazy" : "eager"} className="object-cover opacity-0" />
           <canvas className="absolute inset-0 size-full" />
         </>
       ) : (
-        <div className="absolute inset-0 bg-surface-sunken" />
+        <div className="absolute inset-0 grid place-items-center bg-surface-sunken">
+          <Image src="/logo-mark.svg" alt="" width={253} height={274} className="h-auto w-[28%] max-w-9 opacity-35" />
+        </div>
       )}
     </div>
   );
@@ -244,195 +260,194 @@ export function useInView<T extends Element>(share = 0.6) {
   return [ref, seen] as const;
 }
 
-function InView({ src }: { src: string | null }) {
-  const [ref, seen] = useInView<HTMLDivElement>();
-  return (
-    <div ref={ref} className="h-full">
-      <Print src={src} live={seen} className="h-full min-h-[6.5rem] aspect-auto! md:aspect-square! md:h-auto" />
-    </div>
-  );
-}
-
-function Drawer({ id, open, m }: { id: string; open: boolean; m: CrewMember }) {
-  return (
-    <div
-      id={id}
-      inert={!open}
-      data-drawer=""
-      className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none ${SUB} ${
-        open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-      }`}
-    >
-      <div className={`min-h-0 overflow-hidden ${SUB}`}>
-        <p className="pt-sm text-body text-ink lg:col-span-2 lg:col-start-2 lg:pb-lg">
-          Hello, I am {m.nameEn ?? m.name}, nice to meet you!
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function Toggle({ m, open, controls, onToggle }: { m: CrewMember; open: boolean; controls: string; onToggle: () => void }) {
-  return (
-    <button
-      type="button"
-      aria-expanded={open}
-      aria-controls={controls}
-      aria-label={`${m.name}: ${open ? "close" : "more"}`}
-      onClick={onToggle}
-      className="relative flex h-11 w-9 shrink-0 cursor-pointer items-center justify-center text-ink-muted transition-colors before:absolute before:top-1/2 before:left-1/2 before:size-11 before:-translate-1/2 before:content-[''] hover:text-ink focus:outline-none lg:w-11 lg:before:hidden"
-    >
-      <svg aria-hidden="true" viewBox="0 0 12 12" className={`size-3 transition-transform duration-300 motion-reduce:transition-none ${open ? "rotate-45" : ""}`}>
-        <path d="M6 0v12M0 6h12" stroke="currentColor" strokeWidth="1.2" />
-      </svg>
-    </button>
-  );
-}
-
-// A hyphenated word stays on one line ("Member-led", never "Member-" / "led").
+// Keep hyphenated words on one line.
 function whole(text: string) {
   return text.split(/(\S*-\S*)/).map((part, i) => (i % 2 ? <span key={i} className="whitespace-nowrap">{part}</span> : part));
 }
 
 function Meta({ m, className = "" }: { m: CrewMember; className?: string }) {
+  if (m.group === "alumni") {
+    return (
+      <span className={className}>
+        <span className="tabular-nums">{m.year}</span>
+        <span className="xl:hidden"> · {m.department.en}</span>
+      </span>
+    );
+  }
   return (
     <span className={className}>
       {m.post && whole(m.post.en)}
       {m.post && m.duty && <span className="text-ink-muted"> · </span>}
-      {m.duty && (
-        <span>
-          {whole(m.duty.en)}
-        </span>
-      )}
+      {m.duty && <span>{whole(m.duty.en)}</span>}
     </span>
   );
 }
 
-function rowClick(e: React.MouseEvent, toggle: () => void) {
-  const t = e.target as HTMLElement;
-  if (t.closest("a, button, [data-drawer]")) return;
-  if (window.getSelection()?.toString()) return;
-  toggle();
+function GroupHead({ id, label, count, className = "" }: { id?: string; label: string; count: number; className?: string }) {
+  return (
+    <h3 id={id} className={`flex items-baseline justify-between pb-xs text-body-sm text-ink-muted ${className}`}>
+      {label}
+      <span className="tabular-nums">{count}</span>
+    </h3>
+  );
+}
+
+function Card({ m }: { m: CrewMember }) {
+  const [ref, seen] = useInView<HTMLDivElement>();
+  return (
+    <li className="u-scroll-fade min-w-0">
+      <div ref={ref}>
+        <Print src={m.portrait} live={seen} lazy portrait sizes="(min-width: 768px) 16vw, 33vw" />
+      </div>
+      <p className="mt-xs text-body-sm text-ink">{m.name}</p>
+      <Meta m={m} className="block text-caption text-ink-muted" />
+      {/* Keep 44px hit areas without adding card height. */}
+      <MemberLinks name={m.name} links={m.links} className="-mx-1.5 -mb-3.5 -mt-1.5 flex-wrap" />
+    </li>
+  );
+}
+
+const HANGUL = /[가-힣]/;
+
+// Scroll speed (px/s) and endpoint pause (ms).
+const RUN = 45;
+const REST = 1000;
+
+// Overflowing bios scroll across the role and department columns while active.
+function BioLine({ text, on }: { text: string; on: boolean }) {
+  const box = useRef<HTMLSpanElement>(null);
+  const line = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const b = box.current;
+    const l = line.current;
+    if (!b || !l || !on) return;
+    // Extend past the fade so the final letters remain readable.
+    const d = l.scrollWidth - b.clientWidth;
+    b.toggleAttribute("data-over", d > 1);
+    if (d <= 1 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const far = d + 24;
+    const move = (far / RUN) * 1000;
+    const total = REST + move + REST;
+    const run = l.animate(
+      [
+        { transform: "translateX(0)", offset: 0 },
+        { transform: "translateX(0)", offset: REST / total, easing: "cubic-bezier(0.45, 0, 0.55, 1)" },
+        { transform: `translateX(${-far}px)`, offset: (REST + move) / total },
+        { transform: `translateX(${-far}px)`, offset: 1 },
+      ],
+      { duration: total, iterations: Infinity, direction: "alternate" },
+    );
+    return () => run.cancel();
+  }, [on, text]);
+
+  return (
+    <span
+      ref={box}
+      aria-hidden="true"
+      lang={HANGUL.test(text) ? "ko" : "en"}
+      className={`pointer-events-none absolute inset-0 col-start-2 col-end-[-2] flex items-center overflow-hidden font-serif text-[0.9375rem] leading-[21px] text-ink transition-[opacity,visibility] duration-200 motion-reduce:transition-none data-[over]:[mask-image:linear-gradient(90deg,transparent,#000_0.35em,#000_calc(100%-2em),transparent)] ${
+        HANGUL.test(text) ? "" : "italic"
+      } ${on ? "visible opacity-100" : "invisible opacity-0"}`}
+    >
+      {/* Align serif and sans cap centres. */}
+      <span ref={line} className="shrink-0 whitespace-nowrap [text-box:trim-both_cap_alphabetic]">
+        {`“${text}”`}
+      </span>
+    </span>
+  );
 }
 
 export default function MemberCrew({ members }: { members: CrewMember[] }) {
-  const [hot, setHot] = useState(members[0]?.id ?? null);
-  const [open, setOpen] = useState<string | null>(null);
-  const pointed = members.find((m) => m.id === hot);
-  const toggle = (id: string) => setOpen((o) => (o === id ? null : id));
+  const [hot, setHot] = useState<string | null>(null);
+  const groups = GROUPS.map((g) => ({ ...g, members: members.filter((m) => m.group === g.key) })).filter(
+    (g) => g.members.length > 0,
+  );
+  const order = groups.flatMap((g) => g.members);
 
   return (
     <>
-      <ul className="border-b border-rule-strong lg:hidden">
-        {members.map((m) => (
-          <li
-            key={m.id}
-            onClick={(e) => rowClick(e, () => toggle(m.id))}
-            className="u-scroll-fade grid cursor-pointer content-start items-stretch grid-cols-[6.5rem_minmax(0,1fr)] gap-x-md border-t border-rule-strong py-md md:grid-cols-[8rem_minmax(0,1fr)_auto] md:gap-x-lg"
-          >
-            <InView src={m.portrait} />
-            <div className="flex min-w-0 flex-col gap-y-sm md:justify-between md:py-xxs">
-              {/* Hangul rises ~0.11em above the sans' capitals the trim uses: its top meets the portrait's */}
-              <span className="u-trim mt-[0.11em] text-display-md text-ink md:mt-0">{m.name}</span>
-              <p className="text-body-sm text-ink-muted">
-                <Meta m={m} className="block text-ink" />
-                {m.department.en}
-              </p>
-              {/* Pulled down by the room under a 16px icon in a 44px target: the icons end on the portrait */}
-              <div className="mt-auto -mb-[calc((2.75rem-1rem)/2)] flex flex-wrap items-center md:hidden">
-                <MemberLinks name={m.name} links={m.links} className="-ml-1.5" />
-                <Toggle m={m} open={open === m.id} controls={`crew-m-${m.id}`} onToggle={() => toggle(m.id)} />
-              </div>
-            </div>
-            <div className="hidden items-center self-start md:flex">
-              <MemberLinks name={m.name} links={m.links} />
-              <Toggle m={m} open={open === m.id} controls={`crew-m-${m.id}`} onToggle={() => toggle(m.id)} />
-            </div>
-            <div className="col-[2/-1]">
-              <Drawer id={`crew-m-${m.id}`} open={open === m.id} m={m} />
-            </div>
-          </li>
+      <div className="lg:hidden">
+        {groups.map((g) => (
+          <section key={g.key} aria-labelledby={`crew-m-${g.key}`} className="border-t border-rule-strong pt-sm pb-xxl">
+            <GroupHead id={`crew-m-${g.key}`} label={g.label} count={g.members.length} className="pb-md" />
+            <ul className="grid grid-cols-3 gap-x-sm gap-y-xl md:grid-cols-6 md:gap-x-md">
+              {g.members.map((m) => (
+                <Card key={m.id} m={m} />
+              ))}
+            </ul>
+          </section>
         ))}
-      </ul>
+      </div>
 
-      <div className="hidden grid-cols-12 gap-x-xl lg:grid">
-        <div className="sticky top-[calc(var(--masthead)+var(--spacing-lg))] col-span-4 self-start">
-          <div className="u-develop relative aspect-square">
-            {members.map((m) => (
-              <div
-                key={m.id}
-                className={`absolute inset-0 ${hot === m.id ? "" : "invisible"}`}
-              >
-                <Print src={m.portrait} className="size-full" live={hot === m.id} />
-              </div>
-            ))}
-          </div>
-          <p aria-hidden="true" className="mt-sm text-body-sm text-ink">
-            {pointed?.name}
-            {pointed && (
-              <span className="text-ink-muted">
-                {" ("}
-                {pointed.post ? (
-                  pointed.post.en
-                ) : pointed.duty ? (
-                  pointed.duty.en
-                ) : null}
-                {")"}
-              </span>
-            )}
-          </p>
-          <ul aria-hidden="true" className="mt-lg grid grid-cols-5 gap-xs">
-            {members.map((m) => (
-              <li
-                key={m.id}
-                onPointerEnter={() => setHot(m.id)}
-                className={`transition-opacity duration-200 motion-reduce:transition-none ${
-                  hot === m.id ? "" : "opacity-45"
-                }`}
-              >
-                <Print src={m.portrait} live={hot === m.id} sizes="6rem" />
+      <div className="hidden grid-cols-12 gap-x-xl lg:grid" onPointerLeave={() => setHot(null)}>
+        <div
+          className="col-span-6 grid grid-cols-[auto_minmax(0,1fr)_auto] content-start gap-x-md xl:col-span-7 xl:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto]"
+          onFocus={(e) => {
+            const row = (e.target as HTMLElement).closest<HTMLElement>("[data-crew]");
+            if (row?.dataset.crew) setHot(row.dataset.crew);
+          }}
+          onBlur={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHot(null);
+          }}
+        >
+          {groups.map((g, i) => (
+            <section
+              key={g.key}
+              aria-labelledby={`crew-d-${g.key}`}
+              className={`col-span-full grid grid-cols-subgrid ${i ? "pt-xxl" : ""}`}
+            >
+              <GroupHead id={`crew-d-${g.key}`} label={g.label} count={g.members.length} className="col-span-full" />
+              <ul className="col-span-full grid grid-cols-subgrid border-t border-rule-strong">
+                {g.members.map((m) => {
+                  const read = hot === m.id && !!m.bio;
+                  const away = `transition-[opacity,visibility] duration-200 motion-reduce:transition-none ${read ? "invisible opacity-0" : ""}`;
+                  return (
+                  <li
+                    key={m.id}
+                    data-crew={m.id}
+                    onPointerEnter={() => setHot(m.id)}
+                    className={`relative col-span-full grid grid-cols-subgrid items-start border-b border-rule py-1.5 text-body-sm transition-colors duration-200 motion-reduce:transition-none ${
+                      hot && hot !== m.id ? "text-ink-muted" : "text-ink"
+                    }`}
+                  >
+                    <span className="min-w-[4.5rem]">{m.name}</span>
+                    <Meta m={m} className={away} />
+                    <span className={`hidden text-ink-muted xl:block ${away}`}>{m.department.en}</span>
+                    {/* Centre 32px hit areas on the 21px text line. */}
+                    <MemberLinks name={m.name} links={m.links} dense className="-my-[5.5px] -mr-xxs justify-self-end" />
+                    {m.bio && (
+                      <>
+                        <span className="sr-only">{m.bio}</span>
+                        <BioLine text={m.bio} on={read} />
+                      </>
+                    )}
+                  </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+        </div>
+
+        <div aria-hidden="true" className="col-span-6 xl:col-span-5">
+          {/* Align the portrait wall with the first table rule. */}
+          <GroupHead label={groups[0]?.label ?? ""} count={0} className="invisible" />
+          <ul className="grid grid-cols-5 gap-xs">
+            {order.map((m) => (
+              <li key={m.id} onPointerEnter={() => setHot(m.id)}>
+                <Print
+                  src={m.portrait}
+                  live={hot === m.id}
+                  lazy
+                  portrait
+                  sizes="(min-width: 1280px) 8vw, 10vw"
+                  className={`transition-opacity duration-200 motion-reduce:transition-none ${hot && hot !== m.id ? "opacity-45" : ""}`}
+                />
               </li>
             ))}
           </ul>
         </div>
-
-        <ul
-          className="col-span-8 grid grid-cols-[minmax(0,0.8fr)_minmax(0,1.5fr)_minmax(0,1.7fr)_auto] gap-x-lg border-b border-rule-strong"
-          onFocus={(e) => {
-            const id = (e.target as HTMLElement).closest<HTMLElement>("[data-crew]")?.dataset.crew;
-            if (id) setHot(id);
-          }}
-        >
-          {members.map((m) => {
-            const on = hot === m.id;
-            return (
-              <li
-                key={m.id}
-                data-crew={m.id}
-                onPointerEnter={() => setHot(m.id)}
-                className={`u-scroll-fade col-span-full grid grid-cols-subgrid border-t transition-colors duration-200 motion-reduce:transition-none ${
-                  on ? "border-ink" : "border-rule-strong"
-                }`}
-              >
-                <div
-                  onClick={(e) => rowClick(e, () => toggle(m.id))}
-                  className="col-span-full grid min-h-16 cursor-pointer grid-cols-subgrid items-center py-sm"
-                >
-                <span className="u-trim text-display-md text-ink">{m.name}</span>
-                <Meta m={m} className="u-trim text-body text-ink" />
-                <span className="u-trim text-body text-ink-muted">
-                  {m.department.en}
-                </span>
-                <span className="-mr-xs flex items-center justify-self-end">
-                  <MemberLinks name={m.name} links={m.links} />
-                  <Toggle m={m} open={open === m.id} controls={`crew-d-${m.id}`} onToggle={() => toggle(m.id)} />
-                </span>
-                </div>
-                <Drawer id={`crew-d-${m.id}`} open={open === m.id} m={m} />
-              </li>
-            );
-          })}
-        </ul>
       </div>
     </>
   );
