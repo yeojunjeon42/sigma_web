@@ -16,7 +16,6 @@ export default function Article({
   photos = [],
   videos = [],
   back,
-  others = [],
   newer,
   older,
 }: {
@@ -24,7 +23,6 @@ export default function Article({
   photos?: Photo[];
   videos?: string[];
   back: { href: string; label: string };
-  others?: DocMeta[];
   newer?: DocMeta;
   older?: DocMeta;
 }) {
@@ -34,44 +32,18 @@ export default function Article({
   const [leadPhoto, ...inline] = photos;
   const cover = leadPhoto ? undefined : coverFor(doc.slug);
 
-  const COL = "mx-auto w-full max-w-[42.25rem] lg:col-span-8 lg:col-start-3";
+  const COL = "mx-auto w-full max-w-[42.25rem]";
+  const imageSizes = "(min-width: 708px) 42.25rem, calc(100vw - 2rem)";
 
   return (
     <article>
-      <Container className="u-clear-masthead lg:grid lg:grid-cols-12 lg:gap-x-lg">
-        <div className="hidden lg:col-span-2 lg:row-span-3 lg:block">
-          <div className="sticky top-[calc(var(--masthead)+var(--spacing-lg))]">
-            <Back back={back} />
-            {others.length > 0 && (
-              <nav aria-label="More posts" className="mt-xxl">
-                <p className={`u-trim ${LABEL}`}>
-                  Nearby
-                </p>
-                <ul className="mt-md flex flex-col gap-md">
-                  {others.map((o) => (
-                    <li key={o.slug}>
-                      <Link
-                        href={`/blog/${o.slug}`}
-                        className="group/post flex items-start gap-sm text-caption text-ink-muted transition-colors hover:text-ink"
-                      >
-                        <PostImage src={coverFor(o.slug)} seed={o.slug} ratio="1 / 1" sizes="2.5rem" className="w-10 shrink-0" />
-                        <span>
-                          {o.title}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            )}
-          </div>
+      <Container className="u-clear-masthead">
+        <div className="mb-xl">
+          <Back back={back} />
         </div>
 
-        <header className={COL}>
-          <div className="lg:hidden">
-            <Back back={back} />
-          </div>
-          <p className="mt-xl flex flex-wrap items-center justify-center gap-x-md gap-y-xs text-[0.875rem] leading-[1.4] text-ink-muted tabular-nums lg:mt-0">
+        <header className="mx-auto w-full max-w-[54rem]">
+          <p className="flex flex-wrap items-center justify-center gap-x-md gap-y-xs text-[0.875rem] leading-[1.4] text-ink-muted tabular-nums">
             {dateLabel && (
               <span className="text-ink">
                 {dateLabel}
@@ -103,23 +75,25 @@ export default function Article({
           </p>
         </header>
 
-        <div className={`mt-16 ${COL}`}>
-          {leadPhoto ? (
-            <Image
-              src={leadPhoto.src}
-              alt={doc.title}
-              width={leadPhoto.width}
-              height={leadPhoto.height}
-              sizes="(min-width: 768px) 42.25rem, 100vw"
-              className="u-corner h-auto w-full"
-              priority
-            />
-          ) : (
-            <PostImage src={cover} seed={doc.slug} ratio="16 / 9" sizes="(min-width: 768px) 42.25rem, 100vw" eager className="u-corner w-full" />
-          )}
-        </div>
+        {(leadPhoto || cover) && (
+          <div className={`mt-xxl md:mt-16 ${COL}`}>
+            {leadPhoto ? (
+              <Image
+                src={leadPhoto.src}
+                alt={doc.title}
+                width={leadPhoto.width}
+                height={leadPhoto.height}
+                sizes={imageSizes}
+                className="u-corner h-auto w-full"
+                priority
+              />
+            ) : (
+              <PostImage src={cover} ratio="16 / 9" sizes={imageSizes} eager className="u-corner w-full" />
+            )}
+          </div>
+        )}
 
-        <div className={`mt-16 ${COL}`}>
+        <div className="mt-xxl md:mt-16">
           {doc.html ? (
             <div
               className="prose flow article-prose u-trim [&_figure[data-placeholder]]:my-xl [&_figure[data-placeholder]]:aspect-[16/9] [&_figure[data-placeholder]]:u-corner [&_figure[data-placeholder]]:bg-ink/5"
@@ -129,7 +103,7 @@ export default function Article({
           <CodeCopy />
 
           {(inline.length > 0 || videos.length > 0) && (
-            <ul className="mt-xxl flex flex-col gap-lg">
+            <ul className={`mt-xxl flex flex-col gap-lg ${COL}`}>
               {inline.map((photo) => (
                 <li key={photo.src} className="u-settle">
                   <Image
@@ -137,7 +111,7 @@ export default function Article({
                     alt={doc.title}
                     width={photo.width}
                     height={photo.height}
-                    sizes="(min-width: 768px) 42.25rem, 100vw"
+                    sizes={imageSizes}
                     className="h-auto w-full"
                   />
                 </li>
@@ -151,7 +125,7 @@ export default function Article({
           )}
 
           {(newer || older) && (
-            <nav aria-label="Next and previous posts" className="mt-section grid border-t border-rule md:grid-cols-2">
+            <nav aria-label="Next and previous posts" className={`mt-section grid border-t border-rule md:grid-cols-2 ${COL}`}>
               {[
                 older && { post: older, label: "Older", align: "" },
                 newer && { post: newer, label: "Newer", align: "md:col-start-2 md:text-right" },

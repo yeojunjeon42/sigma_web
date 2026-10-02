@@ -40,8 +40,6 @@ export default async function PostPage({
   if (!doc) notFound();
   const all = await getIndex("posts");
   const at = all.findIndex((p) => p.slug === slug);
-  const others = all.filter((p) => p.slug !== slug);
-  const near = others.slice(Math.max(0, at - 2), Math.max(0, at - 2) + 4);
   const cover = coverFor(slug);
   const ld = {
     "@context": "https://schema.org",
@@ -71,7 +69,6 @@ export default async function PostPage({
           <Article
             doc={doc}
             back={{ href: "/blog", label: "Blog" }}
-            others={near}
             newer={at > 0 ? all[at - 1] : undefined}
             older={at >= 0 && at < all.length - 1 ? all[at + 1] : undefined}
           />
