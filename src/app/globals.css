@@ -324,10 +324,15 @@
       0 0 14px var(--color-canvas);
   }
 
-  .year-ruler {
-    /* The canvas itself: iOS 26 Safari paints the dial's background under its tab bar. */
+  .year-ruler,
+  .year-picker {
+    --ruler-h: 4rem;
+    /* Safari samples this surface for its tab bar. Avoid shadows near that edge. */
     --ruler-paper: var(--color-canvas);
-    --ruler-station: 96px;
+    --ruler-line: color-mix(in srgb, var(--color-ink) 14%, transparent);
+    --ruler-light: inset 0 1px 0 rgb(255 255 255 / 0.6), inset 0 -1px 0 rgb(15 17 13 / 0.04);
+  }
+  .year-ruler {
     --ruler-edge: calc(var(--ruler-station) / 2);
     --ruler-magnet: calc(var(--ruler-edge) + 2 * var(--ruler-pitch));
     position: fixed;
@@ -336,55 +341,118 @@
     margin-inline: auto;
     bottom: max(var(--gutter), env(safe-area-inset-bottom));
     z-index: 30;
-    height: 76px;
+    height: var(--ruler-h);
     overflow: hidden;
-    touch-action: pan-x pan-y;
+    touch-action: pan-y pinch-zoom;
     user-select: none;
     -webkit-user-select: none;
     cursor: grab;
-    border: 1px solid var(--color-rule-strong);
-    border-radius: var(--radius-pill);
-    background: var(--ruler-paper);
-    box-shadow:
-      0 1px 0 rgb(255 255 255 / 0.45) inset,
-      0 12px 34px rgb(10 9 7 / 0.13);
+    border-radius: calc(var(--ruler-h) / 2);
     transform-origin: 50% 100%;
     transition:
-      opacity 360ms ease,
-      translate 480ms cubic-bezier(0.22, 1, 0.36, 1),
-      scale 480ms cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 180ms ease;
+      opacity 200ms ease-out,
+      translate 620ms cubic-bezier(0.3, 1.35, 0.5, 1),
+      scale 620ms cubic-bezier(0.3, 1.35, 0.5, 1),
+      filter 360ms ease-out;
     animation: year-ruler-arrive 680ms cubic-bezier(0.22, 1, 0.36, 1) 180ms backwards;
   }
-  .year-ruler:focus-visible {
-    border-color: var(--color-ink);
+  /* Separate caps and middle preserve curvature during collapse; overlap joins by 1px. */
+  .year-ruler__pill {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .year-ruler__pill > span {
+    position: absolute;
+    bottom: 0;
+    height: var(--ruler-h);
+    border: 1px solid var(--ruler-line);
+    background: var(--ruler-paper);
+    box-shadow: var(--ruler-light);
+    transition: border-color 180ms ease;
+  }
+  .year-ruler__pill > [data-mid] {
+    left: calc(var(--ruler-h) / 2 - 1px);
+    right: calc(var(--ruler-h) / 2 - 1px);
+    border-inline: 0;
+    transform-origin: 50% 100%;
+  }
+  .year-ruler__pill > [data-end] {
+    width: calc(var(--ruler-h) / 2);
+  }
+  .year-ruler__pill > [data-end="start"] {
+    left: 0;
+    border-right: 0;
+    border-radius: calc(var(--ruler-h) / 2) 0 0 calc(var(--ruler-h) / 2);
+    transform-origin: 0 100%;
+  }
+  .year-ruler__pill > [data-end="end"] {
+    right: 0;
+    border-left: 0;
+    border-radius: 0 calc(var(--ruler-h) / 2) calc(var(--ruler-h) / 2) 0;
+    transform-origin: 100% 100%;
+  }
+  .year-ruler:focus-visible .year-ruler__pill > span {
+    border-color: color-mix(in srgb, var(--color-ink) 45%, transparent);
   }
   .year-ruler[data-dragging="1"] {
     cursor: grabbing;
   }
-  .year-ruler[data-pressed="1"] {
-    scale: 0.988;
-    box-shadow:
-      0 1px 0 rgb(255 255 255 / 0.35) inset,
-      0 6px 18px rgb(10 9 7 / 0.12);
-    transition-duration: 100ms;
+  /* Use edge feedback: scaling would move the strip under the finger. */
+  .year-ruler[data-pressed="1"] .year-ruler__pill > span {
+    border-color: color-mix(in srgb, var(--color-ink) 28%, transparent);
+  }
+  /* Resting collapsed state; YearRuler animates the transition. */
+  .year-ruler[data-mini="1"] {
+    pointer-events: none;
+    cursor: auto;
+  }
+  .year-ruler[data-still] :is(.year-ruler__pill > span, .year-ruler__window, .year-ruler__value) {
+    transition: none;
+  }
+  .year-ruler[data-mini="1"] .year-ruler__pill > [data-mid] {
+    scale: var(--fold-mid) var(--fold-s);
+  }
+  .year-ruler[data-mini="1"] .year-ruler__pill > [data-end="start"] {
+    translate: var(--fold-dx) 0;
+    scale: var(--fold-s);
+  }
+  .year-ruler[data-mini="1"] .year-ruler__pill > [data-end="end"] {
+    translate: calc(-1 * var(--fold-dx)) 0;
+    scale: var(--fold-s);
   }
   .year-ruler[data-on=""] {
     pointer-events: none;
     opacity: 0;
-    translate: 0 calc(100% + var(--gutter));
-    scale: 0.94;
+    translate: 0 calc(50% + var(--gutter));
+    scale: 0.7 0.55;
+    filter: blur(8px);
     animation: none;
+    transition:
+      opacity 220ms ease-in 90ms,
+      translate 360ms cubic-bezier(0.45, 0, 0.8, 0.4),
+      scale 360ms cubic-bezier(0.45, 0, 0.8, 0.4),
+      filter 300ms ease-in;
   }
   .year-ruler__window {
     position: absolute;
     inset: 0;
     overflow: hidden;
+    border-radius: inherit;
+    transform-origin: 50% 100%;
+    transition: opacity 200ms ease-out 200ms;
+  }
+  .year-ruler[data-mini="1"] .year-ruler__window {
+    opacity: 0;
+    scale: var(--fold-x) var(--fold-s);
+  }
+  .year-ruler[data-on=""] :is(.year-ruler__window, .year-ruler__value-slot) {
+    opacity: 0;
+    transition: opacity 120ms ease-in;
   }
   .year-ruler__pane {
-    --tick: color-mix(in srgb, var(--color-accent) 78%, var(--color-ink) 22%);
-    --tick-major: var(--color-accent-deep);
-    --tick-tail: color-mix(in srgb, var(--color-accent) 34%, var(--color-ink-muted) 66%);
+    --tick: var(--color-ink-muted);
+    --tick-major: var(--color-accent);
     position: absolute;
     inset: 0;
     -webkit-mask-image: var(--pane-mask);
@@ -393,25 +461,23 @@
   .year-ruler__pane--past {
     --pane-mask: linear-gradient(
       to right,
-      rgb(0 0 0 / 0.68) calc(50% - 9 * var(--ruler-pitch)),
-      rgb(0 0 0 / 0.79) calc(50% - var(--ruler-magnet)),
+      rgb(0 0 0 / 0.62) calc(50% - 9 * var(--ruler-pitch)),
+      rgb(0 0 0 / 0.78) calc(50% - var(--ruler-magnet)),
       transparent calc(50% - var(--ruler-magnet) + 3px)
     );
   }
   .year-ruler__pane--ahead {
-    --tick: color-mix(in srgb, var(--color-accent) 46%, var(--color-ink-muted) 54%);
+    --tick: color-mix(in srgb, var(--color-ink-muted) 70%, var(--color-canvas));
     --pane-mask: linear-gradient(
       to right,
       transparent calc(50% + var(--ruler-magnet) - 3px),
       rgb(0 0 0 / 0.56) calc(50% + var(--ruler-magnet)),
-      rgb(0 0 0 / 0.44) calc(50% + 9 * var(--ruler-pitch))
+      rgb(0 0 0 / 0.4) calc(50% + 9 * var(--ruler-pitch))
     );
   }
   .year-ruler__pane--past-pull,
   .year-ruler__pane--ahead-pull {
-    --tick: var(--color-accent);
-    --tick-major: var(--color-accent);
-    --tick-tail: var(--color-accent);
+    --tick: var(--color-ink);
   }
   .year-ruler__pane--past-pull {
     --pane-mask: linear-gradient(
@@ -453,9 +519,6 @@
   .year-ruler__track > span {
     display: flex;
   }
-  .year-ruler__track > [data-tail] {
-    --tick: var(--tick-tail);
-  }
   .year-ruler__track > span > span {
     position: relative;
     flex: none;
@@ -467,13 +530,13 @@
     top: 50%;
     left: 50%;
     width: 2px;
-    height: 20px;
+    height: 16px;
     border-radius: 1px;
     background: var(--tick);
     translate: -50% -50%;
   }
   .year-ruler__track > span > [data-major]::before {
-    height: 34px;
+    height: 28px;
     background: var(--tick-major);
   }
   .year-ruler__scroller {
@@ -483,14 +546,11 @@
     overflow-x: auto;
     overflow-y: hidden;
     overscroll-behavior-x: none;
-    scroll-snap-type: x mandatory;
+    /* Avoid native snap braking on iOS; YearRuler handles settling. */
     scrollbar-width: none;
   }
   .year-ruler__scroller::-webkit-scrollbar {
     display: none;
-  }
-  .year-ruler[data-free="1"] .year-ruler__scroller {
-    scroll-snap-type: none;
   }
   .year-ruler__rail {
     display: flex;
@@ -501,13 +561,12 @@
   .year-ruler__rail > span {
     flex: none;
     width: var(--ruler-pitch);
-    scroll-snap-align: center;
   }
   .year-ruler__edge-blur {
     position: absolute;
     inset-block: 0;
     z-index: 1;
-    width: 48px;
+    width: 40px;
     pointer-events: none;
     backdrop-filter: blur(2.25px);
   }
@@ -530,9 +589,66 @@
     translate: -50% 0;
     overflow: hidden;
     pointer-events: none;
+    transition: opacity 220ms ease-out 160ms;
+  }
+  .year-ruler[data-mini="1"] .year-ruler__value-slot {
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .year-picker {
+    position: fixed;
+    inset-inline: 0;
+    z-index: 30;
+    width: min(calc(100% - var(--gutter) - var(--gutter)), 36rem);
+    margin-inline: auto;
+    bottom: calc(max(var(--gutter), env(safe-area-inset-bottom)) + var(--ruler-h) + 8px);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(4.25rem, 1fr));
+    gap: 2px;
+    padding: 6px;
+    border: 1px solid var(--ruler-line);
+    border-radius: 28px;
     background: var(--ruler-paper);
-    /* the dial's own top highlight, carried across the box that covers it */
-    box-shadow: 0 1px 0 rgb(255 255 255 / 0.45) inset;
+    box-shadow: var(--ruler-light);
+    transform-origin: 50% 100%;
+    opacity: 0;
+    translate: 0 12px;
+    scale: 0.92;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 140ms ease-in,
+      translate 240ms cubic-bezier(0.45, 0, 0.8, 0.4),
+      scale 240ms cubic-bezier(0.45, 0, 0.8, 0.4),
+      visibility 0s linear 240ms;
+  }
+  .year-picker[data-open="1"] {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      opacity 200ms ease-out,
+      translate 520ms cubic-bezier(0.3, 1.3, 0.5, 1),
+      scale 520ms cubic-bezier(0.3, 1.3, 0.5, 1),
+      visibility 0s;
+  }
+  .year-picker__year {
+    min-height: 2.75rem;
+    border-radius: 22px;
+    font-size: var(--text-title);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-ink-muted);
+    transition: background-color 120ms ease;
+  }
+  .year-picker__year:active {
+    background: var(--color-surface);
+  }
+  .year-picker__year[aria-current="true"] {
+    color: var(--color-accent);
   }
   .year-ruler__value {
     position: absolute;
@@ -543,13 +659,18 @@
     margin: 0;
     pointer-events: none;
     text-align: center;
-    /* the sans, like every other year on the page */
     font-family: var(--font-sans);
     font-size: var(--text-display-lg);
     line-height: 1;
     font-variant-numeric: tabular-nums;
     color: var(--color-accent);
     text-box: trim-both cap alphabetic;
+    transform-origin: 50% 50%;
+  }
+  /* Keep the year centred as the capsule shrinks from its bottom edge. */
+  .year-ruler[data-mini="1"] .year-ruler__value {
+    scale: var(--fold-s);
+    translate: 0 calc((var(--ruler-h) - var(--ruler-chip-h)) / 2);
   }
   .year-ruler__digit {
     position: relative;
@@ -593,13 +714,21 @@
   }
 
   @media (min-width: 768px) {
-    .year-ruler {
+    .year-ruler,
+    .year-picker {
       display: none;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .year-ruler {
+    .year-ruler,
+    .year-ruler[data-on=""],
+    .year-ruler__pill > span,
+    .year-ruler__window,
+    .year-ruler__value-slot,
+    .year-ruler[data-on=""] :is(.year-ruler__window, .year-ruler__value-slot),
+    .year-picker,
+    .year-picker[data-open="1"] {
       animation: none;
       transition: none;
     }
@@ -1135,6 +1264,18 @@ html[data-rules] .u-rule-in[data-in]::before {
       }
     }
   }
+}
+
+/* Translated dial content does not advance view timelines; keep its rows visible. */
+html[data-slide] .u-scroll-fade {
+  animation: none;
+}
+[data-flow] {
+  transition: opacity 300ms ease-out;
+}
+html[data-fast] [data-flow] {
+  opacity: 0.14;
+  transition: opacity 140ms ease-in;
 }
 
 .prose .katex {
