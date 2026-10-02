@@ -1,37 +1,39 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { EMAIL } from "@/features/site/data/contact";
 
 const ENDPOINT = "https://api.web3forms.com/submit";
 const KEY = "88d928f1-f41f-4ec4-b59b-e3c66d04209c";
 
 type Status = "idle" | "sending" | "sent" | "error";
+type RequiredField = "name" | "email" | "message";
+type Errors = Partial<Record<RequiredField, string>>;
 
 const ARCHIVE_DRAFT = `I'd like to add a build to the archive.
 
-Name of the build:
+Name:
 Year:
-Team (names and 학번):
-What it does, in a few lines:
-Photos or links:`;
+Team:
+Link (Google Drive or other):`;
 
 const BLOG_DRAFT = `I'd like to write a post for the blog.
 
-Working title:
-What it's about, in a few lines:
-Who's writing (names and 학번):`;
+Title:
+Author:
+Article link (Google Drive or other):`;
 
 const DRAFTS: Record<string, string> = { archive: ARCHIVE_DRAFT, blog: BLOG_DRAFT };
 
 const FIELD = "group flex flex-col gap-y-xs";
 const HEAD = "flex items-baseline justify-between text-caption text-ink-muted transition-colors group-focus-within:text-ink";
-const ENTRY = "block h-11 w-full border-b border-ink/30 bg-transparent text-title text-ink transition-colors focus:border-ink focus:outline-none";
+const BORDER = "border-b border-ink/30 transition-colors focus:border-ink focus:outline-none aria-invalid:border-accent aria-invalid:focus:border-accent";
+const ENTRY = `block h-11 w-full bg-transparent text-title text-ink ${BORDER}`;
 
-function Field({ label, note, className = "", children }: { label: string; note?: string; className?: string; children: React.ReactNode }) {
+function Field({ id, label, note, error, className = "", children }: { id: string; label: string; note?: string; error?: string; className?: string; children: React.ReactNode }) {
   return (
-    <label className={`${FIELD} ${className}`}>
-      <span className={HEAD}>
+    <div className={`${FIELD} ${className}`}>
+      <label htmlFor={id} className={HEAD}>
         <span className="u-trim">
           {label}
         </span>
@@ -40,10 +42,34 @@ function Field({ label, note, className = "", children }: { label: string; note?
             {note}
           </span>
         ) : null}
-      </span>
+      </label>
       {children}
-    </label>
+      {error && <p id={`${id}-error`} className="text-caption text-accent-deep">{error}</p>}
+    </div>
   );
+}
+
+function SendButton({ children, type = "button", disabled = false, onClick }: { children: React.ReactNode; type?: "button" | "submit"; disabled?: boolean; onClick?: () => void }) {
+  return (
+    <button
+      type={type}
+      disabled={disabled}
+      onClick={onClick}
+      className="group/send inline-flex h-12 cursor-pointer items-center rounded-pill bg-ink px-lg text-body text-canvas transition-opacity hover:opacity-80 disabled:cursor-default disabled:opacity-40"
+    >
+      <span className="u-trim block">
+        {children}
+        <span aria-hidden="true" className="ml-[0.4em] inline-block transition-transform group-hover/send:translate-x-0.5">↗</span>
+      </span>
+    </button>
+  );
+}
+
+function fieldError(field: HTMLInputElement | HTMLTextAreaElement) {
+  if (!field.value.trim()) {
+    return field.name === "name" ? "Enter your name." : field.name === "email" ? "Enter your email address." : "Enter a message.";
+  }
+  if (field.validity.typeMismatch) return "Enter a valid email address.";
 }
 
 function fit(el: HTMLTextAreaElement | null) {
@@ -57,9 +83,29 @@ export function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [draft, setDraft] = useState("");
   const [stamp, setStamp] = useState("");
+  const [errors, setErrors] = useState<Errors>({});
+  const messageRef = useCallback((el: HTMLTextAreaElement | null) => {
+    if (!el) return;
+    const draft = DRAFTS[new URLSearchParams(window.location.search).get("about") ?? ""];
+    if (!el.value && draft) el.value = draft;
+    fit(el);
+  }, []);
 
   async function send(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (status === "sending") return;
+    const fields = [...e.currentTarget.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("[required]")];
+    const nextErrors: Errors = {};
+    for (const field of fields) {
+      const error = fieldError(field);
+      if (error) nextErrors[field.name as RequiredField] = error;
+    }
+    setErrors(nextErrors);
+    const firstInvalid = fields.find((field) => nextErrors[field.name as RequiredField]);
+    if (firstInvalid) {
+      requestAnimationFrame(() => firstInvalid.focus());
+      return;
+    }
     const data = new FormData(e.currentTarget);
     const body = String(data.get("message") ?? "");
     const subject = `[Contact] ${String(data.get("name") ?? "")}`;
@@ -93,73 +139,76 @@ export function ContactForm() {
           <p className="mt-md text-body text-ink">
             We’ll come back to you shortly.
           </p>
-          <p className="mt-md">
-            <button
-              type="button"
-              onClick={() => setStatus("idle")}
-              className="u-swipe-rest relative cursor-pointer text-ui text-ink uppercase before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 lg:before:hidden"
-            >
-              Send another
-            </button>
-          </p>
+          <div className="mt-lg">
+            <SendButton onClick={() => setStatus("idle")}>Send another</SendButton>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <form onSubmit={send} className="grid gap-y-lg md:grid-cols-2 md:gap-x-lg lg:grid-cols-7">
-      <Field label={"Name"} className="lg:col-span-4">
-        <input name="name" type="text" required autoComplete="name" className={ENTRY} />
+    <form
+      noValidate
+      onSubmit={send}
+      onInput={(e) => {
+        const field = e.target;
+        if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) || !field.required) return;
+        const name = field.name as RequiredField;
+        if (errors[name]) setErrors((previous) => ({ ...previous, [name]: fieldError(field) }));
+      }}
+      className="grid gap-y-lg md:grid-cols-2 md:gap-x-lg lg:grid-cols-7"
+    >
+      <Field id="contact-name" label="Name" error={errors.name} className="lg:col-span-4">
+        <input
+          id="contact-name"
+          name="name"
+          type="text"
+          required
+          autoComplete="name"
+          aria-invalid={!!errors.name}
+          aria-describedby={errors.name ? "contact-name-error" : undefined}
+          className={ENTRY}
+        />
       </Field>
 
-      <Field label={"Email"} className="lg:col-span-3">
-        <input name="email" type="email" required autoComplete="email" className={ENTRY} />
+      <Field id="contact-email" label="Email" error={errors.email} className="lg:col-span-3">
+        <input
+          id="contact-email"
+          name="email"
+          type="email"
+          required
+          autoComplete="email"
+          aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? "contact-email-error" : undefined}
+          className={ENTRY}
+        />
       </Field>
 
-      <Field label={"From"} note={"Optional"} className="md:col-span-2 lg:col-span-7">
-        <input name="organisation" type="text" autoComplete="organization" className={ENTRY} />
+      <Field id="contact-organisation" label="From" note="Optional" className="md:col-span-2 lg:col-span-7">
+        <input id="contact-organisation" name="organisation" type="text" autoComplete="organization" className={ENTRY} />
       </Field>
 
-      <Field label={"Message"} className="md:col-span-2 lg:col-span-7">
+      <Field id="contact-message" label="Message" error={errors.message} className="md:col-span-2 lg:col-span-7">
         <textarea
+          id="contact-message"
           name="message"
           required
           rows={3}
-          ref={(el) => {
-            const draft = DRAFTS[new URLSearchParams(window.location.search).get("about") ?? ""];
-            if (el && !el.value && draft) {
-              el.value = draft;
-            }
-            fit(el);
-          }}
+          aria-invalid={!!errors.message}
+          aria-describedby={errors.message ? "contact-message-error" : undefined}
+          ref={messageRef}
           onInput={(e) => fit(e.currentTarget)}
-          className="block min-h-[calc(3lh+var(--spacing-sm))] w-full resize-none border-b border-ink/30 bg-transparent py-xs text-title text-ink transition-colors [field-sizing:content] focus:border-ink focus:outline-none"
+          className={`block min-h-[calc(3lh+var(--spacing-sm))] w-full resize-none bg-transparent py-xs text-title text-ink [field-sizing:content] ${BORDER}`}
         />
       </Field>
 
       <input type="checkbox" name="botcheck" tabIndex={-1} autoComplete="off" className="hidden" />
 
       <div className="mt-sm flex flex-wrap items-center gap-x-xl gap-y-sm md:col-span-2 lg:col-span-7">
-        <button
-          type="submit"
-          disabled={status === "sending"}
-          className="group/send inline-flex h-12 cursor-pointer items-center rounded-pill bg-ink px-lg text-body text-canvas transition-opacity hover:opacity-80 disabled:cursor-default disabled:opacity-40"
-        >
-          <span className="u-trim block">
-            {status === "sending" ? (
-              "Sending"
-            ) : (
-              "Send message"
-            )}
-            <span
-              aria-hidden="true"
-              className="ml-[0.4em] inline-block transition-transform group-hover/send:translate-x-0.5"
-            >
-              ↗
-            </span>
-          </span>
-        </button>
+        <SendButton type="submit" disabled={status === "sending"}>
+          {status === "sending" ? "Sending" : "Send message"}
+        </SendButton>
         <p aria-live="polite" className="text-body-sm text-ink">
           {status === "error" ? (
             <>
