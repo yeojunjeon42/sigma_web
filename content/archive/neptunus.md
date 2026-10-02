@@ -2,9 +2,8 @@
 title: Neptunus
 year: 2016
 date: 2016
-tags: [2016, URP, 탐사로봇, 수륙양용]
-source: 2016 작품집 원고 · Neptunus 인터뷰 원고
-team: 김용혁 (기계항공공학부), 박동훈 (전기정보공학부), 이혜건 (조소과), 박유진 (기계항공공학부), 김용재 (조선해양공학과)
+tags: [2016, URP, Exploration robot, Amphibious]
+team: 김용혁, 박동훈, 이혜건, 박유진, 김용재
 ---
 
 ## Concept과 개발목표

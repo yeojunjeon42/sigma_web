@@ -3,8 +3,7 @@ title: WalkNine
 titleKo: 워크나인
 year: 2012
 date: 2012
-tags: [2007-2014, 보행로봇, 창의설계]
-source: 구작품 해설 워크나인.txt
+tags: [2007-2014, Walking robot, Creative design]
 ---
 
 2012년 창의적 공학설계 경진대회에 출품했던 4족보행 로봇으로, 프로세서로 임베디드 리눅스

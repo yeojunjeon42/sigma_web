@@ -3,8 +3,7 @@ title: VR Drone for Image Training
 titleKo: 이미지 트레이닝 VR 드론
 year: 2020
 date: 2020
-tags: [2020, 창의설계축전, 드론, 스포츠]
-source: 2020 창의설계축전 과제보고서 · PRJ_Report_2020_Doraemon-Project-Report.hwp
+tags: [2020, Creative Design Festival, Drone, Sport]
 team: 이성현, 정석철, 박진솔, 이주형
 ---
 

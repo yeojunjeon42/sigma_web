@@ -2,8 +2,7 @@
 title: RC Submarine
 year: 2025
 date: 2025
-tags: [2025, 메이킹, 잠수함]
-source: 2025 2학기 메이킹 팀 발표자료
+tags: [2025, Making, Submarine]
 team: 전여준, 신승주, 김보성, 전하윤, 김상빈
 ---
 

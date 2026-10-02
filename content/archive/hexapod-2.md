@@ -2,9 +2,8 @@
 title: Hexapod 2.0
 year: 2016
 date: 2016
-tags: [2016, 보행로봇, 자유연구]
-source: 2016 작품집 원고
-team: 박동훈 (전기정보공학부)
+tags: [2016, Walking robot, Independent research]
+team: 박동훈
 ---
 
 ## Concept과 개발목표

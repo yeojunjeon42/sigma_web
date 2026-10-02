@@ -2,8 +2,7 @@
 title: SIGMA x PORTAL301 Collaboration
 titleKo: PORTAL301 기술 협업
 year: 2025
-tags: [2025, 협업, 자율주행, 산업용로봇]
-source: PORTAL301 연계 프로젝트 과제 안내 (2025)
+tags: [2025, Collaboration, Autonomous driving, Industrial robot]
 ---
 
 ## Robot Motion Planning

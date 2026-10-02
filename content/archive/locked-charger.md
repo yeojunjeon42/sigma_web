@@ -3,9 +3,8 @@ title: Locked Charger
 titleKo: 분리불가 충전기
 year: 2016
 date: 2016
-tags: [2016, 신입생, 자유연구]
-source: 2016 작품집 원고
-team: 서민석 (전기정보공학부), 오우석 (전기정보공학부), 김재현 (기계항공공학부), 김태형 (기계항공공학부)
+tags: [2016, First-year, Independent research]
+team: 서민석, 오우석, 김재현, 김태형
 ---
 
 ## Concept과 개발목표

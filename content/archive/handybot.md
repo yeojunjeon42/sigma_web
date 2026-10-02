@@ -2,9 +2,8 @@
 title: HandyBot
 year: 2025
 date: 2025
-tags: [2025, 메이킹, 원격조종]
-source: 2025 2학기 메이킹 팀 발표자료
-team: 공지환, 김주형, 송희경, 이서현, 김동광 (ME 20), 김정환 (ECE 21), 홍성우 (Design 21), 이승현 (ME 25)
+tags: [2025, Making, Teleoperation]
+team: 공지환, 김주형, 송희경, 이서현, 김동광, 김정환, 홍성우, 이승현
 ---
 
 ## Setting a GOAL

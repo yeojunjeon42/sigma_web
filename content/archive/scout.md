@@ -2,9 +2,8 @@
 title: Scout
 year: 2017
 date: 2017
-tags: [2017, 신입생프로젝트, 벽면주행]
-source: 2017 작품집 SigmaWorks 14p · 2017 리플렛
-team: 김수인 (기계항공 17), 박경록 (기계항공 17), 이석원 (전기정보 17)
+tags: [2017, First-year project, Wall climbing]
+team: 김수인, 박경록, 이석원
 ---
 
 ## Concept과 개발목표

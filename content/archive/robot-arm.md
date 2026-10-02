@@ -2,8 +2,7 @@
 title: Robot Arm
 year: 2025
 date: 2025
-tags: [2025, 메이킹, 로봇팔]
-source: 2025 2학기 메이킹 팀 발표자료
+tags: [2025, Making, Robot arm]
 team: 김세은, 박시연, 서승경, 유영욱, 황인성
 ---
 

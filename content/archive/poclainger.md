@@ -1,8 +1,7 @@
 ---
 title: POCLAINGER
 titleKo: 포크레인저
-tags: [2007-2014, 엑소스켈레톤, 중장비]
-source: 2015 30주년 작품집 7p(목차) · 2015 삼성 메카클럽 지원서
+tags: [2007-2014, Exoskeleton, Heavy machinery]
 ---
 
 포크레인저는 엑소스켈레톤을 통한 보다 기기의 쉬운 조종을 컨셉으로 개발된 로봇으로, 사용자는

@@ -3,8 +3,7 @@ title: Medicine Management for the Elderly
 titleKo: 노인 약 관리 시스템
 year: 2020
 date: 2020
-tags: [2020, 창의설계축전, 헬스케어, 고령화]
-source: 2020 창의설계축전 과제보고서 · PRJ_Report_2020_Project-Report-Elderly-Deuleul-Management.hwp
+tags: [2020, Creative Design Festival, Healthcare, Ageing]
 team: 이성민, 박서연, 조규진
 ---
 

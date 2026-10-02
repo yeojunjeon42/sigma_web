@@ -3,9 +3,8 @@ title: Self-Driving Car
 titleKo: 무인 자율 주행 자동차
 year: 2017
 date: 2017
-tags: [2017, 자유연구, 자율주행]
-source: 2017 작품집 SigmaWorks 50p · 2017 리플렛
-team: 유용재 (전기정보 14), 권대희 (전기정보 14), 김지강 (기계항공 14), 정찬영 (기계항공 15), 강동혁 (에너지자원 13)
+tags: [2017, Independent research, Autonomous driving]
+team: 유용재, 권대희, 김지강, 정찬영, 강동혁
 ---
 
 자율주행시스템을 탑재한 무인 모형 자동차

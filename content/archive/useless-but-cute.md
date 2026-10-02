@@ -3,9 +3,8 @@ title: Useless But Cute
 titleKo: 쓸데없지만 귀여워
 year: 2017
 date: 2017
-tags: [2017, 신입생프로젝트, 인터랙션]
-source: 2017 작품집 SigmaWorks 20p · 2017 리플렛
-team: 장현세 (기계항공 16), 이승연 (기계항공 16)
+tags: [2017, First-year project, Interaction]
+team: 장현세, 이승연
 ---
 
 ## Concept과 개발목표

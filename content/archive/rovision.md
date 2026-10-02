@@ -2,9 +2,8 @@
 title: ROVision
 year: 2015
 date: 2015
-tags: [2015, 수중로봇, 테크윈]
-source: 2015 30주년 작품집 26p
-team: 김용재 (조선 10), 유용재 (전기 14), 이규원 (기계 14), 이형석 (기계 14), 오승현 (서양화 15)
+tags: [2015, Underwater robot, Techwin]
+team: 김용재, 유용재, 이규원, 이형석, 오승현
 ---
 
 ROV(Remotely Operated underwater Vehicle)란 수중에서 다양한 기능을 수행하는 탐사정을

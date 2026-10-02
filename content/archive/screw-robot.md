@@ -3,9 +3,8 @@ title: Screw-Propelled Robot
 titleKo: 나선지렁이
 year: 2017
 date: 2017
-tags: [2017, URP, 탐사로봇]
-source: 2017 작품집 SigmaWorks 26p · 2017 리플렛 · 2017 URP 연구계획서
-team: 국도관 (기계항공 16), 윤경탁 (기계항공 16), 홍지우 (전기정보 13)
+tags: [2017, URP, Exploration robot]
+team: 국도관, 윤경탁, 홍지우
 ---
 
 ## Concept과 개발목표

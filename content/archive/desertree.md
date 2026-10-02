@@ -2,9 +2,8 @@
 title: Desertree
 year: 2016
 date: 2016
-tags: [2016, 신입생, 자유연구]
-source: 2016 작품집 원고
-team: 신호원 (전기정보공학부), 김종민 (기계항공공학부), 김민극 (기계항공공학부), 김정훈 (기계항공공학부), 권혁재 (전기정보공학부)
+tags: [2016, First-year, Independent research]
+team: 신호원, 김종민, 김민극, 김정훈, 권혁재
 ---
 
 ## Concept과 개발목표

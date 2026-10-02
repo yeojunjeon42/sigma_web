@@ -33,5 +33,5 @@ export async function getEntries(): Promise<Map<string, Entry>> {
 }
 
 function name(member: string) {
-  return member.replace(/\s*\([^)]*\)\s*$/, "").trim();
+  return member.replace(/\s*\([^)]*\)/g, "").trim();
 }

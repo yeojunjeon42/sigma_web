@@ -3,7 +3,7 @@ title: From least squares to gradient descent
 date: 2026-08-20
 year: 2026
 summary: A seminar write-up that builds the first models of machine learning from their mathematics — least squares, likelihood, the logistic loss and the step that minimises it.
-tags: [세미나, 머신러닝]
+tags: [Seminar, Machine learning]
 author: Author
 sample: true
 ---

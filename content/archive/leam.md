@@ -3,9 +3,8 @@ title: LEAM
 titleKo: 인공근육 기반 경량화 외골격
 year: 2017
 date: 2017
-tags: [2017, URP, 외골격, 인공근육]
-source: 2017 작품집 SigmaWorks 30p · 2017 리플렛 · 2017 URP 연구계획서
-team: 안서기 (기계항공 16), 장현세 (기계항공 16), 임건호 (기계항공 17), 정종혁 (전기정보 16)
+tags: [2017, URP, Exoskeleton, Artificial muscle]
+team: 안서기, 장현세, 임건호, 정종혁
 ---
 
 ## Concept과 개발목표

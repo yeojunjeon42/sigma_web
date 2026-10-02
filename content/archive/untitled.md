@@ -3,9 +3,8 @@ title: Untitled
 titleKo: 무제
 year: 2016
 date: 2016
-tags: [2016, 미디어아트, 해커톤]
-source: 2016 작품집 원고
-team: 이혜건 (조소과), 오승현 (서양화과), 박재연 (전기정보공학부), 김태형 (전기정보공학부)
+tags: [2016, Media art, Hackathon]
+team: 이혜건, 오승현, 박재연, 김태형
 ---
 
 어떻게 하면 좀 더 순수하게 사람의 마음을 만질 수 있을까? 담아낼 수 있을까? Untitled는 두명의

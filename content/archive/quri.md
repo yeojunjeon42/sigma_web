@@ -2,9 +2,8 @@
 title: Quri
 year: 2017
 date: 2017
-tags: [2017, 자유연구, 교감로봇]
-source: 2017 작품집 SigmaWorks 40p · 2017 리플렛
-team: 박재연 (전기정보 15), 최가람 (전기정보 16), 홍지우 (전기정보 13), 최예진 (서양화 15)
+tags: [2017, Independent research, Companion robot]
+team: 박재연, 최가람, 홍지우, 최예진
 ---
 
 ## Concept과 개발목표

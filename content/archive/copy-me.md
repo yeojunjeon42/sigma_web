@@ -3,9 +3,8 @@ title: Copy Me
 titleKo: 날 따라해봐요
 year: 2017
 date: 2017
-tags: [2017, 신입생프로젝트, 창의설계축전, 로봇팔]
-source: 2017 작품집 SigmaWorks 10p · 2017 리플렛
-team: 임건호 (기계항공 17), 김창현 (기계항공 17), 김형주 (전기정보 17), 안형서 (전기정보 17)
+tags: [2017, First-year project, Creative Design Festival, Robot arm]
+team: 임건호, 김창현, 김형주, 안형서
 ---
 
 ## Concept과 개발목표

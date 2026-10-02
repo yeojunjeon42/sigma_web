@@ -3,9 +3,8 @@ title: Sense of Balance
 titleKo: 평형감각
 year: 2017
 date: 2017
-tags: [2017, 개인프로젝트, 제어]
-source: 2017 리플렛 · 2017 도록 텍스트 초안
-team: 이석준 (전기정보 16)
+tags: [2017, Solo project, Control]
+team: 이석준
 ---
 
 ## Concept과 개발목표
