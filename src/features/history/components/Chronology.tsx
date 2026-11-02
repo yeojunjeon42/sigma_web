@@ -27,20 +27,20 @@ export default function Chronology({
   nodes: YearNode[];
 }) {
   return (
-    <div className="-mx-[var(--gutter)] border-b border-rule px-[var(--gutter)] md:-mx-md md:px-md">
+    <div className="border-b border-rule max-md:-mx-[var(--gutter)] max-md:px-[var(--gutter)] md:col-span-full md:grid md:grid-cols-subgrid">
       <RuleIn />
       {nodes.map((node) => {
         return (
         <section
           key={node.year}
           id={`y${node.year}`}
-          className="u-rule-in -mx-[var(--gutter)] scroll-mt-[var(--masthead)] border-t border-rule px-[var(--gutter)] py-lg even:bg-surface md:-mx-md md:px-md md:grid md:grid-cols-12 md:items-baseline md:gap-x-lg md:py-xl"
+          className="u-rule-in scroll-mt-[var(--masthead)] border-t border-rule py-lg max-md:-mx-[var(--gutter)] max-md:px-[var(--gutter)] max-md:even:bg-surface md:col-span-full md:grid md:grid-cols-subgrid md:items-baseline md:py-xl"
         >
-          <div className="mb-xs flex items-start justify-between gap-md md:col-span-2 md:mb-0 md:flex-col md:justify-start md:gap-sm">
+          <div className="mb-xs flex items-start justify-between gap-md md:mb-0 md:flex-col md:justify-start md:gap-sm lg:col-span-2">
             <h2 className="text-body tabular-nums text-ink">{node.year}</h2>
           </div>
 
-          <ul className="u-scroll-fade md:col-span-10">
+          <ul className="u-scroll-fade md:col-start-2 md:col-end-[-1] md:grid md:grid-cols-subgrid lg:col-start-3">
             {node.events.map((e) => {
               const w = when(e.date);
               const title = (
@@ -60,10 +60,10 @@ export default function Chronology({
                 <li
                   key={e.id}
                   id={`e-${e.id}`}
-                  className="u-line-cap grid grid-cols-[4.5rem_minmax(0,1fr)] items-baseline gap-x-sm py-xxs text-body text-ink md:grid-cols-[6rem_minmax(0,1fr)]"
+                  className="u-line-cap grid grid-cols-6 items-baseline gap-x-gutter py-xxs text-body text-ink md:col-span-full md:grid-cols-subgrid"
                 >
                   <span
-                    className={`${DATE} ${e.award ? "text-accent-deep" : "text-ink-muted"}`}
+                    className={`${DATE} col-span-2 lg:col-span-1 ${e.award ? "text-accent-deep" : "text-ink-muted"}`}
                   >
                     {e.award ? (
                       "Award"
@@ -74,13 +74,13 @@ export default function Chronology({
                   {work ? (
                     <Link
                       href={`/archive?view=reel&at=${work}`}
-                      className="u-swipe relative before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 lg:before:hidden"
+                      className="u-swipe relative col-start-3 col-end-[-1] justify-self-start lg:col-start-2 before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 lg:before:hidden"
                     >
                       {title}
                       <span aria-hidden="true">{"\u00a0↗"}</span>
                     </Link>
                   ) : (
-                    <span>{title}</span>
+                    <span className="col-start-3 col-end-[-1] lg:col-start-2">{title}</span>
                   )}
                 </li>
               );
