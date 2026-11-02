@@ -16,7 +16,7 @@ const STYLE = `
 `;
 
 type Doc = Document & {
-  startViewTransition?: (cb: () => Promise<void>) => { finished: Promise<void>; skipTransition?: () => void };
+  startViewTransition?: (cb: () => Promise<void>) => { ready: Promise<void>; finished: Promise<void>; skipTransition?: () => void };
 };
 
 const SLOW = 650;
@@ -97,7 +97,15 @@ export default function ArchiveTransitions() {
               }, 8);
             }),
         );
-      vt.finished.finally(clear);
+      // ready rejects when a slow transition is skipped; navigation still finishes normally.
+      const failed = (error: unknown) => {
+        if (!(error instanceof DOMException && error.name === "AbortError")) console.error(error);
+      };
+      void vt.ready.catch(failed);
+      void vt.finished.then(clear, (error: unknown) => {
+        clear();
+        failed(error);
+      });
       window.setTimeout(() => {
         if (window.location.search !== url.search) vt.skipTransition?.();
       }, SLOW);
