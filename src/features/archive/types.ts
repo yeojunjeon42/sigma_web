@@ -35,7 +35,7 @@ export interface ArchiveProject {
 }
 
 export const ERAS: { key: Era; label: string }[] = [
-  { key: "2007-2014", label: "2007–2014" },
+  { key: "2007-2014", label: "2007" },
   { key: "2015", label: "2015" },
   { key: "2016", label: "2016" },
   { key: "2017", label: "2017" },
@@ -43,3 +43,5 @@ export const ERAS: { key: Era; label: string }[] = [
   { key: "2024", label: "2024" },
   { key: "2025", label: "2025" },
 ];
+
+export const eraLabel = (era: Era) => ERAS.find((e) => e.key === era)?.label ?? era;

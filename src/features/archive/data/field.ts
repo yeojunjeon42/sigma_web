@@ -1,9 +1,10 @@
 import type { ArchiveProject } from "../types";
 import { LIFTED, type Look } from "./covers";
+import objects from "./objects.json";
 import { SCREEN } from "@/lib/halftone";
 
-// Edge fade in px; captions align halfway into FieldScreen's mask.
-export const FEATHER = SCREEN * 9;
+// The field prints at half the site's screen, so that small cut-outs stay readable.
+export const FIELD_CELL = SCREEN / 2;
 
 export type Shape = "port" | "sq" | "land";
 
@@ -14,6 +15,11 @@ export const PLATE: Record<Shape, { w: number; h: number }> = {
 };
 
 const INSET = 0.09;
+
+// Already sized and centred on a square canvas, so each fills its plate.
+const OBJECTS: Record<string, { file: string }> = objects;
+
+export const objectSrc = (id: string) => (OBJECTS[id] ? `/archive-looks/${id}/${OBJECTS[id].file}` : null);
 
 export type TileKind = "lift" | "photo" | "none";
 
@@ -62,8 +68,20 @@ function contain(
   return [x, y, w, h];
 }
 
+// Keeps a cut-out at the centre of its plate, with room for the name inside the plate's foot.
+export const CLEAR: Tile["box"] = [0.12, 0.12, 0.76, 0.76];
+
 export function tileFor(project: ArchiveProject, look: Look): Tile {
-  const lifted = look === "photo" ? undefined : LIFTED[project.id];
+  const object = look === "object" ? OBJECTS[project.id] : undefined;
+  if (object) {
+    return {
+      kind: "lift",
+      shape: "sq",
+      src: `/archive-looks/${project.id}/${object.file}`,
+      box: [0, 0, 1, 1],
+    };
+  }
+  const lifted = look === "photo" || look === "object" ? undefined : LIFTED[project.id];
   if (lifted) {
     const ratio = lifted.w / lifted.h;
     const shape = shapeFor(ratio);
