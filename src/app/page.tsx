@@ -4,7 +4,7 @@ import HeroField from "@/components/ui/HeroField";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Container, GridField, Reveal } from "@/components/ui";
-import { getSponsors } from "@/features/sponsors/api/getSponsors";
+import { getCofounded, getSponsors } from "@/features/sponsors/api/getSponsors";
 import { getArchiveWithMedia } from "@/features/archive/api/getArchive";
 import { HERO_BUILDS } from "@/features/archive/data/hero";
 import { splitTitle } from "@/features/archive/components/splitTitle";
@@ -29,8 +29,9 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const [sponsors, builds, awards] = await Promise.all([
+  const [sponsors, cofounded, builds, awards] = await Promise.all([
     getSponsors(),
+    getCofounded(),
     getArchiveWithMedia(),
     getAwards(),
   ]);
@@ -75,14 +76,14 @@ export default async function Home() {
       <Navbar />
 
       <div className="relative z-10 bg-canvas">
-        <HeroField sponsors={sponsors} builds={plates} />
+        <HeroField sponsors={sponsors} cofounded={cofounded} builds={plates} />
 
       <main id="main">
         <section
           aria-label="Founded 1984"
           className="bg-band text-ink"
         >
-          <Container className="grid gap-y-xl py-xxl md:grid-cols-12 md:items-end md:py-section">
+          <Container className="grid gap-y-xl py-xxl md:grid-cols-12 md:items-end md:gap-x-gutter md:py-section">
             <p className="u-drift [--drift-from:32px] [--drift-to:-32px] md:col-span-8">
               <span className="text-body text-ink">
                 Founded
@@ -109,7 +110,7 @@ export default async function Home() {
             />
 
             <Reveal
-              className="mt-section grid grid-cols-2 gap-x-lg gap-y-xxl md:grid-cols-12 md:gap-y-section lg:mt-section-lg"
+              className="mt-section grid grid-cols-2 gap-x-gutter gap-y-xxl md:grid-cols-12 md:gap-y-section lg:mt-section-lg"
               stagger={70}
             >
               <h2 className="text-title text-ink md:col-span-3 md:row-start-1">
