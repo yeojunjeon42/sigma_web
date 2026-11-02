@@ -32,7 +32,7 @@ export default function HistoryHero({
   event: ClubEvent;
 }) {
   return (
-    <header className="grid grid-cols-[auto_minmax(0,1fr)_auto] gap-x-md gap-y-lg pb-xxl pt-[calc(var(--masthead)+var(--spacing-xl))] [--Y:clamp(4rem,12vw,7rem)] lg:min-h-svh lg:grid-cols-12 lg:grid-rows-[auto_minmax(18rem,1fr)_auto] lg:gap-x-lg lg:gap-y-xl lg:pb-lg lg:pt-[calc(var(--masthead)+var(--spacing-lg))] lg:[--Y:min(calc((100svh-var(--masthead)-2*var(--spacing-lg))*0.7/2.83),calc(15vw))]">
+    <header className="grid grid-cols-6 gap-x-gutter gap-y-lg pb-xxl pt-[calc(var(--masthead)+var(--spacing-xl))] [--Y:clamp(4rem,12vw,7rem)] md:grid-cols-12 lg:min-h-svh lg:grid-rows-[auto_minmax(18rem,1fr)_auto] lg:gap-y-xl lg:pb-lg lg:pt-[calc(var(--masthead)+var(--spacing-lg))] lg:[--Y:min(calc((100svh-var(--masthead)-2*var(--spacing-lg))*0.7/2.83),calc(15vw))]">
       <style>{MOTION}</style>
       <h1 className="contents">
         <span className="sr-only">
@@ -40,7 +40,8 @@ export default function HistoryHero({
         </span>
         <span
           aria-hidden="true"
-          className={`${BIG} u-away [--away:-12svh] col-start-1 row-start-1 self-start justify-self-start lg:col-span-2 lg:row-span-2`}
+          data-offgrid
+          className={`${BIG} u-away [--away:-12svh] col-span-2 col-start-1 row-start-1 self-start justify-self-start lg:row-span-2`}
         >
           <span className="hy-in-a block">
             <span className="-ml-[0.022em] block rotate-180">1984</span>
@@ -48,7 +49,7 @@ export default function HistoryHero({
         </span>
       </h1>
 
-      <section aria-label="Now" className="col-span-2 col-start-2 row-start-1 lg:col-span-4 lg:col-start-9">
+      <section aria-label="Now" className="col-span-3 col-start-4 row-start-1 md:col-span-6 md:col-start-4 lg:col-span-3 lg:col-start-10">
         <ul className="flex flex-col gap-y-lg">
           {now.slice(0, 2).map((e) => {
             const w = when(e.date);
@@ -66,7 +67,7 @@ export default function HistoryHero({
         </ul>
       </section>
 
-      <figure className="col-span-3 row-start-2 flex min-h-0 flex-col gap-sm lg:col-span-7 lg:col-start-3 lg:ml-lg">
+      <figure className="col-span-full row-start-2 flex min-h-0 flex-col gap-sm lg:col-span-6 lg:col-start-4">
         <div className="u-corner relative aspect-[4/3] overflow-hidden md:aspect-[16/9] bg-ink/10 lg:aspect-auto lg:min-h-0 lg:flex-1">
           <Image src={photo.src} alt="" fill priority sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
         </div>
@@ -76,10 +77,10 @@ export default function HistoryHero({
         </figcaption>
       </figure>
 
-      <div className="col-span-2 row-start-3 flex flex-col gap-y-lg self-end lg:col-span-4 lg:col-start-1">
-        <dl className="grid grid-cols-2 gap-x-lg">
+      <div className="col-span-4 row-start-3 flex flex-col gap-y-lg self-end md:col-span-9 md:grid md:grid-cols-subgrid lg:col-span-6 lg:col-start-1">
+        <dl className="grid grid-cols-2 gap-x-gutter md:col-span-full md:grid-cols-subgrid">
           {facts.map((f) => (
-            <div key={f.label} className="flex flex-col-reverse gap-y-xs">
+            <div key={f.label} className="flex flex-col-reverse gap-y-xs md:col-span-3">
               <dt className={CAP}>
                 {f.label}
               </dt>
@@ -87,7 +88,7 @@ export default function HistoryHero({
             </div>
           ))}
         </dl>
-        <p className={CAP}>
+        <p className={`${CAP} md:col-span-full`}>
           Running for
           <span className="ml-sm text-lead text-ink [&>span]:inline">
             <RollingDate />
@@ -97,7 +98,8 @@ export default function HistoryHero({
 
       <span
         aria-hidden="true"
-        className={`${BIG} u-away [--away:40svh] [--away-blur:28px] [--away-fade:0] col-start-3 row-start-3 self-end justify-self-end lg:col-span-2 lg:col-start-11 lg:row-span-2 lg:row-start-2 lg:-mr-[0.02em]`}
+        data-offgrid
+        className={`${BIG} u-away [--away:40svh] [--away-blur:28px] [--away-fade:0] col-span-2 col-start-5 row-start-3 self-end justify-self-end md:col-start-11 lg:row-span-2 lg:row-start-2 lg:-mr-[0.02em]`}
       >
         <span className="hy-in-b block">{latest}</span>
       </span>

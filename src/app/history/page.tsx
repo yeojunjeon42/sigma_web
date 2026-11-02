@@ -53,11 +53,11 @@ export default async function ClubLifePage() {
                 event={CLUB_EVENTS[0]}
               />
 
-              <div className="lg:grid lg:grid-cols-12 lg:gap-x-lg">
-                <div id="ledger" className="lg:col-span-8 lg:self-start">
+              <div className="md:grid md:grid-cols-12 md:gap-x-gutter">
+                <div id="ledger" className="md:col-span-full md:grid md:grid-cols-subgrid lg:col-span-8 lg:self-start">
                   <Chronology nodes={nodes} />
                 </div>
-                <aside className="hidden lg:col-span-4 lg:block">
+                <aside data-offgrid className="hidden lg:col-span-4 lg:block">
                   <Collage events={CLUB_EVENTS} />
                 </aside>
               </div>

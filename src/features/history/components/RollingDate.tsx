@@ -95,7 +95,7 @@ export default function RollingDate({ className = "" }: { className?: string }) 
   }, [still]);
 
   return (
-    <span ref={box} aria-hidden="true" className={`block whitespace-nowrap font-mono leading-none tracking-[-0.04em] tabular-nums ${className}`}>
+    <span ref={box} aria-hidden="true" className={`block whitespace-nowrap leading-none tabular-nums ${className}`}>
       {ROWS.flat().map((u, i) => (
         <span key={i} className="mr-[0.32em] inline last:mr-0">
           {[0, 1].map((k) => (
