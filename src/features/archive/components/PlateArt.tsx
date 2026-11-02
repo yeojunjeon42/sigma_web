@@ -13,6 +13,7 @@ export default function PlateArt({
   tile,
   sizes,
   hover = false,
+  plain = false,
   eager = false,
   fetchPriority,
   className = "",
@@ -21,6 +22,8 @@ export default function PlateArt({
   tile: Tile;
   sizes: string;
   hover?: boolean;
+  // No drawn tile: the plate is the paper.
+  plain?: boolean;
   eager?: boolean;
   fetchPriority?: "high" | "low";
   className?: string;
@@ -71,7 +74,7 @@ export default function PlateArt({
           );
         },
         SCREEN,
-        phase(el),
+        [0, 0],
         GROUND,
       );
       if (done) {
@@ -108,12 +111,12 @@ export default function PlateArt({
     <div
       ref={ref}
       style={{ aspectRatio: `${plate.w} / ${plate.h}`, ...style }}
-      className={`relative overflow-hidden ${screen ? "bg-canvas" : "bg-surface-sunken"} ${
-        tile.kind === "none" ? HATCH : ""
+      className={`relative overflow-hidden ${plain ? "" : screen ? "bg-canvas" : "bg-surface-sunken"} ${
+        tile.kind === "none" && !plain ? HATCH : ""
       } ${className}`}
     >
       {tile.kind === "lift" && tile.src ? (
-        <div className="absolute" style={box}>
+        <div data-offgrid className="absolute" style={box}>
           <Image src={tile.src} alt="" fill sizes={sizes} loading={loading} fetchPriority={fetchPriority} className="object-contain" />
         </div>
       ) : null}
@@ -143,14 +146,6 @@ export default function PlateArt({
       ) : null}
     </div>
   );
-}
-
-function phase(el: HTMLElement): [number, number] {
-  const sheet = el.closest<HTMLElement>("[data-depth]");
-  if (!sheet) return [0, 0];
-  const a = el.getBoundingClientRect();
-  const b = sheet.getBoundingClientRect();
-  return [a.left - b.left, a.top - b.top];
 }
 
 function focus(value = "50% 50%"): [number, number] {

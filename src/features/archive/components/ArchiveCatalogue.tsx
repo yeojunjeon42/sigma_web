@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Container } from "@/components/ui";
 import { displayTags } from "@/features/content/data/tags";
-import type { ArchiveProject, Bilingual } from "../types";
+import { eraLabel, type ArchiveProject, type Bilingual } from "../types";
 import type { Look } from "../data/covers";
 import type { Sort } from "../api/getArchive";
 import { tileFor } from "../data/field";
@@ -26,7 +26,7 @@ function Preview({ project, look }: { project: ArchiveProject; look: Look }) {
       aria-hidden="true"
       className="pointer-events-none absolute top-1/2 right-0 z-30 hidden w-[12rem] -translate-y-1/2 overflow-hidden lg:group-hover/row:block lg:group-focus-visible/row:block"
     >
-      {tile.kind === "photo" && tile.src ? (
+      {(tile.kind === "photo" || look === "object") && tile.src ? (
         <ResolvePlate tile={tile} sizes="256px" />
       ) : (
         <PlateArt tile={tile} sizes="256px" hover className="w-full" />
@@ -61,7 +61,7 @@ function Row({
   look: Look;
 }) {
   const name = splitTitle(project.title);
-  const year = project.year ?? project.era.replace("-", "–");
+  const year = project.year ?? eraLabel(project.era);
 
   const body = (
     <div
@@ -79,7 +79,6 @@ function Row({
         className={`u-trim text-title text-ink transition-[translate] duration-200 ease-out motion-reduce:transition-none md:col-span-7 lg:col-span-5 lg:group-hover/row:translate-x-sm lg:group-focus-visible/row:translate-x-sm`}
       >
         {name.en}
-        <span className="text-ink-muted">{"\u00a0↗"}</span>
         {project.award ? (
           <>
             <span aria-hidden="true" className="ml-xs inline-block size-[0.34em] bg-accent align-[0.167em]" />

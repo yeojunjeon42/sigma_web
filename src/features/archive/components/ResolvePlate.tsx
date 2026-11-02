@@ -60,17 +60,22 @@ export default function ResolvePlate({ tile, sizes }: { tile: Tile; sizes: strin
       g.drawImage(img, (cols - img.naturalWidth * s) * fx, (rows - img.naturalHeight * s) * fy, img.naturalWidth * s, img.naturalHeight * s);
       const d = g.getImageData(0, 0, cols, rows).data;
       tone = new Float32Array(cols * rows);
+      const solid = new Float32Array(cols * rows);
       let lo = 1;
       let hi = 0;
       for (let i = 0; i < cols * rows; i++) {
         const v = (0.3 * d[i * 4] + 0.59 * d[i * 4 + 1] + 0.11 * d[i * 4 + 2]) / 255;
         tone[i] = v;
-        lo = Math.min(lo, v);
-        hi = Math.max(hi, v);
+        solid[i] = d[i * 4 + 3] / 255;
+        if (solid[i] > 0.5) {
+          lo = Math.min(lo, v);
+          hi = Math.max(hi, v);
+        }
       }
       const span = Math.max(0.1, hi - lo);
-      for (let i = 0; i < tone.length; i++) tone[i] = (tone[i] - lo) / span;
-      relief(tone, cols, rows);
+      // Levels come from the object alone, and a cut-out's empty cells print nothing.
+      for (let i = 0; i < tone.length; i++) tone[i] = 1 - (1 - Math.min(1, Math.max(0, (tone[i] - lo) / span))) * solid[i];
+      relief(tone, cols, rows, solid);
       return true;
     };
 

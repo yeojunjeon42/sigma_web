@@ -15,9 +15,9 @@ interface Cover {
 
 export const COVERS = data as Record<string, Cover>;
 
-export const LOOKS = ["cutout", "drawing", "pen", "duotone", "photo"] as const;
+export const LOOKS = ["object", "cutout", "drawing", "pen", "duotone", "photo"] as const;
 export type Look = (typeof LOOKS)[number];
-export const DEFAULT_LOOK: Look = "photo";
+export const DEFAULT_LOOK: Look = "object";
 
 export function parseLook(raw: string | undefined): Look {
   return LOOKS.find((l) => l === raw) ?? DEFAULT_LOOK;

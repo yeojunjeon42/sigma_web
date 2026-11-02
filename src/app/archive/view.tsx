@@ -12,7 +12,7 @@ import {
   sortArchive,
   type Sort,
 } from "@/features/archive/api/getArchive";
-import ArchiveDepth from "@/features/archive/components/ArchiveDepth";
+import ArchiveField from "@/features/archive/components/ArchiveField";
 import ArchiveEntry from "@/features/archive/components/ArchiveEntry";
 import ArchiveGrid from "@/features/archive/components/ArchiveGrid";
 import ArchiveTransitions from "@/features/archive/components/ArchiveTransitions";
@@ -26,7 +26,7 @@ import ArchiveCatalogue from "@/features/archive/components/ArchiveCatalogue";
 import { DEFAULT_LOOK, parseLook, type Look } from "@/features/archive/data/covers";
 import { tileFor } from "@/features/archive/data/field";
 import { displayTags } from "@/features/content/data/tags";
-import { ERAS, type ArchiveProject, type Era } from "@/features/archive/types";
+import { ERAS, eraLabel, type ArchiveProject, type Era } from "@/features/archive/types";
 import { getEntries } from "@/features/archive/api/getEntries";
 import { getIndex } from "@/features/content/api/getContent";
 import YearRuler, { type Mark } from "@/features/history/components/YearRuler";
@@ -122,14 +122,14 @@ export default async function ArchiveView({
       to: reelBuilds.length + g.projects.length,
     });
     for (const p of g.projects) {
-      const year = String(p.year ?? p.era.replace("-", "–"));
-      const eraLabel = p.era.replace("-", "–");
+      const label = eraLabel(p.era);
+      const year = String(p.year ?? label);
       const entry = entries.get(p.id);
       reelBuilds.push({
         id: p.id,
         name: splitTitle(p.title).en,
         year,
-        era: eraLabel === year ? null : eraLabel,
+        era: label === year ? null : label,
         award: p.award?.en,
         tags: displayTags((tags.get(p.id) ?? []).filter((t) => !common.has(t)), 3).map((t) => t.en),
         body: entry?.html,
@@ -167,10 +167,10 @@ export default async function ArchiveView({
   );
 
   const field = (
-    <ArchiveDepth
+    <ArchiveField
       groups={groups}
-      tags={tags}
       teamSize={teamSize}
+      sort={sort}
       look={look}
       eager={eager}
       reelHref={(id) => href(era, "reel", sort, look, id)}
@@ -269,14 +269,14 @@ export default async function ArchiveView({
                       return (
                         <li key={e.key} className="shrink-0">
                           {!split ? (
-                            walk ? walkTo(`era-${e.key}`, "flex") : filter("flex")
+                            walk ? walkTo(`era-${e.label}`, "flex") : filter("flex")
                           ) : !walk && !feedWalk ? (
                             filter("flex")
                           ) : (
                             <>
-                              {walk ? walkTo(`era-${e.key}`, "hidden lg:flex") : filter("hidden lg:flex")}
+                              {walk ? walkTo(`era-${e.label}`, "hidden lg:flex") : filter("hidden lg:flex")}
                               {feedWalk
-                                ? walkTo(`feed-era-${e.key}`, "flex lg:hidden")
+                                ? walkTo(`feed-era-${e.label}`, "flex lg:hidden")
                                 : filter("flex lg:hidden")}
                             </>
                           )}

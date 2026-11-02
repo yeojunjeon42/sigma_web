@@ -426,7 +426,7 @@ function glPrinter(canvas: HTMLCanvasElement, restored: () => void): Printer | n
   };
 }
 
-function flatPrinter(canvas: HTMLCanvasElement): Printer | null {
+export function flatPrinter(canvas: HTMLCanvasElement): Printer | null {
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
 

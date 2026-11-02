@@ -5,7 +5,6 @@ export const DOT = 0.42;
 export const GROUND_INK = "--color-rule-field";
 // Marks are squares at the area of a round dot of the same radius, so tone holds.
 export const SQUARE = 0.886;
-export const GROUND_DOT = (1 - GROUND) * SCREEN * DOT * SQUARE;
 // Persist the last hero index so the next visit starts with another build.
 export const PLATE_KEY = "sigma_plate";
 
@@ -90,6 +89,8 @@ export function relief(tone: Float32Array, cols: number, rows: number, solid?: F
 }
 
 // Adds one mark to the current path. r is the radius of the round dot it stands in for.
+// No closePath: fill and clip close each subpath anyway, and in Chrome it walks the whole path, so a
+// plate's worth of marks took seconds a frame.
 export function square(g: CanvasRenderingContext2D, x: number, y: number, r: number, turn: number) {
   const c = Math.cos(turn) * r * SQUARE;
   const s = Math.sin(turn) * r * SQUARE;
@@ -97,7 +98,6 @@ export function square(g: CanvasRenderingContext2D, x: number, y: number, r: num
   g.lineTo(x + c + s, y + s - c);
   g.lineTo(x + c - s, y + s + c);
   g.lineTo(x - c - s, y - s + c);
-  g.closePath();
 }
 
 export function halftone(

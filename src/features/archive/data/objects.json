@@ -1,0 +1,587 @@
+{
+"air": {
+"file": "object-38904b99.webp",
+"box": [
+0.1642,
+0.3225,
+0.8375,
+0.6792
+]
+},
+"alpha-d": {
+"file": "object-7c97a70b.webp",
+"box": [
+0.05,
+0.2383,
+0.95,
+0.7942
+]
+},
+"angelswing": {
+"file": "object-8b9d4e59.webp",
+"box": [
+0.05,
+0.2433,
+0.95,
+0.7025
+]
+},
+"art-for-blind": {
+"file": "object-e7c47e22.webp",
+"box": [
+0.05,
+0.1558,
+0.9458,
+0.7608
+]
+},
+"artisma": {
+"file": "object-6a0fb86e.webp",
+"box": [
+0.05,
+0.2117,
+0.95,
+0.8867
+]
+},
+"atlas-2016": {
+"file": "object-cdcbd66a.webp",
+"box": [
+0.1283,
+0.2475,
+0.9217,
+0.7783
+]
+},
+"atlas": {
+"file": "object-f759dc93.webp",
+"box": [
+0.1442,
+0.1292,
+0.9267,
+0.7908
+]
+},
+"ballboy": {
+"file": "object-da220633.webp",
+"box": [
+0.155,
+0.1933,
+0.92,
+0.8917
+]
+},
+"board-game-bot": {
+"file": "object-feb56a91.webp",
+"box": [
+0.05,
+0.1567,
+0.95,
+0.8258
+]
+},
+"book-cart": {
+"file": "object-a335d206.webp",
+"box": [
+0.2583,
+0.05,
+0.74,
+0.95
+]
+},
+"braille-block": {
+"file": "object-e161f32b.webp",
+"box": [
+0.05,
+0.3692,
+0.95,
+0.6525
+]
+},
+"cobra": {
+"file": "object-d1b69023.webp",
+"box": [
+0.05,
+0.3092,
+0.95,
+0.7908
+]
+},
+"copy-me": {
+"file": "object-ed65221c.webp",
+"box": [
+0.05,
+0.1217,
+0.95,
+0.7792
+]
+},
+"crystal": {
+"file": "object-36de07e4.webp",
+"box": [
+0.2192,
+0.1658,
+0.8808,
+0.8725
+]
+},
+"desertree": {
+"file": "object-4233a556.webp",
+"box": [
+0.0558,
+0.2658,
+0.875,
+0.7567
+]
+},
+"dramatic": {
+"file": "object-6d7290a2.webp",
+"box": [
+0.2875,
+0.2175,
+0.7125,
+0.7842
+]
+},
+"handybot": {
+"file": "object-ed66d4a7.webp",
+"box": [
+0.1383,
+0.1525,
+0.8733,
+0.775
+]
+},
+"hexapod-2": {
+"file": "object-95adc191.webp",
+"box": [
+0.05,
+0.1908,
+0.95,
+0.8092
+]
+},
+"hexapod": {
+"file": "object-e5bf028a.webp",
+"box": [
+0.0942,
+0.1758,
+0.9008,
+0.8433
+]
+},
+"iden": {
+"file": "object-7e0ec695.webp",
+"box": [
+0.2167,
+0.1617,
+0.7975,
+0.7733
+]
+},
+"ikung": {
+"file": "object-f02ce21c.webp",
+"box": [
+0.2483,
+0.2008,
+0.7575,
+0.8008
+]
+},
+"interactive-architecture": {
+"file": "object-ec934cff.webp",
+"box": [
+0.1658,
+0.1267,
+0.8092,
+0.95
+]
+},
+"isac": {
+"file": "object-aefaa2c8.webp",
+"box": [
+0.0617,
+0.1992,
+0.95,
+0.7608
+]
+},
+"isim": {
+"file": "object-aefc02d5.webp",
+"box": [
+0.05,
+0.1992,
+0.95,
+0.7592
+]
+},
+"leam": {
+"file": "object-c1a4d79a.webp",
+"box": [
+0.1592,
+0.05,
+0.8133,
+0.95
+]
+},
+"locked-charger": {
+"file": "object-66894efd.webp",
+"box": [
+0.05,
+0.2767,
+0.95,
+0.8242
+]
+},
+"mapangi": {
+"file": "object-51b47d95.webp",
+"box": [
+0.4325,
+0.05,
+0.5642,
+0.95
+]
+},
+"medicine-management": {
+"file": "object-f2ab77a4.webp",
+"box": [
+0.1942,
+0.255,
+0.7775,
+0.795
+]
+},
+"microplastic-robot": {
+"file": "object-7568acf8.webp",
+"box": [
+0.1775,
+0.2133,
+0.8208,
+0.7942
+]
+},
+"neptunus": {
+"file": "object-d91927f5.webp",
+"box": [
+0.1775,
+0.175,
+0.815,
+0.8425
+]
+},
+"open-noise-control": {
+"file": "object-ea852ebb.webp",
+"box": [
+0.1617,
+0.05,
+0.7717,
+0.95
+]
+},
+"pet-robot": {
+"file": "object-d8424bf4.webp",
+"box": [
+0.1692,
+0.2067,
+0.9308,
+0.745
+]
+},
+"poclainger": {
+"file": "object-53daaecb.webp",
+"box": [
+0.05,
+0.315,
+0.95,
+0.5858
+]
+},
+"pov-display": {
+"file": "object-fdacfcd1.webp",
+"box": [
+0.1075,
+0.1525,
+0.8608,
+0.7658
+]
+},
+"pygmalion": {
+"file": "object-bf6dc085.webp",
+"box": [
+0.2408,
+0.1483,
+0.8475,
+0.84
+]
+},
+"quri": {
+"file": "object-95a87312.webp",
+"box": [
+0.16,
+0.1792,
+0.8583,
+0.8267
+]
+},
+"rammus": {
+"file": "object-d5c929b3.webp",
+"box": [
+0.1625,
+0.2583,
+0.8558,
+0.7775
+]
+},
+"rc-submarine": {
+"file": "object-46696646.webp",
+"box": [
+0.05,
+0.2833,
+0.95,
+0.6175
+]
+},
+"robot-arm": {
+"file": "object-ed74fe5d.webp",
+"box": [
+0.1742,
+0.1367,
+0.84,
+0.8392
+]
+},
+"rovision": {
+"file": "object-4962dcd0.webp",
+"box": [
+0.085,
+0.2717,
+0.8292,
+0.825
+]
+},
+"school-zone": {
+"file": "object-e43512c7.webp",
+"box": [
+0.05,
+0.38,
+0.95,
+0.7142
+]
+},
+"scout": {
+"file": "object-83fdc04d.webp",
+"box": [
+0.05,
+0.11,
+0.95,
+0.79
+]
+},
+"screw-robot": {
+"file": "object-675b759e.webp",
+"box": [
+0.05,
+0.23,
+0.95,
+0.6708
+]
+},
+"self-driving-car": {
+"file": "object-d5a3b115.webp",
+"box": [
+0.1425,
+0.0758,
+0.9108,
+0.8975
+]
+},
+"smart-car-2009": {
+"file": "object-1e65a246.webp",
+"box": [
+0.0825,
+0.1942,
+0.95,
+0.8192
+]
+},
+"smart-car-2013": {
+"file": "object-3da14f7e.webp",
+"box": [
+0.0892,
+0.17,
+0.9408,
+0.8458
+]
+},
+"snuewheel": {
+"file": "object-9a392164.webp",
+"box": [
+0.05,
+0.1867,
+0.95,
+0.7133
+]
+},
+"speech-bot": {
+"file": "object-a1551446.webp",
+"box": [
+0.3,
+0.1075,
+0.7392,
+0.8867
+]
+},
+"swarm-tracking": {
+"file": "object-50635f67.webp",
+"box": [
+0.05,
+0.1867,
+0.8767,
+0.7408
+]
+},
+"syncope-device": {
+"file": "object-8931ae56.webp",
+"box": [
+0.1583,
+0.2392,
+0.8883,
+0.78
+]
+},
+"tachikoma": {
+"file": "object-5616fd21.webp",
+"box": [
+0.05,
+0.1292,
+0.95,
+0.8108
+]
+},
+"tangerine-toy": {
+"file": "object-123dfd4b.webp",
+"box": [
+0.2225,
+0.2242,
+0.7808,
+0.775
+]
+},
+"techwin-2011": {
+"file": "object-24122219.webp",
+"box": [
+0.05,
+0.2675,
+0.95,
+0.7275
+]
+},
+"tic-mask": {
+"file": "object-45882a65.webp",
+"box": [
+0.0808,
+0.145,
+0.8192,
+0.95
+]
+},
+"turtlebot": {
+"file": "object-121d9cab.webp",
+"box": [
+0.215,
+0.2142,
+0.84,
+0.7683
+]
+},
+"two-wheeled": {
+"file": "object-e8c8c953.webp",
+"box": [
+0.0667,
+0.05,
+0.8442,
+0.91
+]
+},
+"unicycle": {
+"file": "object-6335dbe9.webp",
+"box": [
+0.1925,
+0.1342,
+0.8208,
+0.8433
+]
+},
+"universal-fridge": {
+"file": "object-ea491557.webp",
+"box": [
+0.1567,
+0.0758,
+0.8408,
+0.91
+]
+},
+"untitled": {
+"file": "object-01ccd4f4.webp",
+"box": [
+0.2392,
+0.1158,
+0.695,
+0.8242
+]
+},
+"useless-but-cute": {
+"file": "object-e39c569c.webp",
+"box": [
+0.1692,
+0.2267,
+0.8333,
+0.685
+]
+},
+"vibrating-shoes": {
+"file": "object-ab960009.webp",
+"box": [
+0.195,
+0.2258,
+0.845,
+0.765
+]
+},
+"vr-drone": {
+"file": "object-0782d3aa.webp",
+"box": [
+0.1417,
+0.05,
+0.83,
+0.95
+]
+},
+"vr-rider": {
+"file": "object-71aaa657.webp",
+"box": [
+0.1617,
+0.05,
+0.7875,
+0.95
+]
+},
+"walk": {
+"file": "object-fbdd61dc.webp",
+"box": [
+0.3258,
+0.1508,
+0.6758,
+0.8517
+]
+},
+"walknine": {
+"file": "object-2864057a.webp",
+"box": [
+0.05,
+0.155,
+0.95,
+0.9083
+]
+}
+}
