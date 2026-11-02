@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Arrow, Container } from "@/components/ui";
+import { Arrow } from "@/components/ui";
 import { displayTags } from "../data/tags";
 import { formatDate } from "@/lib/date";
 import type { Photo } from "@/features/archive/types";
@@ -32,17 +32,17 @@ export default function Article({
   const [leadPhoto, ...inline] = photos;
   const cover = leadPhoto ? undefined : coverFor(doc.slug);
 
-  const COL = "mx-auto w-full max-w-[42.25rem]";
-  const imageSizes = "(min-width: 708px) 42.25rem, calc(100vw - 2rem)";
+  const COL = "col-span-full md:col-span-10 md:col-start-2 lg:col-span-8 lg:col-start-3 xl:col-span-6 xl:col-start-4";
+  const imageSizes = "(min-width: 708px) 50vw, calc(100vw - 2rem)";
 
   return (
     <article>
-      <Container className="u-clear-masthead">
-        <div className="mb-xl">
+      <div className="u-sheet u-clear-masthead mx-auto w-full max-w-wide">
+        <div className="col-span-full mb-xl">
           <Back back={back} />
         </div>
 
-        <header className="mx-auto w-full max-w-[54rem]">
+        <header className="col-span-full md:col-span-10 md:col-start-2">
           <p className="flex flex-wrap items-center justify-center gap-x-md gap-y-xs text-[0.875rem] leading-[1.4] text-ink-muted tabular-nums">
             {dateLabel && (
               <span className="text-ink">
@@ -93,10 +93,10 @@ export default function Article({
           </div>
         )}
 
-        <div className="mt-xxl md:mt-16">
+        <div className="col-span-full mt-xxl grid grid-cols-subgrid md:mt-16">
           {doc.html ? (
             <div
-              className="prose flow article-prose u-trim [&_figure[data-placeholder]]:my-xl [&_figure[data-placeholder]]:aspect-[16/9] [&_figure[data-placeholder]]:u-corner [&_figure[data-placeholder]]:bg-ink/5"
+              className={`${COL} prose flow article-prose u-trim [&_figure[data-placeholder]]:my-xl [&_figure[data-placeholder]]:aspect-[16/9] [&_figure[data-placeholder]]:u-corner [&_figure[data-placeholder]]:bg-ink/5`}
               dangerouslySetInnerHTML={{ __html: doc.html }}
             />
           ) : null}
@@ -125,7 +125,7 @@ export default function Article({
           )}
 
           {(newer || older) && (
-            <nav aria-label="Next and previous posts" className={`mt-section grid border-t border-rule md:grid-cols-2 ${COL}`}>
+            <nav aria-label="Next and previous posts" className={`mt-section grid border-t border-rule md:grid-cols-2 md:gap-x-gutter ${COL}`}>
               {[
                 older && { post: older, label: "Older", align: "" },
                 newer && { post: newer, label: "Newer", align: "md:col-start-2 md:text-right" },
@@ -148,7 +148,7 @@ export default function Article({
             </nav>
           )}
         </div>
-      </Container>
+      </div>
     </article>
   );
 }
