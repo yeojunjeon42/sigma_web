@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { pageThemeMeta } from "@/lib/browserTheme";
 
 const NAV = [
   { label: "Home", href: "/" },
@@ -284,7 +285,7 @@ export default function Navbar({
   }, [open]);
 
   useEffect(() => {
-    const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    const meta = pageThemeMeta();
     if (!open || !meta || !bar.current) return;
     const was = meta.content;
     meta.content = getComputedStyle(bar.current).backgroundColor;

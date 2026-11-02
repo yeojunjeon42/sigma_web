@@ -118,6 +118,10 @@
   --gutter: clamp(1rem, 2vw, 1.5rem);
   --masthead: 3.5rem;
   --screen: 100svh;
+  --safe-top: 0px;
+  --safe-right: 0px;
+  --safe-bottom: 0px;
+  --safe-left: 0px;
 }
 
 @media (min-width: 768px) {
@@ -861,6 +865,41 @@ html[data-turn] body > :not(header) {
 /* Darken the root too, including overscroll and browser bars. */
 html:has([data-terminal]) {
   background-color: var(--color-canvas-inverse);
+}
+
+/* Keep page pixels out of the device's unsafe strips, even while scrolling or turning a page. */
+.safe-areas {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  border: solid #000;
+  border-width: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+}
+@media (max-width: 63.999rem), (pointer: coarse) {
+  :root {
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+  }
+  html,
+  html:has([data-terminal]),
+  body {
+    background-color: #000;
+  }
+  body {
+    padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  }
+  .navbar-chrome {
+    top: var(--safe-top);
+    left: var(--safe-left);
+    right: var(--safe-right);
+    width: auto;
+  }
+  .nav-sheet {
+    max-height: calc(100dvh - var(--masthead) - var(--safe-top) - var(--safe-bottom));
+  }
 }
 @keyframes term-blink {
   50% {

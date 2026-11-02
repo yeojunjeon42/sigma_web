@@ -3,6 +3,7 @@ import { Geist_Mono } from "next/font/google";
 import { Ld } from "@/app/ai/terminal";
 import { organization } from "@/app/ai/ld";
 import { TerminalNav, Prompt } from "./TerminalNav";
+import { browserTheme } from "@/lib/browserTheme";
 
 const mono = Geist_Mono({ weight: ["400", "500"], subsets: ["latin"], display: "swap" });
 
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0907",
+  themeColor: browserTheme("#0a0907"),
 };
 
 // data-terminal also darkens the root for overscroll and browser chrome.

@@ -17,7 +17,7 @@ export default function ContactPill({ showOnMobile = false, ...props }: ContactL
   return (
     <div
       data-overlay
-      className={`pointer-events-none fixed left-[var(--gutter)] z-50 bottom-[max(1rem,env(safe-area-inset-bottom))] max-w-[calc(100vw-2*var(--gutter))] ${showOnMobile ? "" : "max-md:hidden"}`}
+      className={`pointer-events-none fixed left-[calc(var(--gutter)+var(--safe-left))] z-50 bottom-[max(1rem,env(safe-area-inset-bottom))] max-w-[calc(100vw-var(--safe-left)-var(--safe-right)-2*var(--gutter))] ${showOnMobile ? "" : "max-md:hidden"}`}
     >
       <Link
         {...linkProps(props)}

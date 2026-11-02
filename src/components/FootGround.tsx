@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
+import { pageThemeMeta } from "@/lib/browserTheme";
 
 export default function FootGround() {
   useEffect(() => {
     const foot = document.querySelector("footer[data-band]");
     if (!foot) return;
     const root = document.documentElement;
-    const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    const meta = pageThemeMeta();
     const paper = meta?.content;
     const band = getComputedStyle(root).getPropertyValue("--color-band").trim();
     const io = new IntersectionObserver(([e]) => {
