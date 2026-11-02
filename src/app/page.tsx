@@ -8,7 +8,7 @@ import { getCofounded, getSponsors } from "@/features/sponsors/api/getSponsors";
 import { getArchiveWithMedia } from "@/features/archive/api/getArchive";
 import { HERO_BUILDS } from "@/features/archive/data/hero";
 import { splitTitle } from "@/features/archive/components/splitTitle";
-import looks from "@/features/archive/data/looks.json";
+import { objectSrc } from "@/features/archive/data/field";
 import RecordLines from "@/features/site/components/RecordLines";
 import { CountUp } from "@/components/ui/CountUp";
 import { getAwards } from "@/features/awards/api/getAwards";
@@ -40,16 +40,15 @@ export default async function Home() {
 
   const plates = HERO_BUILDS.flatMap((id) => {
     const p = builds.find((x) => x.id === id);
-    return p
-      ? [{ id, src: `/archive-looks/${id}/cutout.webp`, name: splitTitle(p.title).en, year: p.year }]
-      : [];
+    const src = objectSrc(id);
+    return p && src ? [{ id, src, name: splitTitle(p.title).en, year: p.year }] : [];
   });
 
   const line = [...builds].reverse().map((p) => ({
     id: p.id,
     name: splitTitle(p.title).en,
     year: p.year,
-    src: p.id in looks ? `/archive-looks/${p.id}/cutout.webp` : null,
+    src: objectSrc(p.id),
   }));
 
   const merged = new Map<string, { year: number; contest: typeof awards[number]["contest"]; got: typeof awards[number]["result"][] }>();
