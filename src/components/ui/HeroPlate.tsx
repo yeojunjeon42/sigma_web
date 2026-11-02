@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { DOT, GROUND, GROUND_INK, PLATE_KEY, SCREEN } from "@/lib/halftone";
-import { printer, vignette } from "@/lib/printer";
+import { DOT, GROUND, GROUND_INK, PLATE_KEY, SCREEN, relief, turnAt } from "@/lib/halftone";
+import { printer, scaled, STRIDE, vignette } from "@/lib/printer";
 
 export type HeroBuild = {
   id: string;
@@ -16,13 +16,24 @@ const PHONE_SCREEN = 5;
 const SIZES = 40;
 const BANDS = 10;
 const SWELL = 1.6;
-const LENS = 0.34;
-const HOLE = 0.62;
+const LENS = 0.3;
 const FRONT = 0.3;
-const WAVE = 1500;
+const WAVE = 1300;
 const QUICK = 650;
 const BAND = 240;
-const FADE = 0.6;
+// Spring rates (1/s) for the glass, the tail it drags and the idle wander.
+const FOLLOW = 22;
+const TRAIL = 9;
+// How far the tail may fall behind, in lens radii.
+const DRAG = 0.7;
+const ROAM = 2.4;
+// The photograph comes up through the dots: their radius over the cell at the centre (over 0.707 they
+// merge into solid picture), and the share of the lens's radius that is already solid.
+const COVER = 0.75;
+const CORE = 0.28;
+const FAST = 0.18;
+const PRESS = 0.3;
+const TAP = 0.16;
 const CYCLE = 7000;
 const IDLE = 2200;
 const HOLD = 300;
@@ -32,7 +43,6 @@ const PAD = 3;
 const FEATHER = 12;
 const KNOCK = 0.8;
 const EBB = 0.35;
-const PAPER_INK = "--color-rule-strong";
 
 let shown: HeroBuild | null = null;
 let advance: (() => void) | null = null;
@@ -73,7 +83,7 @@ export function HeroCaption({ builds, className = "" }: { builds: HeroBuild[]; c
       <button
         type="button"
         onClick={() => advance?.()}
-        className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-end leading-none text-ink uppercase transition-opacity hover:opacity-60 lg:min-h-0 lg:min-w-0"
+        className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-end leading-none text-ink transition-opacity hover:opacity-60 lg:min-h-0 lg:min-w-0"
       >
         Next
       </button>
@@ -86,7 +96,7 @@ type Box = { x: number; y: number; w: number; h: number };
 
 export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  // Rebuild on md crossings: grid and paper dimensions are captured at setup.
+  // Rebuild on md crossings: the grid is captured at setup.
   const [layout, setLayout] = useState(0);
 
   useEffect(() => {
@@ -100,8 +110,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const frozen = !!canvas.closest("[inert]");
     const fine = window.matchMedia("(hover: hover)").matches;
-    const paper = window.matchMedia("(min-width: 768px)").matches;
-    const cell = paper ? SCREEN : PHONE_SCREEN;
+    const cell = window.matchMedia("(min-width: 768px)").matches ? SCREEN : PHONE_SCREEN;
     const top = cell * DOT;
     const rTop = top * SWELL;
     const rGround = (1 - GROUND) * top;
@@ -111,19 +120,19 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     let cols = 0;
     let rows = 0;
     let box: Box = { x: 0, y: 0, w: 0, h: 0 };
-    let rev = new Float32Array(0);
     let quiet = new Float32Array(0);
-    let shown = new Float32Array(0);
-    let revMax = 0;
 
-    const SLOTS = SIZES * (BANDS + 1);
+    const SLOTS = SIZES * BANDS;
     let cap = 1 << 10;
+    let bt = new Float32Array(SLOTS * cap);
+    let spin = new Float32Array(0);
+    const veilA = { data: new Float32Array(1 << 14), n: 0 };
+    const veilB = { data: new Float32Array(1 << 14), n: 0 };
     let bx = new Float32Array(SLOTS * cap);
     let by = new Float32Array(SLOTS * cap);
     const held = new Int32Array(SLOTS);
     let mixes: string[] = [];
     let ink = "#0f0d09";
-    let pale = "#b0b0b0";
 
     const all = [...builds];
     let curated = 0;
@@ -132,6 +141,11 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     const imgs = new Map<number, HTMLImageElement>();
     const bad = new Set<number>();
     const tones = new Map<number, Tones>();
+    const ready = new Set<number>();
+    const going = new Set<number>();
+    let epoch = 0;
+    let live = true;
+    let reach = 0;
     let a = -1;
     let b = -1;
     let want: { i: number; at?: { x: number; y: number }; quick?: boolean } | null = null;
@@ -140,7 +154,8 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     let origin = { x: 0, y: 0 };
 
     const ptr = { x: 0, y: 0, in: false, speed: 0, down: 0, link: false, left: 0 };
-    const lens = { x: 0, y: 0, vx: 0, vy: 0, px: 0, py: 0, amp: 0, boost: 0 };
+    const lens = { x: 0, y: 0, vx: 0, vy: 0, amp: 0, boost: 0 };
+    const tail = { x: 0, y: 0, vx: 0, vy: 0 };
     const par = { x: 0, y: 0 };
     let raf = 0;
     let last = 0;
@@ -149,16 +164,16 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     let roam = false;
     let pressed = false;
     let on = 0;
+    let settling = 0;
 
     const css = (n: string, f: string) =>
       getComputedStyle(document.documentElement).getPropertyValue(n).trim() || f;
     // Cache styles to avoid per-frame recalculation.
     const base = css(GROUND_INK, "#76767a");
-    pale = css(PAPER_INK, "#b0b0b0");
-    mixes = [...ramp([base, css("--color-accent", "#ed2024"), css("--color-accent-deep", "#8e1316")], BANDS), pale];
+    mixes = [...ramp([base, css("--color-accent", "#ed2024"), css("--color-accent-deep", "#8e1316")], BANDS)];
     ink = css("--color-ink", "#0f0d09");
 
-    const load = (i: number) => {
+    const element = (i: number) => {
       let img = imgs.get(i);
       if (!img) {
         img = new Image();
@@ -173,6 +188,10 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
         img.src = all[i].src;
         imgs.set(i, img);
       }
+      return img;
+    };
+    const load = (i: number) => {
+      const img = element(i);
       return img.complete && img.naturalWidth ? img : null;
     };
 
@@ -183,7 +202,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       return { x: box.x + (box.w - w) / 2, y: box.y + (box.h - h) / 2, w, h };
     };
 
-    const measure = (i: number, img: HTMLImageElement, r: Box) => {
+    const measure = (i: number, img: CanvasImageSource, r: Box) => {
       const c = Math.max(1, Math.round(r.w / cell));
       const n = Math.max(1, Math.round(r.h / cell));
       const key = `${c}x${n}`;
@@ -225,13 +244,43 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       const pick = (q: number) => inside[Math.min(inside.length - 1, Math.floor(q * inside.length))];
       const lo = pick(0.04);
       const hi = Math.max(lo + 0.08, Math.min(paper, pick(0.96)));
-      for (let k = 0; k < tone.length; k++) {
-        const v = Math.min(1, Math.max(0, (tone[k] - lo) / (hi - lo)));
-        tone[k] = Math.min(v, 1 - 0.22 * solid[k]);
-      }
+      for (let k = 0; k < tone.length; k++) tone[k] = Math.min(1, Math.max(0, (tone[k] - lo) / (hi - lo)));
+      relief(tone, c, n, solid);
+      for (let k = 0; k < tone.length; k++) tone[k] = Math.min(tone[k], 1 - 0.22 * solid[k]);
       const out = { key, cols: c, rows: n, tone };
       tones.set(i, out);
       return out;
+    };
+
+    // Everything a plate costs happens before it is asked for: decode, tones, texture.
+    const prepare = async (i: number) => {
+      if (ready.has(i) || going.has(i) || bad.has(i) || !W) return;
+      going.add(i);
+      const run = epoch;
+      try {
+        const img = element(i);
+        await img.decode();
+        await rest();
+        if (!live || run !== epoch) return;
+        const r = place(img);
+        const file = await (await fetch(img.src)).blob();
+        const small = await scaled(file, Math.max(1, Math.round(r.w / cell)) * 2, Math.max(1, Math.round(r.h / cell)) * 2, "medium");
+        if (!live || run !== epoch) return;
+        measure(i, small, r);
+        small.close();
+        await rest();
+        await pr.prime(img, r, file).catch(() => {});
+        if (!live || run !== epoch) return;
+        ready.add(i);
+        kick();
+      } catch {
+        bad.add(i);
+        if (want?.i === i) want = null;
+        kick();
+      } finally {
+        going.delete(i);
+        if (live && run !== epoch) void prepare(i);
+      }
     };
 
     const sample = (g: Tones, r: Box, x: number, y: number) => {
@@ -261,13 +310,29 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       pr.size(W, H, Math.min(window.devicePixelRatio || 1, 3));
       cols = Math.ceil(W / cell);
       rows = Math.ceil(H / cell);
-      rev = new Float32Array(cols * rows);
-      revMax = 0;
-      hush();
+      spin = new Float32Array(cols * rows);
+      for (let j = 0; j < rows; j++)
+        for (let i = 0; i < cols; i++)
+          spin[j * cols + i] = turnAt((i + 0.5) * cell, (j + 0.5) * cell);
+      // The mask is slow to make: wait for a dragged window to settle.
+      if (quiet.length) {
+        quiet = new Float32Array(cols * rows);
+        window.clearTimeout(settling);
+        settling = window.setTimeout(() => {
+          hush();
+          kick();
+        }, 120);
+      } else hush();
       if (t >= 1) origin = { x: box.x + box.w / 2, y: box.y + box.h / 2 };
       if (!ptr.in && lens.amp < 0.02) {
-        lens.x = lens.px = origin.x;
-        lens.y = lens.py = origin.y;
+        lens.x = tail.x = origin.x;
+        lens.y = tail.y = origin.y;
+      }
+      epoch++;
+      ready.clear();
+      if (b >= 0) {
+        void prepare(b);
+        void prepare(after(curated));
       }
       kick();
     };
@@ -324,22 +389,6 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       }
     };
 
-    const stamp = (x: number, y: number, r: number, gain: number) => {
-      const i0 = Math.max(0, Math.floor((x - r) / cell));
-      const i1 = Math.min(cols - 1, Math.ceil((x + r) / cell));
-      const j0 = Math.max(0, Math.floor((y - r) / cell));
-      const j1 = Math.min(rows - 1, Math.ceil((y + r) / cell));
-      for (let j = j0; j <= j1; j++) {
-        for (let i = i0; i <= i1; i++) {
-          const d = Math.hypot((i + 0.5) * cell - x, (j + 0.5) * cell - y);
-          const v = smooth(clamp((r - d) / (r * 0.5), 0, 1)) * gain;
-          const k = j * cols + i;
-          if (v > rev[k]) rev[k] = v;
-          if (v > revMax) revMax = v;
-        }
-      }
-    };
-
     const start = (i: number, at?: { x: number; y: number }, quick = false) => {
       a = b;
       b = i;
@@ -347,13 +396,17 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       wave = quick ? QUICK : WAVE;
       if (i < builds.length) curated = i;
       origin = at ?? { x: box.x + box.w / 2, y: box.y + box.h / 2 };
+      // Fixed for the whole wave: measured per frame, the front would shift as the glass moves.
+      reach = 0;
+      for (const cx of [box.x - DRIFT[0], box.x + box.w + DRIFT[0]])
+        for (const cy of [box.y - DRIFT[1], box.y + box.h + DRIFT[1]])
+          reach = Math.max(reach, Math.hypot(cx - origin.x, cy - origin.y));
       t0 = performance.now();
       t = still || frozen ? 1 : 0;
       if (t >= 1) show(all[b]);
       try {
         localStorage.setItem(PLATE_KEY, String(curated));
       } catch {}
-      load((curated + 1) % builds.length);
       kick();
     };
 
@@ -369,8 +422,9 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       if (t < 1 || want) return;
       const i = after(curated);
       if (i < 0) return;
-      if (load(i)) start(i, at);
-      else want = { i, at };
+      want = { i, at };
+      void prepare(i);
+      kick();
     };
 
     const draw = () => {
@@ -386,10 +440,17 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       const ga = ia && ra && t < 1 ? measure(a, ia, ra) : null;
       const gb = ib && rb ? measure(b, ib, rb) : null;
 
-      const R = clamp(W * 0.085, 70, 150) * (1 + lens.boost);
+      const R = clamp(W * 0.105, 84, 180) * (1 + lens.boost);
       const lensOn = lens.amp > 0.01 && !still;
-
-      if (paper) pr.ground(cell / 2, cell / 2, cell, rGround, pale, lensOn ? { x: lens.x, y: lens.y, r: R } : null, EDGE);
+      const power = lensOn ? LENS * lens.amp : 0;
+      const open = fine && lens.amp > 0.01 ? smooth(clamp(lens.amp, 0, 1)) : 0;
+      veilA.n = veilB.n = 0;
+      // The tail eases toward its limit rather than meeting it, so a fast move has no corner.
+      const lag = Math.hypot(tail.x - lens.x, tail.y - lens.y);
+      const hold = lag > 0 ? (R * DRAG * (1 - Math.exp(-lag / (R * DRAG)))) / lag : 0;
+      const tx = (tail.x - lens.x) * hold;
+      const ty = (tail.y - lens.y) * hold;
+      const tt = tx * tx + ty * ty;
 
       let x0 = Infinity;
       let y0 = Infinity;
@@ -408,16 +469,16 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
         x1 = Math.max(x1, lens.x + R);
         y1 = Math.max(y1, lens.y + R);
       }
+      if (open > 0) {
+        x0 = Math.min(x0, lens.x + Math.min(tx, 0) - R);
+        y0 = Math.min(y0, lens.y + Math.min(ty, 0) - R);
+        x1 = Math.max(x1, lens.x + Math.max(tx, 0) + R);
+        y1 = Math.max(y1, lens.y + Math.max(ty, 0) + R);
+      }
 
       held.fill(0);
       let grew = false;
       if (x1 > x0) {
-        const reach = Math.max(
-          Math.hypot(x0 - origin.x, y0 - origin.y),
-          Math.hypot(x1 - origin.x, y0 - origin.y),
-          Math.hypot(x0 - origin.x, y1 - origin.y),
-          Math.hypot(x1 - origin.x, y1 - origin.y),
-        );
         const i0 = Math.max(0, Math.floor(x0 / cell));
         const i1 = Math.min(cols - 1, Math.ceil(x1 / cell));
         const j0 = Math.max(0, Math.floor(y0 / cell));
@@ -434,37 +495,44 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
               const from = ga && ra ? sample(ga, ra, px, py) : 1;
               tone = from + (tone - from) * lt;
             }
-            let r = (1 - GROUND * (0.12 + 0.88 * tone)) * top;
-            const built = r > rGround + 0.06;
-            const d = lensOn ? Math.hypot(px - lens.x, py - lens.y) : Infinity;
-            const loupe = d < R;
-            if (!built && (!loupe || !paper)) continue;
-
-            let x = px;
-            let y = py;
-            if (built) {
-              const q = quiet[j * cols + i];
-              if (q > 0) r = rGround + (r - rGround) * (1 - KNOCK * q);
-              if (!paper) r *= smooth(clamp((r - rGround) / (EBB * top), 0, 1));
-              r *= 1 - rev[j * cols + i];
-              if (lt > 0 && lt < 1) r *= 1 + FRONT * Math.sin(Math.PI * lt);
-            } else r = rGround;
-            r *= vignette(py / H, EDGE);
-            if (loupe) {
-              const q = (1 - (d / R) * (d / R)) * lens.amp * LENS;
-              x = lens.x + (px - lens.x) * (1 + q);
-              y = lens.y + (py - lens.y) * (1 + q);
-              r *= 1 + q * 0.9;
+            // One field: it bends, swells and opens the dots by distance alone, and each effect
+            // reaches zero with zero slope at the edge, so no line can show.
+            const ox = px - lens.x;
+            const oy = py - lens.y;
+            const d = Math.hypot(ox, oy);
+            const bend = d < R ? 1 - (d / R) * (d / R) : 0;
+            const q = bend * bend * power;
+            const x = lens.x + ox * (1 + q);
+            const y = lens.y + oy * (1 + q);
+            let veil = 0;
+            if (open > 0) {
+              const along = tt > 0 ? clamp((ox * tx + oy * ty) / tt, 0, 1) : 0;
+              veil = smooth(clamp((R - Math.hypot(ox - tx * along, oy - ty * along)) / (R * (1 - CORE)), 0, 1)) * open;
+              if (veil > 0.01) {
+                const rp = cell * (1 + q) * COVER * veil;
+                if (gb && lt > 0) lay(veilB, x, y, rp, lt, spin[j * cols + i]);
+                if (ga && lt < 1) lay(veilA, x, y, rp, 1 - lt, spin[j * cols + i]);
+              }
             }
+
+            let r = (1 - GROUND * (0.12 + 0.88 * tone)) * top;
+            if (r <= rGround + 0.06) continue;
+            const hushed = quiet[j * cols + i];
+            if (hushed > 0) r = rGround + (r - rGround) * (1 - KNOCK * hushed);
+            r *= smooth(clamp((r - rGround) / (EBB * top), 0, 1));
+            if (lt > 0 && lt < 1) r *= 1 + FRONT * Math.sin(Math.PI * lt);
+            r *= vignette(py / H, EDGE);
+            r *= (1 + q * 0.9) * (1 - veil * veil);
             if (r < 0.25) continue;
 
             const size = clamp(Math.round((r / rTop) * SIZES) - 1, 0, SIZES - 1);
-            const band = built ? Math.min(BANDS - 1, Math.round((1 - tone) * (BANDS - 1))) : BANDS;
+            const band = Math.min(BANDS - 1, Math.round((1 - tone) * (BANDS - 1)));
             const slot = band * SIZES + size;
             const n = held[slot];
             if (n < cap) {
               bx[slot * cap + n] = x;
               by[slot * cap + n] = y;
+              bt[slot * cap + n] = spin[j * cols + i];
               held[slot] = n + 1;
             } else grew = true;
           }
@@ -474,35 +542,25 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       const slots = {
         x: bx,
         y: by,
+        turn: bt,
         held,
         cap,
         radius: (slot: number) => (rTop * ((slot % SIZES) + 1)) / SIZES,
         ink: (slot: number) => Math.floor(slot / SIZES),
       };
-      pr.dots(slots, SIZES * BANDS, SLOTS, mixes);
+      pr.dots(slots, 0, SLOTS, mixes);
 
-      const face = t > 0.5 ? ib : ia;
-      const fr = t > 0.5 ? rb : ra;
-      if (revMax > 0.01 && face && fr) {
-        if (shown.length !== rev.length) shown = new Float32Array(rev.length);
-        for (let j = 0; j < rows; j++) {
-          const e = vignette(((j + 0.5) * cell) / H, EDGE);
-          for (let i = 0, k = j * cols; i < cols; i++, k++) shown[k] = rev[k] * e;
-        }
-        pr.photo(face, fr, shown, cols, rows, cell);
-      }
+      const seen = { x: lens.x, y: lens.y, r: R, power };
+      if (ia && ra) pr.photo(ia, ra, veilA, seen);
+      if (ib && rb) pr.photo(ib, rb, veilB, seen);
 
-      pr.dots(slots, 0, SIZES * BANDS, mixes);
-
-      if (lensOn) {
-        pr.circle(lens.x, lens.y, R, ink, 0.5 * lens.amp, 1);
-        if (ptr.in) pr.circle(ptr.x, ptr.y, 2.5, ink, lens.amp);
-      }
+      if (lensOn && ptr.in) pr.mark(ptr.x, ptr.y, 2.5, ink, lens.amp);
 
       if (grew) {
         cap *= 2;
         bx = new Float32Array(SLOTS * cap);
         by = new Float32Array(SLOTS * cap);
+        bt = new Float32Array(SLOTS * cap);
         kick();
       }
       return R;
@@ -513,7 +571,8 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       const dt = clamp((now - last) / 1000, 0.001, 0.05);
       last = now;
 
-      if (want && t >= 1 && load(want.i)) start(want.i, want.at, want.quick);
+      // Only the first plate may start unprepared: nothing is moving yet.
+      if (want && t >= 1 && (ready.has(want.i) || (b < 0 && load(want.i)))) start(want.i, want.at, want.quick);
       if (b < 0 && !want) {
         let last = -1;
         try {
@@ -523,60 +582,39 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
         const first = after(((last % builds.length) + builds.length) % builds.length);
         if (first >= 0) {
           want = { i: first };
-          load(first);
+          void prepare(first);
         }
       }
       if (t < 1) {
         t = Math.min(1, (now - t0) / wave);
         if (t > 0.5) show(all[b]);
-      }
+      } else if (b >= 0 && !want) void prepare(after(curated));
 
       if (!still) {
         roam = fine && !ptr.in && now - ptr.left > IDLE;
         const s = now / 1000;
         const gx = roam ? box.x + box.w * (0.5 + 0.3 * Math.cos(s * 0.57)) : ptr.x;
         const gy = roam ? box.y + box.h * (0.5 + 0.26 * Math.sin(s * 0.83 + 1)) : ptr.y;
-        const k = roam ? 14 : 120;
-        const c = roam ? 7 : 16;
-        lens.vx += ((gx - lens.x) * k - lens.vx * c) * dt;
-        lens.vy += ((gy - lens.y) * k - lens.vy * c) * dt;
-        lens.x += lens.vx * dt;
-        lens.y += lens.vy * dt;
+        chase(lens, gx, gy, roam ? ROAM : FOLLOW, dt);
+        chase(tail, lens.x, lens.y, TRAIL, dt);
         on = roam ? 0.8 : ptr.in && !ptr.link ? 1 : 0;
         lens.amp += (on - lens.amp) * (1 - Math.exp(-dt * (roam ? 2 : 8)));
         ptr.speed *= Math.exp(-dt * 6);
-        const swell = ptr.down && ptr.in ? 0.9 : clamp(ptr.speed / 1800, 0, 0.7);
-        lens.boost += (swell - lens.boost) * (1 - Math.exp(-dt * 6));
+        const swell = ptr.down && ptr.in ? PRESS : clamp(ptr.speed / 2400, 0, FAST);
+        lens.boost += (swell - lens.boost) * (1 - Math.exp(-dt * 5));
         const tx = ptr.in ? (ptr.x / W) * 2 - 1 : 0;
         const ty = ptr.in ? (ptr.y / H) * 2 - 1 : 0;
         par.x += (tx - par.x) * (1 - Math.exp(-dt * 4));
         par.y += (ty - par.y) * (1 - Math.exp(-dt * 4));
-
-        if (revMax > 0) {
-          const fade = Math.exp(-dt / (t < 1 ? FADE / 4 : FADE));
-          revMax = 0;
-          for (let i = 0; i < rev.length; i++) {
-            const v = rev[i] * fade;
-            rev[i] = v < 0.004 ? 0 : v;
-            if (v > revMax) revMax = v;
-          }
-        }
+      } else {
+        lens.x = tail.x = ptr.x;
+        lens.y = tail.y = ptr.y;
+        lens.amp = ptr.in && !ptr.link ? 1 : 0;
       }
 
-      const R = draw() ?? 0;
+      draw();
 
-      if (!still && lens.amp > 0.2 && t >= 1) {
-        const hole = R * HOLE;
-        const steps = Math.max(1, Math.ceil(Math.hypot(lens.x - lens.px, lens.y - lens.py) / (hole / 2)));
-        for (let s = 1; s <= steps; s++) {
-          const f = s / steps;
-          stamp(lens.px + (lens.x - lens.px) * f, lens.py + (lens.y - lens.py) * f, hole, lens.amp);
-        }
-      }
-      lens.px = lens.x;
-      lens.py = lens.y;
-
-      if (seen && !document.hidden && (t < 1 || want || revMax > 0.004 || (fine && !still && !frozen))) kick();
+      if (seen && !document.hidden && (t < 1 || want || (fine && !still && !frozen))) kick();
     };
 
     function kick() {
@@ -590,9 +628,9 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       const now = performance.now();
       if (ptr.in) ptr.speed = Math.max(ptr.speed, Math.hypot(x - ptr.x, y - ptr.y) / Math.max(0.008, (now - move) / 1000));
       else if (lens.amp < 0.02) {
-        lens.x = lens.px = x;
-        lens.y = lens.py = y;
-        lens.vx = lens.vy = 0;
+        lens.x = tail.x = x;
+        lens.y = tail.y = y;
+        lens.vx = lens.vy = tail.vx = tail.vy = 0;
       }
       move = now;
       ptr.x = x;
@@ -600,21 +638,12 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       ptr.in = true;
       ptr.link = !!(e.target as HTMLElement).closest("a,button");
       if (e.type === "pointerdown") ptr.down = now;
-      if (still) {
-        rev.fill(0);
-        revMax = 0;
-        stamp(x, y, clamp(W * 0.085, 70, 150) * HOLE, 1);
-      }
       kick();
     };
     const out = () => {
       ptr.in = false;
       ptr.down = 0;
       ptr.left = performance.now();
-      if (still) {
-        rev.fill(0);
-        revMax = 0;
-      }
       kick();
     };
     const up = (e: PointerEvent) => {
@@ -624,7 +653,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     };
     const click = (e: MouseEvent) => {
       if (pressed || (e.target as HTMLElement).closest("a,button")) return;
-      lens.boost = Math.min(1, lens.boost + 0.5);
+      lens.boost = Math.min(PRESS, lens.boost + TAP);
       const r = host.getBoundingClientRect();
       next({ x: e.clientX - r.left, y: e.clientY - r.top });
     };
@@ -636,8 +665,8 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       let i = all.findIndex((x) => x.id === d.id);
       if (i < 0) i = all.push(d) - 1;
       if (i === b && !want) return;
-      load(i);
       want = { i, at: { x: box.x + box.w / 2, y: box.y + box.h }, quick: true };
+      void prepare(i);
       kick();
     };
     const released = () => {
@@ -652,7 +681,6 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     // ResizeObserver handles initial sizing; font loads require remasking.
     ro.observe(host);
     io.observe(host);
-    let live = true;
     if (document.fonts && document.fonts.status !== "loaded")
       document.fonts.ready.then(() => {
         if (!live) return;
@@ -685,6 +713,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
 
     return () => {
       live = false;
+      window.clearTimeout(settling);
       md.removeEventListener("change", turned);
       for (const img of imgs.values()) img.onload = img.onerror = null;
       if (raf) cancelAnimationFrame(raf);
@@ -712,6 +741,40 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       className="pointer-events-none absolute inset-0 z-0 h-full w-full"
     />
   );
+}
+
+function lay(v: { data: Float32Array; n: number }, x: number, y: number, r: number, alpha: number, turn: number) {
+  if ((v.n + 1) * STRIDE > v.data.length) {
+    const more = new Float32Array(v.data.length * 2);
+    more.set(v.data);
+    v.data = more;
+  }
+  const o = v.n++ * STRIDE;
+  v.data[o] = x;
+  v.data[o + 1] = y;
+  v.data[o + 2] = r;
+  v.data[o + 3] = alpha;
+  v.data[o + 4] = turn;
+}
+
+// Yield to the browser between the steps of preparing a plate.
+const rest = () =>
+  new Promise<void>((go) => {
+    if (typeof requestIdleCallback === "function") requestIdleCallback(() => go(), { timeout: 400 });
+    else setTimeout(go, 1);
+  });
+
+// Critically damped and exact for any dt: no overshoot, and a dropped frame doesn't change the path.
+function chase(p: { x: number; y: number; vx: number; vy: number }, gx: number, gy: number, w: number, dt: number) {
+  const e = Math.exp(-w * dt);
+  const dx = p.x - gx;
+  const jx = (p.vx + w * dx) * dt;
+  p.x = gx + (dx + jx) * e;
+  p.vx = (p.vx - w * jx) * e;
+  const dy = p.y - gy;
+  const jy = (p.vy + w * dy) * dt;
+  p.y = gy + (dy + jy) * e;
+  p.vy = (p.vy - w * jy) * e;
 }
 
 const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);

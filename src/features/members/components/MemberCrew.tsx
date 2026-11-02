@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Bilingual } from "@/features/site/data/about";
 import type { MemberLinks as Links } from "../data/roster";
 import MemberLinks from "./MemberLinks";
-import { DOT, SCREEN } from "@/lib/halftone";
+import { DOT, SCREEN, relief, square, turnAt } from "@/lib/halftone";
 
 type CrewGroup = "alumni" | "executives" | "members";
 
@@ -30,10 +30,12 @@ export interface CrewMember {
 
 const IN = 700;
 const OUT = 400;
+const FACE_RELIEF = 0.3;
 
 type Sheet = {
   bmp: HTMLImageElement;
   tone: Float32Array;
+  spin: Float32Array;
   cols: number;
   rows: number;
   cell: number;
@@ -111,11 +113,18 @@ export function Print({
       const sorted = Float32Array.from(tone).sort();
       const lo = sorted[Math.floor(0.04 * sorted.length)];
       const hi = Math.max(lo + 0.08, sorted[Math.min(sorted.length - 1, Math.floor(0.96 * sorted.length))]);
-      for (let i = 0; i < tone.length; i++) tone[i] = 0.12 + 0.88 * Math.min(1, Math.max(0, (tone[i] - lo) / (hi - lo)));
+      for (let i = 0; i < tone.length; i++) tone[i] = Math.min(1, Math.max(0, (tone[i] - lo) / (hi - lo)));
+      relief(tone, cols, rows, undefined, FACE_RELIEF);
+      for (let i = 0; i < tone.length; i++) tone[i] = 0.12 + 0.88 * tone[i];
+      // One turn field across the page, so a wall of portraits doesn't repeat one pattern.
+      const at = canvas.getBoundingClientRect();
+      const spin = new Float32Array(cols * rows);
+      for (let y = 0; y < rows; y++)
+        for (let x = 0; x < cols; x++) spin[y * cols + x] = turnAt(at.left + window.scrollX + (x + 0.5) * cell, at.top + window.scrollY + (y + 0.5) * cell);
       const dpr = Math.min(window.devicePixelRatio || 1, 3);
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
-      return { bmp, tone, cols, rows, cell, w, h, crop, dots: null };
+      return { bmp, tone, spin, cols, rows, cell, w, h, crop, dots: null };
     };
 
     const paint = () => {
@@ -229,7 +238,7 @@ export function Print({
   );
 }
 
-function press(g: CanvasRenderingContext2D, { tone, cols, rows, cell, w, h }: Sheet) {
+function press(g: CanvasRenderingContext2D, { tone, spin, cols, rows, cell, w, h }: Sheet) {
   const css = getComputedStyle(document.documentElement);
   g.fillStyle = css.getPropertyValue("--color-canvas").trim() || "#dfe1dc";
   g.fillRect(0, 0, w, h);
@@ -239,10 +248,7 @@ function press(g: CanvasRenderingContext2D, { tone, cols, rows, cell, w, h }: Sh
     for (let x = 0; x < cols; x++) {
       const r = (1 - tone[y * cols + x]) * cell * DOT;
       if (r < 0.3) continue;
-      const cx = x * cell + cell / 2;
-      const cy = y * cell + cell / 2;
-      g.moveTo(cx + r, cy);
-      g.arc(cx, cy, r, 0, Math.PI * 2);
+      square(g, x * cell + cell / 2, y * cell + cell / 2, r, spin[y * cols + x]);
     }
   g.fill();
 }
@@ -346,7 +352,7 @@ function BioLine({ text, on }: { text: string; on: boolean }) {
       ref={box}
       aria-hidden="true"
       lang={HANGUL.test(text) ? "ko" : "en"}
-      className={`pointer-events-none absolute inset-0 col-start-2 col-end-[-2] flex items-center overflow-hidden font-serif text-[0.9375rem] leading-[21px] text-ink transition-[opacity,visibility] duration-200 motion-reduce:transition-none data-[over]:[mask-image:linear-gradient(90deg,transparent,#000_0.35em,#000_calc(100%-2em),transparent)] ${
+      className={`pointer-events-none absolute inset-0 col-start-3 col-end-[-2] row-end-2 flex xl:col-start-2 items-center overflow-hidden font-serif text-[0.9375rem] leading-[21px] text-ink transition-[opacity,visibility] duration-200 motion-reduce:transition-none data-[over]:[mask-image:linear-gradient(90deg,transparent,#000_0.35em,#000_calc(100%-2em),transparent)] ${
         HANGUL.test(text) ? "" : "italic"
       } ${on ? "visible opacity-100" : "invisible opacity-0"}`}
     >
@@ -371,7 +377,7 @@ export default function MemberCrew({ members }: { members: CrewMember[] }) {
         {groups.map((g) => (
           <section key={g.key} aria-labelledby={`crew-m-${g.key}`} className="border-t border-rule-strong pt-sm pb-xxl">
             <GroupHead id={`crew-m-${g.key}`} label={g.label} count={g.members.length} className="pb-md" />
-            <ul className="grid grid-cols-3 gap-x-sm gap-y-xl md:grid-cols-6 md:gap-x-md">
+            <ul className="grid grid-cols-3 gap-x-gutter gap-y-xl md:grid-cols-6">
               {g.members.map((m) => (
                 <Card key={m.id} m={m} />
               ))}
@@ -380,9 +386,9 @@ export default function MemberCrew({ members }: { members: CrewMember[] }) {
         ))}
       </div>
 
-      <div className="hidden grid-cols-12 gap-x-xl lg:grid" onPointerLeave={() => setHot(null)}>
+      <div className="hidden grid-cols-12 gap-x-gutter lg:grid" onPointerLeave={() => setHot(null)}>
         <div
-          className="col-span-6 grid grid-cols-[auto_minmax(0,1fr)_auto] content-start gap-x-md xl:col-span-7 xl:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto]"
+          className="col-span-6 grid grid-cols-subgrid content-start xl:col-span-7"
           onFocus={(e) => {
             const row = (e.target as HTMLElement).closest<HTMLElement>("[data-crew]");
             if (row?.dataset.crew) setHot(row.dataset.crew);
@@ -407,15 +413,15 @@ export default function MemberCrew({ members }: { members: CrewMember[] }) {
                     key={m.id}
                     data-crew={m.id}
                     onPointerEnter={() => setHot(m.id)}
-                    className={`relative col-span-full grid grid-cols-subgrid items-start border-b border-rule py-1.5 text-body-sm transition-colors duration-200 motion-reduce:transition-none ${
+                    className={`relative col-span-full grid grid-cols-subgrid items-start border-b border-rule py-1.5 text-body-sm transition-colors duration-200 motion-reduce:transition-none [&>*]:row-start-1 ${
                       hot && hot !== m.id ? "text-ink-muted" : "text-ink"
                     }`}
                   >
-                    <span className="min-w-[4.5rem]">{m.name}</span>
-                    <Meta m={m} className={away} />
-                    <span className={`hidden text-ink-muted xl:block ${away}`}>{m.department.en}</span>
+                    <span className="col-span-2 col-start-1 whitespace-nowrap xl:col-span-1">{m.name}</span>
+                    <Meta m={m} className={`col-span-3 col-start-3 xl:col-span-2 xl:col-start-2 ${away}`} />
+                    <span className={`col-span-4 col-start-4 hidden text-ink-muted xl:block ${away}`}>{m.department.en}</span>
                     {/* Centre 32px hit areas on the 21px text line. */}
-                    <MemberLinks name={m.name} links={m.links} dense className="-my-[5.5px] -mr-xxs justify-self-end" />
+                    <MemberLinks name={m.name} links={m.links} dense className="col-start-6 -my-[5.5px] -mr-xxs justify-self-end xl:col-start-7" />
                     {m.bio && (
                       <>
                         <span className="sr-only">{m.bio}</span>
@@ -433,7 +439,8 @@ export default function MemberCrew({ members }: { members: CrewMember[] }) {
         <div aria-hidden="true" className="col-span-6 xl:col-span-5">
           {/* Align the portrait wall with the first table rule. */}
           <GroupHead label={groups[0]?.label ?? ""} count={0} className="invisible" />
-          <ul className="grid grid-cols-5 gap-xs">
+          {/* One object on the sheet: its outer edges are on columns, its gaps are the wall's own. */}
+          <ul data-offgrid className="grid grid-cols-5 gap-xs">
             {order.map((m) => (
               <li key={m.id} onPointerEnter={() => setHot(m.id)}>
                 <Print

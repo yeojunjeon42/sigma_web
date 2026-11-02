@@ -1,5 +1,6 @@
 "use client";
 
+import { square, turnAt } from "@/lib/halftone";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { EMAIL } from "@/features/site/data/contact";
 
@@ -157,7 +158,7 @@ export function ContactForm() {
         const name = field.name as RequiredField;
         if (errors[name]) setErrors((previous) => ({ ...previous, [name]: fieldError(field) }));
       }}
-      className="grid gap-y-lg md:grid-cols-2 md:gap-x-lg lg:grid-cols-7"
+      className="grid gap-y-lg md:grid-cols-2 md:gap-x-gutter lg:grid-cols-7"
     >
       <Field id="contact-name" label="Name" error={errors.name} className="lg:col-span-4">
         <input
@@ -287,7 +288,7 @@ function Receipt({ stamp }: { stamp: string }) {
           const r = (1 - tone[y * n + x]) * CELL * 0.52 * local;
           if (r < 0.2) continue;
           g.beginPath();
-          g.arc((x + 0.5) * CELL, (y + 0.5) * CELL, r, 0, Math.PI * 2);
+          square(g, (x + 0.5) * CELL, (y + 0.5) * CELL, r, turnAt((x + 0.5) * CELL, (y + 0.5) * CELL));
           g.fill();
         }
       if (k < 1) raf = requestAnimationFrame(draw);
@@ -299,7 +300,7 @@ function Receipt({ stamp }: { stamp: string }) {
   return (
     <div aria-hidden="true" className="relative size-[176px] shrink-0 -rotate-6">
       <canvas ref={ref} width={SIZE * 2} height={SIZE * 2} className="size-full" />
-      <p className="absolute inset-x-0 top-[66%] text-center font-mono text-[12px] leading-[1.35] text-accent tabular-nums">
+      <p className="absolute inset-x-0 top-[66%] text-center text-[12px] leading-[1.35] text-accent tabular-nums">
         {stamp.split(" ")[0]}
         <br />
         {stamp.split(" ")[1]}
