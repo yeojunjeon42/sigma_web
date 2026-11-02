@@ -335,10 +335,10 @@ export default function ArchiveReel({
       className="relative"
     >
       <div className="sticky top-0 h-[var(--screen)] overflow-hidden pt-[max(1.5rem,calc(var(--masthead)+1.5rem-var(--lift,0px)))] pb-lg">
-        <div className="u-gutter mx-auto grid h-[calc(100%-var(--lift,0px))] grid-rows-[minmax(0,1fr)_auto] md:grid-cols-[minmax(0,2.25fr)_minmax(0,5.25fr)_minmax(0,4.5fr)] md:grid-rows-1 md:gap-x-[clamp(1.5rem,2.5vw,3rem)]">
+        <div className="u-sheet mx-auto h-[calc(100%-var(--lift,0px))] grid-rows-[minmax(0,1fr)_auto] md:grid-rows-1">
           <nav
             aria-label="Builds"
-            className="relative hidden overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_1.5rem,black_calc(100%-4rem),transparent)] md:block"
+            className="relative hidden overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_1.5rem,black_calc(100%-4rem),transparent)] md:col-span-3 md:block"
           >
             <ol
               ref={railRef}
@@ -387,7 +387,7 @@ export default function ArchiveReel({
 
           <div
             ref={stripRef}
-            className="relative min-h-0 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_12%,black_88%,transparent)]"
+            className="relative col-span-full min-h-0 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_12%,black_88%,transparent)] md:col-span-4"
           >
             {builds.map((x, i) => (
               <div
@@ -413,7 +413,7 @@ export default function ArchiveReel({
                   sizes="(min-width: 1024px) 26vw, 60vw"
                   eager={i === start}
                   fetchPriority={i === start ? "high" : "low"}
-                  className="w-full overflow-hidden u-corner"
+                  className="w-full overflow-hidden"
                 />
               </div>
             ))}
@@ -422,7 +422,7 @@ export default function ArchiveReel({
             </div>
           </div>
 
-          <div className="flex min-h-0 flex-col pt-md pb-lg md:py-0">
+          <div className="col-span-full flex min-h-0 flex-col pt-md pb-lg md:col-span-5 md:py-0">
             <div
               key={b.id}
               aria-live="polite"
