@@ -1,5 +1,6 @@
 "use client";
 
+import { square, turnAt } from "@/lib/halftone";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { PLATE_RELEASE, PLATE_SHOW } from "@/components/ui/HeroPlate";
@@ -24,7 +25,7 @@ const STOPS = [
   [142, 19, 22],
 ];
 
-const META = "font-mono text-[12px] leading-none tracking-normal uppercase";
+const META = "text-ui leading-none tracking-normal";
 const ALL =
   "inline-flex min-h-11 items-center text-ink transition-opacity hover:opacity-60 lg:min-h-0";
 
@@ -167,7 +168,7 @@ export default function RecordLines({
             : [176, 176, 176];
           g.fillStyle = `rgb(${c[0]} ${c[1]} ${c[2]})`;
           g.beginPath();
-          g.arc((i + 0.5) * CELL, (j + 0.5) * CELL, r, 0, Math.PI * 2);
+          square(g, (i + 0.5) * CELL, (j + 0.5) * CELL, r, turnAt((i + 0.5) * CELL, (j + 0.5) * CELL));
           g.fill();
         }
       }
@@ -404,7 +405,7 @@ export default function RecordLines({
   const names = (copy: number) => (
     <ul aria-hidden={copy > 0 || undefined} className="inline">
       {builds.map((b) => (
-        <li key={b.id} className="inline">
+        <li key={b.id} className="mr-[1em] inline">
           <Link
             href={`/archive?view=reel&at=${b.id}`}
             prefetch={false}
@@ -417,16 +418,12 @@ export default function RecordLines({
             {b.year ? (
               // Align the year's capitals with the name's cap line.
               <span className="relative ml-[0.5em] inline-block h-[1cap] w-[calc(12px*2.4)] align-baseline">
-                <span className="u-trim absolute top-0 left-0 font-mono text-[12px] tracking-normal text-ink tabular-nums">
+                <span className="u-trim absolute top-0 left-0 text-[12px] tracking-normal text-ink tabular-nums">
                   {b.year}
                 </span>
               </span>
             ) : null}
           </Link>
-          <span
-            aria-hidden="true"
-            className="mx-[0.5em] inline-block size-[0.16em] -translate-y-[0.32em] rounded-full bg-rule-strong"
-          />
         </li>
       ))}
     </ul>
@@ -436,11 +433,11 @@ export default function RecordLines({
     <ul aria-hidden={copy > 0 || undefined} className="inline">
       {results.map((r) => (
         <li key={r.key} className="mr-[2.4em] inline">
-          <span className="mr-[0.9em] font-mono text-[12px] text-ink tabular-nums">
+          <span className="mr-[0.9em] text-[12px] text-ink tabular-nums">
             {r.year}
           </span>
           {r.contest}
-          <span className="ml-[1em] font-mono text-[12px] text-ink uppercase">
+          <span className="ml-[1em] text-[12px] text-ink">
             {r.result}
           </span>
         </li>
@@ -464,7 +461,7 @@ export default function RecordLines({
           {`All ${builds.length} ↗`}
         </Link>
       </div>
-      <div className={`${fade} mt-sm`}>
+      <div data-offgrid className={`${fade} mt-sm`}>
         <div
           data-track="1"
           className="inline-block origin-bottom text-[length:clamp(2.125rem,5.4vw,4rem)] leading-[1.12] tracking-[-0.025em] will-change-transform"
@@ -482,7 +479,7 @@ export default function RecordLines({
           {`All ${total} ↗`}
         </Link>
       </div>
-      <div className={`${fade} mt-sm`}>
+      <div data-offgrid className={`${fade} mt-sm`}>
         <div
           data-track="2"
           className="inline-block origin-bottom text-[length:clamp(0.9375rem,1.5vw,1.1875rem)] leading-[1.3] tracking-[-0.01em] text-ink will-change-transform"
@@ -506,6 +503,7 @@ export default function RecordLines({
 
       <div
         data-peek
+        data-offgrid
         aria-hidden="true"
         className="pointer-events-none absolute top-0 left-0 z-20 h-[176px] w-[220px] scale-[0.92] border border-rule-strong bg-canvas opacity-0 transition-[opacity,scale] duration-200 will-change-transform data-[show]:scale-100 data-[show]:opacity-100"
       >

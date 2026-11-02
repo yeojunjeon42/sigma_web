@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef } from "react";
-import { SCREEN } from "@/lib/halftone";
+import { SCREEN, relief, square, turnAt } from "@/lib/halftone";
 import { PLATE, type Tile } from "../data/field";
 
 const IN = 950;
@@ -70,6 +70,7 @@ export default function ResolvePlate({ tile, sizes }: { tile: Tile; sizes: strin
       }
       const span = Math.max(0.1, hi - lo);
       for (let i = 0; i < tone.length; i++) tone[i] = (tone[i] - lo) / span;
+      relief(tone, cols, rows);
       return true;
     };
 
@@ -94,8 +95,7 @@ export default function ResolvePlate({ tile, sizes }: { tile: Tile; sizes: strin
           if (r < 0.25) continue;
           const cx = x * SCREEN + SCREEN / 2;
           const cy = y * SCREEN + SCREEN / 2;
-          g.moveTo(cx + r, cy);
-          g.arc(cx, cy, r, 0, Math.PI * 2);
+          square(g, cx, cy, r, turnAt(cx, cy));
         }
       }
       g.fill();
@@ -157,7 +157,7 @@ export default function ResolvePlate({ tile, sizes }: { tile: Tile; sizes: strin
     <div
       ref={ref}
       style={{ aspectRatio: `${plate.w} / ${plate.h}` }}
-      className="relative w-full overflow-hidden u-corner bg-canvas"
+      className="relative w-full overflow-hidden bg-canvas"
     >
       {tile.src ? (
         <Image

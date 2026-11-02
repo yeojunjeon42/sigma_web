@@ -1,11 +1,16 @@
-// WebGL and Canvas 2D renderers preserve slot order so overlaps match.
+// WebGL and Canvas 2D renderers preserve slot order so overlaps match. Every mark is a square.
+import { SQUARE, square } from "./halftone";
 
 export type Box = { x: number; y: number; w: number; h: number };
-export type Hole = { x: number; y: number; r: number } | null;
 export type Fade = readonly [number, number];
+// Dots that show the photograph: x, y, radius, alpha, turn per dot. The lens is the one the dots moved through.
+export type Veil = { data: Float32Array; n: number };
+export type Lens = { x: number; y: number; r: number; power: number };
 export type Slots = {
   x: Float32Array;
   y: Float32Array;
+  // Per mark, indexed like x and y.
+  turn: Float32Array;
   held: Int32Array;
   cap: number;
   radius: (slot: number) => number;
@@ -15,11 +20,39 @@ export type Slots = {
 export interface Printer {
   size(w: number, h: number, dpr: number): void;
   clear(): void;
-  ground(ox: number, oy: number, cell: number, r: number, colour: string, hole?: Hole, fade?: Fade): void;
+  ground(ox: number, oy: number, cell: number, r: number, colour: string): void;
   dots(s: Slots, from: number, to: number, palette: string[]): void;
-  photo(img: HTMLImageElement, at: Box, mask: Float32Array, cols: number, rows: number, cell: number): void;
-  circle(x: number, y: number, r: number, colour: string, alpha: number, stroke?: number): void;
+  prime(img: HTMLImageElement, at: Box, file: Blob): Promise<void>;
+  photo(img: HTMLImageElement, at: Box, veil: Veil, lens: Lens): void;
+  mark(x: number, y: number, r: number, colour: string, alpha: number): void;
   dispose(): void;
+}
+
+// Scale an image file on a worker: on the page's own thread this took a frame or more, mid-motion.
+let scaler: Worker | null = null;
+let asked = 0;
+const waiting = new Map<number, { go: (b: ImageBitmap) => void; no: (e: unknown) => void }>();
+const SCALER = `onmessage=async({data:{id,file,o}})=>{try{const b=await createImageBitmap(file,o);postMessage({id,b},[b])}catch(e){postMessage({id})}}`;
+
+export function scaled(file: Blob, resizeWidth: number, resizeHeight: number, resizeQuality: ResizeQuality): Promise<ImageBitmap> {
+  const o: ImageBitmapOptions = { resizeWidth, resizeHeight, resizeQuality, premultiplyAlpha: "premultiply" };
+  if (!scaler && typeof Worker === "function") {
+    try {
+      scaler = new Worker(URL.createObjectURL(new Blob([SCALER], { type: "text/javascript" })));
+      scaler.onmessage = ({ data: { id, b } }: MessageEvent<{ id: number; b?: ImageBitmap }>) => {
+        const w = waiting.get(id);
+        waiting.delete(id);
+        if (b) w?.go(b);
+        else w?.no(new Error("scale"));
+      };
+    } catch {}
+  }
+  if (!scaler) return createImageBitmap(file, o);
+  const id = asked++;
+  return new Promise((go, no) => {
+    waiting.set(id, { go, no });
+    scaler?.postMessage({ id, file, o });
+  });
 }
 
 export function printer(canvas: HTMLCanvasElement, restored: () => void): Printer | null {
@@ -27,6 +60,8 @@ export function printer(canvas: HTMLCanvasElement, restored: () => void): Printe
 }
 
 const PALETTE = 16;
+// Floats per mark: x, y, radius, ink or alpha, turn.
+export const STRIDE = 5;
 
 const FULL = `#version 300 es
 void main() {
@@ -50,18 +85,11 @@ uniform vec2 u_origin;
 uniform float u_cell;
 uniform float u_r;
 uniform vec4 u_ink;
-uniform vec3 u_hole;
-uniform vec2 u_fade;
 out vec4 o;
 void main() {
   vec2 p = vec2(gl_FragCoord.x, u_px.y - gl_FragCoord.y) / u_dpr;
-  vec2 c = u_origin + floor((p - u_origin) / u_cell + 0.5) * u_cell;
-  if (u_hole.z > 0.0 && distance(c, u_hole.xy) < u_hole.z) discard;
-  float y = c.y * u_dpr / u_px.y;
-  float t = 1.0;
-  if (u_fade.x > 0.0 && y < u_fade.x) t = clamp(y / u_fade.x, 0.0, 1.0);
-  else if (u_fade.y < 1.0 && y > u_fade.y) t = clamp((1.0 - y) / (1.0 - u_fade.y), 0.0, 1.0);
-  float k = clamp((u_r * t * t * (3.0 - 2.0 * t) - distance(p, c)) * u_dpr + 0.5, 0.0, 1.0);
+  vec2 c = abs(p - u_origin - floor((p - u_origin) / u_cell + 0.5) * u_cell);
+  float k = clamp((u_r - max(c.x, c.y)) * u_dpr + 0.5, 0.0, 1.0);
   if (k <= 0.0) discard;
   o = u_ink * k;
 }`;
@@ -69,59 +97,67 @@ void main() {
 const DOT_V = `#version 300 es
 layout(location = 0) in vec2 a_corner;
 layout(location = 1) in vec4 a_dot;
-uniform float u_stroke;
+layout(location = 2) in float a_turn;
 ${CLIP}
 out vec2 v_off;
 flat out float v_r;
 flat out float v_k;
 void main() {
-  float ext = a_dot.z + u_stroke * 0.5 + 1.0 / u_dpr;
-  v_off = a_corner * ext;
+  v_off = a_corner * (a_dot.z + 1.0 / u_dpr);
   v_r = a_dot.z;
   v_k = a_dot.w;
-  gl_Position = clip(a_dot.xy + v_off);
+  float c = cos(a_turn);
+  float s = sin(a_turn);
+  gl_Position = clip(a_dot.xy + vec2(v_off.x * c - v_off.y * s, v_off.x * s + v_off.y * c));
 }`;
 
 const DOT_F = `#version 300 es
 precision highp float;
 uniform vec4 u_pal[${PALETTE}];
 uniform float u_dpr;
-uniform float u_stroke;
 in vec2 v_off;
 flat in float v_r;
 flat in float v_k;
 out vec4 o;
 void main() {
-  float d = length(v_off);
-  float e = u_stroke > 0.0 ? u_stroke * 0.5 - abs(d - v_r) : v_r - d;
-  float k = clamp(e * u_dpr + 0.5, 0.0, 1.0);
+  float k = clamp((v_r - max(abs(v_off.x), abs(v_off.y))) * u_dpr + 0.5, 0.0, 1.0);
   if (k <= 0.0) discard;
   o = u_pal[int(v_k + 0.5)] * k;
 }`;
 
-const PHOTO_V = `#version 300 es
-uniform vec4 u_rect;
-${CLIP}
-out vec2 v_uv;
-out vec2 v_p;
-void main() {
-  v_uv = vec2(float(gl_VertexID & 1), float((gl_VertexID >> 1) & 1));
-  v_p = u_rect.xy + v_uv * u_rect.zw;
-  gl_Position = clip(v_p);
-}`;
-
+// Each fragment reads the photograph where the lens took it from (d(1 + p(1 - (d/R)^2)^2) = d', by
+// Newton), so the picture runs on through the dots without a seam and is untouched at the lens's edge.
 const PHOTO_F = `#version 300 es
 precision highp float;
 uniform sampler2D u_img;
-uniform sampler2D u_mask;
-uniform vec2 u_grid;
-in vec2 v_uv;
-in vec2 v_p;
+uniform vec4 u_rect;
+uniform vec4 u_lens;
+uniform vec2 u_px;
+uniform float u_dpr;
+in vec2 v_off;
+flat in float v_r;
+flat in float v_k;
 out vec4 o;
 void main() {
-  o = texture(u_img, v_uv) * texture(u_mask, v_p / u_grid).r;
+  float k = clamp((v_r - max(abs(v_off.x), abs(v_off.y))) * u_dpr + 0.5, 0.0, 1.0);
+  if (k <= 0.0) discard;
+  vec2 p = vec2(gl_FragCoord.x, u_px.y - gl_FragCoord.y) / u_dpr;
+  vec2 v = p - u_lens.xy;
+  float seen = length(v);
+  float d = seen / (1.0 + u_lens.w);
+  for (int i = 0; i < 3; i++) {
+    float u = d / u_lens.z;
+    float s = max(1.0 - u * u, 0.0);
+    d -= (d * (1.0 + u_lens.w * s * s) - seen) / (1.0 + u_lens.w * s * s - 4.0 * u_lens.w * u * u * s);
+  }
+  vec2 q = seen < u_lens.z ? u_lens.xy + v * (d / max(seen, 0.001)) : p;
+  vec2 uv = (q - u_rect.xy) / u_rect.zw;
+  vec2 inside = step(vec2(0.0), uv) * step(uv, vec2(1.0));
+  // Cutouts carry a faint residue of their old background: ease it away instead of printing a halo.
+  vec4 c = texture(u_img, uv);
+  c *= smoothstep(0.2, 0.75, c.a) / max(c.a, 0.001);
+  o = c * k * v_k * inside.x * inside.y;
 }`;
-
 
 type Program = { p: WebGLProgram; u: (name: string) => WebGLUniformLocation | null };
 
@@ -143,9 +179,6 @@ function glPrinter(canvas: HTMLCanvasElement, restored: () => void): Printer | n
   let corners: WebGLBuffer;
   let inst: WebGLBuffer;
   let vao: WebGLVertexArrayObject;
-  let maskTex: WebGLTexture;
-  let maskKey = "";
-  let bytes = new Uint8Array(0);
   let data = new Float32Array(1 << 14);
   const pal = new Float32Array(PALETTE * 4);
   const photos = new Map<HTMLImageElement, { tex: WebGLTexture; w: number; h: number }>();
@@ -193,7 +226,7 @@ function glPrinter(canvas: HTMLCanvasElement, restored: () => void): Printer | n
     if (gl.isContextLost()) return;
     ground = compile(FULL, GROUND);
     dot = compile(DOT_V, DOT_F);
-    photo = compile(PHOTO_V, PHOTO_F);
+    photo = compile(DOT_V, PHOTO_F);
     corners = gl.createBuffer();
     inst = gl.createBuffer();
     vao = gl.createVertexArray();
@@ -204,11 +237,12 @@ function glPrinter(canvas: HTMLCanvasElement, restored: () => void): Printer | n
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     gl.bindBuffer(gl.ARRAY_BUFFER, inst);
     gl.enableVertexAttribArray(1);
-    gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(1, 4, gl.FLOAT, false, STRIDE * 4, 0);
     gl.vertexAttribDivisor(1, 1);
+    gl.enableVertexAttribArray(2);
+    gl.vertexAttribPointer(2, 1, gl.FLOAT, false, STRIDE * 4, 16);
+    gl.vertexAttribDivisor(2, 1);
     gl.bindVertexArray(null);
-    maskTex = texture();
-    maskKey = "";
     photos.clear();
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
@@ -230,15 +264,31 @@ function glPrinter(canvas: HTMLCanvasElement, restored: () => void): Printer | n
     into[at + 3] = k;
   };
 
-  const draw = (n: number, stroke: number) => {
+  const draw = (n: number) => {
     gl.bindBuffer(gl.ARRAY_BUFFER, inst);
-    gl.bufferData(gl.ARRAY_BUFFER, data.subarray(0, n * 4), gl.DYNAMIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, data.subarray(0, n * STRIDE), gl.DYNAMIC_DRAW);
     frame(dot);
-    gl.uniform1f(dot.u("u_stroke"), stroke);
     gl.uniform4fv(dot.u("u_pal"), pal);
     gl.bindVertexArray(vao);
     gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, n);
     gl.bindVertexArray(null);
+  };
+
+  const upload = (img: HTMLImageElement, source: TexImageSource, w: number, h: number) => {
+    const tex = photos.get(img)?.tex ?? texture();
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+    const shot = { tex, w, h };
+    photos.delete(img);
+    photos.set(img, shot);
+    // Keep the outgoing plate, the shown one and the next.
+    for (const [k, v] of photos) {
+      if (photos.size <= 3) break;
+      gl.deleteTexture(v.tex);
+      photos.delete(k);
+    }
+    return shot;
   };
 
   const lost = (e: Event) => {
@@ -275,16 +325,14 @@ function glPrinter(canvas: HTMLCanvasElement, restored: () => void): Printer | n
       gl.clear(gl.COLOR_BUFFER_BIT);
     },
 
-    ground(ox, oy, cell, r, colour, hole, fade = NONE) {
+    ground(ox, oy, cell, r, colour) {
       if (!ok) return;
       frame(ground);
       gl.uniform2f(ground.u("u_origin"), ox, oy);
       gl.uniform1f(ground.u("u_cell"), cell);
-      gl.uniform1f(ground.u("u_r"), r);
+      gl.uniform1f(ground.u("u_r"), r * SQUARE);
       premul(colour, 1, pal, 0);
       gl.uniform4f(ground.u("u_ink"), pal[0], pal[1], pal[2], pal[3]);
-      gl.uniform3f(ground.u("u_hole"), hole?.x ?? 0, hole?.y ?? 0, hole?.r ?? 0);
-      gl.uniform2f(ground.u("u_fade"), fade[0], fade[1]);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     },
 
@@ -293,12 +341,12 @@ function glPrinter(canvas: HTMLCanvasElement, restored: () => void): Printer | n
       let n = 0;
       for (let slot = from; slot < to; slot++) n += s.held[slot];
       if (!n) return;
-      if (data.length < n * 4) data = new Float32Array(1 << Math.ceil(Math.log2(n * 4)));
+      if (data.length < n * STRIDE) data = new Float32Array(1 << Math.ceil(Math.log2(n * STRIDE)));
       let o = 0;
       for (let slot = from; slot < to; slot++) {
         const c = s.held[slot];
         if (!c) continue;
-        const r = s.radius(slot);
+        const r = s.radius(slot) * SQUARE;
         const k = s.ink(slot);
         const base = slot * s.cap;
         for (let j = 0; j < c; j++) {
@@ -306,14 +354,26 @@ function glPrinter(canvas: HTMLCanvasElement, restored: () => void): Printer | n
           data[o++] = s.y[base + j];
           data[o++] = r;
           data[o++] = k;
+          data[o++] = s.turn[base + j];
         }
       }
       for (let i = 0; i < Math.min(PALETTE, palette.length); i++) premul(palette[i], 1, pal, i * 4);
-      draw(n, 0);
+      draw(n);
     },
 
-    photo(img, at, mask, cols, rows, cell) {
-      if (!ok) return;
+    // Upload ahead of time, so a change of plate costs nothing.
+    async prime(img, at, file) {
+      const pw = Math.max(1, Math.ceil(at.w * dpr));
+      const ph = Math.max(1, Math.ceil(at.h * dpr));
+      const had = photos.get(img);
+      if (!ok || (had && had.w === pw && had.h === ph)) return;
+      const bmp = await scaled(file, pw, ph, "high");
+      if (ok) upload(img, bmp, pw, ph);
+      bmp.close();
+    },
+
+    photo(img, at, veil, lens) {
+      if (!ok || !veil.n) return;
       const pw = Math.max(1, Math.ceil(at.w * dpr));
       const ph = Math.max(1, Math.ceil(at.h * dpr));
       let shot = photos.get(img);
@@ -321,51 +381,34 @@ function glPrinter(canvas: HTMLCanvasElement, restored: () => void): Printer | n
         stage.width = pw;
         stage.height = ph;
         stage.getContext("2d")?.drawImage(img, 0, 0, pw, ph);
-        const tex = shot?.tex ?? texture();
-        gl.bindTexture(gl.TEXTURE_2D, tex);
         gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, stage);
+        shot = upload(img, stage, pw, ph);
         gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
         stage.width = stage.height = 1;
-        shot = { tex, w: pw, h: ph };
       }
-      photos.delete(img);
-      photos.set(img, shot);
-      for (const [k, v] of photos) {
-        if (photos.size <= 2) break;
-        gl.deleteTexture(v.tex);
-        photos.delete(k);
-      }
-
-      if (bytes.length !== cols * rows) bytes = new Uint8Array(cols * rows);
-      for (let k = 0; k < bytes.length; k++) bytes[k] = mask[k] * 255;
-      gl.activeTexture(gl.TEXTURE1);
-      gl.bindTexture(gl.TEXTURE_2D, maskTex);
-      gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-      const key = `${cols}x${rows}`;
-      if (key !== maskKey) {
-        maskKey = key;
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8, cols, rows, 0, gl.RED, gl.UNSIGNED_BYTE, bytes);
-      } else gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, cols, rows, gl.RED, gl.UNSIGNED_BYTE, bytes);
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, shot.tex);
 
+      gl.bindBuffer(gl.ARRAY_BUFFER, inst);
+      gl.bufferData(gl.ARRAY_BUFFER, veil.data.subarray(0, veil.n * STRIDE), gl.DYNAMIC_DRAW);
       frame(photo);
       gl.uniform4f(photo.u("u_rect"), at.x, at.y, at.w, at.h);
-      gl.uniform2f(photo.u("u_grid"), cols * cell, rows * cell);
+      gl.uniform4f(photo.u("u_lens"), lens.x, lens.y, lens.r, lens.power);
       gl.uniform1i(photo.u("u_img"), 0);
-      gl.uniform1i(photo.u("u_mask"), 1);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      gl.bindVertexArray(vao);
+      gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, veil.n);
+      gl.bindVertexArray(null);
     },
 
-    circle(x, y, r, colour, alpha, stroke = 0) {
+    mark(x, y, r, colour, alpha) {
       if (!ok) return;
       data[0] = x;
       data[1] = y;
       data[2] = r;
       data[3] = 0;
+      data[4] = 0;
       premul(colour, alpha, pal, 0);
-      draw(1, stroke);
+      draw(1);
     },
 
     dispose() {
@@ -375,7 +418,6 @@ function glPrinter(canvas: HTMLCanvasElement, restored: () => void): Printer | n
       ok = false;
       for (const v of photos.values()) gl.deleteTexture(v.tex);
       photos.clear();
-      gl.deleteTexture(maskTex);
       gl.deleteBuffer(corners);
       gl.deleteBuffer(inst);
       gl.deleteVertexArray(vao);
@@ -394,11 +436,6 @@ function flatPrinter(canvas: HTMLCanvasElement): Printer | null {
   let pattern: CanvasPattern | null = null;
   let patternKey = "";
   let tile = 1;
-  const mc = document.createElement("canvas");
-  const pc = document.createElement("canvas");
-  const mctx = mc.getContext("2d");
-  const pctx = pc.getContext("2d");
-  let mask: ImageData | null = null;
 
   return {
     size(w, h, d) {
@@ -413,7 +450,7 @@ function flatPrinter(canvas: HTMLCanvasElement): Printer | null {
       ctx.clearRect(0, 0, W, H);
     },
 
-    ground(ox, oy, cell, r, colour, hole, fade = NONE) {
+    ground(ox, oy, cell, r, colour) {
       const key = `${colour}|${cell}|${r}|${dpr}`;
       if (key !== patternKey) {
         patternKey = key;
@@ -421,58 +458,16 @@ function flatPrinter(canvas: HTMLCanvasElement): Printer | null {
         tile = c.width = c.height = Math.max(1, Math.round(cell * dpr));
         const g = c.getContext("2d");
         if (g) {
+          const half = (r * SQUARE * tile) / cell;
           g.fillStyle = colour;
-          g.beginPath();
-          g.arc(tile / 2, tile / 2, (r * tile) / cell, 0, Math.PI * 2);
-          g.fill();
+          g.fillRect(tile / 2 - half, tile / 2 - half, half * 2, half * 2);
         }
         pattern = g && ctx.createPattern(c, "repeat");
       }
       if (!pattern) return;
       pattern.setTransform(new DOMMatrix().translateSelf(ox - cell / 2, oy - cell / 2).scaleSelf(cell / tile));
-      ctx.save();
-      if (hole) {
-        const cut = new Path2D();
-        cut.rect(0, 0, W, H);
-        const ph = hole.r / cell;
-        const j0 = Math.floor((hole.y - oy) / cell - ph);
-        const j1 = Math.ceil((hole.y - oy) / cell + ph);
-        for (let j = j0; j <= j1; j++) {
-          const dy = oy + j * cell - hole.y;
-          if (dy * dy >= hole.r * hole.r) continue;
-          const w = Math.sqrt(hole.r * hole.r - dy * dy) / cell;
-          const i0 = Math.floor((hole.x - ox) / cell - w) + 1;
-          const i1 = Math.ceil((hole.x - ox) / cell + w) - 1;
-          if (i1 >= i0) cut.rect(ox + (i0 - 0.5) * cell, oy + (j - 0.5) * cell, (i1 - i0 + 1) * cell, cell);
-        }
-        ctx.clip(cut, "evenodd");
-      }
-      const ja = Math.ceil((fade[0] * H - oy) / cell);
-      const jb = Math.floor((fade[1] * H - oy) / cell);
-      const band = new Path2D();
-      band.rect(0, oy + (ja - 0.5) * cell, W, (jb - ja + 1) * cell);
-      ctx.clip(band);
       ctx.fillStyle = pattern;
       ctx.fillRect(0, 0, W, H);
-      ctx.restore();
-
-      ctx.fillStyle = colour;
-      ctx.beginPath();
-      const i0 = Math.floor(-ox / cell);
-      const i1 = Math.ceil((W - ox) / cell);
-      for (let j = Math.floor(-oy / cell); j <= Math.ceil((H - oy) / cell); j++) {
-        if (j >= ja && j <= jb) continue;
-        const cy = oy + j * cell;
-        const e = r * vignette(cy / H, fade);
-        if (e < 0.05) continue;
-        for (let i = i0; i <= i1; i++) {
-          const cx = ox + i * cell;
-          if (hole && Math.hypot(cx - hole.x, cy - hole.y) < hole.r) continue;
-          ctx.moveTo(cx + e, cy);
-          ctx.arc(cx, cy, e, 0, Math.PI * 2);
-        }
-      }
-      ctx.fill();
     },
 
     dots(s, from, to, palette) {
@@ -483,59 +478,39 @@ function flatPrinter(canvas: HTMLCanvasElement): Printer | null {
         const base = slot * s.cap;
         ctx.fillStyle = palette[s.ink(slot)];
         ctx.beginPath();
-        for (let k = 0; k < n; k++) {
-          const x = s.x[base + k];
-          const y = s.y[base + k];
-          ctx.moveTo(x + r, y);
-          ctx.arc(x, y, r, 0, Math.PI * 2);
-        }
+        for (let k = 0; k < n; k++) square(ctx, s.x[base + k], s.y[base + k], r, s.turn[base + k]);
         ctx.fill();
       }
     },
 
-    photo(img, at, rev, cols, rows, cell) {
-      if (!mctx || !pctx) return;
-      if (!mask || mask.width !== cols || mask.height !== rows) {
-        mc.width = cols;
-        mc.height = rows;
-        mask = mctx.createImageData(cols, rows);
-      }
-      for (let k = 0; k < rev.length; k++) mask.data[k * 4 + 3] = rev[k] * 255;
-      mctx.putImageData(mask, 0, 0);
-      const pw = Math.max(1, Math.ceil(at.w * dpr));
-      const ph = Math.max(1, Math.ceil(at.h * dpr));
-      if (pc.width !== pw || pc.height !== ph) {
-        pc.width = pw;
-        pc.height = ph;
-      }
-      pctx.globalCompositeOperation = "source-over";
-      pctx.clearRect(0, 0, pw, ph);
-      pctx.drawImage(mc, -at.x * dpr, -at.y * dpr, cols * cell * dpr, rows * cell * dpr);
-      pctx.globalCompositeOperation = "source-in";
-      pctx.drawImage(img, 0, 0, pw, ph);
-      ctx.drawImage(pc, at.x, at.y, at.w, at.h);
-    },
+    async prime() {},
 
-    circle(x, y, r, colour, alpha, stroke = 0) {
-      ctx.globalAlpha = alpha;
+    photo(img, at, veil) {
+      if (!veil.n) return;
+      let sum = 0;
+      ctx.save();
       ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      if (stroke) {
-        ctx.strokeStyle = colour;
-        ctx.lineWidth = stroke;
-        ctx.stroke();
-      } else {
-        ctx.fillStyle = colour;
-        ctx.fill();
+      for (let k = 0; k < veil.n; k++) {
+        const o = k * STRIDE;
+        sum += veil.data[o + 3];
+        square(ctx, veil.data[o], veil.data[o + 1], veil.data[o + 2] / SQUARE, veil.data[o + 4]);
       }
+      ctx.clip();
+      ctx.globalAlpha = sum / veil.n;
+      ctx.drawImage(img, at.x, at.y, at.w, at.h);
+      ctx.restore();
+    },
+
+    mark(x, y, r, colour, alpha) {
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = colour;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
       ctx.globalAlpha = 1;
     },
 
     dispose() {},
   };
 }
-
-const NONE: Fade = [0, 1];
 
 export function vignette(y: number, [top, bottom]: Fade) {
   const t =

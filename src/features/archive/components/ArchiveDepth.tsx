@@ -121,8 +121,9 @@ export default function ArchiveDepth({
             data-ground
             style={{
               ...EDGE,
-              backgroundImage: `radial-gradient(var(${GROUND_INK}) ${GROUND_DOT.toFixed(2)}px, transparent 0)`,
-              backgroundSize: `${SCREEN}px ${SCREEN}px`,
+              backgroundColor: `var(${GROUND_INK})`,
+              maskImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${SCREEN}' height='${SCREEN}'%3E%3Crect x='${(SCREEN / 2 - GROUND_DOT).toFixed(2)}' y='${(SCREEN / 2 - GROUND_DOT).toFixed(2)}' width='${(GROUND_DOT * 2).toFixed(2)}' height='${(GROUND_DOT * 2).toFixed(2)}'/%3E%3C/svg%3E")`,
+              maskSize: `${SCREEN}px ${SCREEN}px`,
             }}
             className="pointer-events-none absolute inset-0 z-[1]"
           />
@@ -170,7 +171,7 @@ export default function ArchiveDepth({
                     aria-hidden="true"
                     data-chip
                     style={CHIP_AT}
-                    className={`pointer-events-none fixed top-0 left-0 z-30 hidden max-w-[18rem] rounded-[var(--radius-photo)] bg-canvas-inverse p-sm text-ink-inverse peer-hover:block peer-focus-visible:block ${META} [&>:first-child]:[text-box:trim-start_cap_alphabetic] [&>:last-child]:[text-box:trim-end_cap_alphabetic] [&>:last-child>*]:[text-box:trim-end_cap_alphabetic]`}
+                    className={`pointer-events-none fixed top-0 left-0 z-30 hidden max-w-[18rem] bg-canvas-inverse p-sm text-ink-inverse peer-hover:block peer-focus-visible:block ${META} [&>:first-child]:[text-box:trim-start_cap_alphabetic] [&>:last-child]:[text-box:trim-end_cap_alphabetic] [&>:last-child>*]:[text-box:trim-end_cap_alphabetic]`}
                   >
                     <span className="block text-body-sm leading-[1.3] text-ink-inverse">
                       {name.en}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type CSSProperties } from "react";
-import { DOT, GROUND, GROUND_INK, SCREEN } from "@/lib/halftone";
+import { DOT, GROUND, GROUND_INK, SCREEN, relief, turnAt } from "@/lib/halftone";
 import { useMedia } from "@/lib/media";
 import { printer } from "@/lib/printer";
 import { FIELD_STAGE } from "./fieldPointer";
@@ -42,6 +42,7 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
     let cap = 1 << 11;
     let bx = new Float32Array(SLOTS * cap);
     let by = new Float32Array(SLOTS * cap);
+    let turns = new Float32Array(SLOTS * cap);
     const held = new Int32Array(SLOTS);
     let mixes: string[] = [];
     let mixKey = "";
@@ -74,8 +75,6 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
       src.height = rows * 2;
       const sg = src.getContext("2d", { willReadFrequently: true });
       if (!sg) return null;
-      sg.fillStyle = paper;
-      sg.fillRect(0, 0, src.width, src.height);
       sg.drawImage(img, 0, 0, src.width, src.height);
       let data: Uint8ClampedArray;
       try {
@@ -84,17 +83,23 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
         return null;
       }
 
+      const paperTone = lum(rgb(paper));
       const tone = new Float32Array(cols * rows);
+      const solid = new Float32Array(cols * rows);
       for (let y = 0; y < rows; y++) {
         for (let x = 0; x < cols; x++) {
           let sum = 0;
+          let al = 0;
           for (let yy = 0; yy < 2; yy++) {
             for (let xx = 0; xx < 2; xx++) {
               const p = ((y * 2 + yy) * src.width + (x * 2 + xx)) * 4;
-              sum += 0.3 * data[p] + 0.59 * data[p + 1] + 0.11 * data[p + 2];
+              const k = data[p + 3] / 255;
+              sum += k * lum([data[p], data[p + 1], data[p + 2]]) + (1 - k) * paperTone;
+              al += k;
             }
           }
-          tone[y * cols + x] = sum / 4 / 255;
+          tone[y * cols + x] = sum / 4;
+          solid[y * cols + x] = al / 4;
         }
       }
 
@@ -107,6 +112,7 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
       for (let i = 0; i < tone.length; i++) {
         tone[i] = Math.min(1, Math.max(0, (tone[i] - lo) / (hi - lo)));
       }
+      relief(tone, cols, rows, solid);
 
       const out = { key, cols, rows, tone };
       measured.set(el, out);
@@ -224,6 +230,7 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
             if (n < cap) {
               bx[slot * cap + n] = px;
               by[slot * cap + n] = py;
+              turns[slot * cap + n] = turnAt(i * SCREEN, j * SCREEN);
               held[slot] = n + 1;
             } else grew = true;
           }
@@ -234,6 +241,7 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
         {
           x: bx,
           y: by,
+          turn: turns,
           held,
           cap,
           radius: (slot) => (max * ((slot % SPAN) + 1)) / STEPS,
@@ -248,6 +256,7 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
         cap *= 2;
         bx = new Float32Array(SLOTS * cap);
         by = new Float32Array(SLOTS * cap);
+        turns = new Float32Array(SLOTS * cap);
         pending = true;
       }
 
@@ -288,7 +297,7 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
     const ro = new ResizeObserver(kick);
 
     const paper = host.querySelector<HTMLElement>("[data-ground]");
-    if (paper) paper.style.backgroundImage = "none";
+    if (paper) paper.style.display = "none";
 
     io.observe(host);
     ro.observe(host);
@@ -322,6 +331,7 @@ export default function FieldScreen({ edge }: { edge?: CSSProperties }) {
 }
 
 const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
+const lum = (c: number[]) => (0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2]) / 255;
 const frame = () => Number(document.timeline.currentTime ?? -1);
 
 function mask(depth: number) {
