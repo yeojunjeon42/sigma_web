@@ -10,6 +10,7 @@ import PageTurn from "@/components/PageTurn";
 import "lenis/dist/lenis.css";
 import "./globals.css";
 import { SITE_URL } from "@/features/site/data/site";
+import { browserTheme } from "@/lib/browserTheme";
 
 const sans = localFont({
   src: [
@@ -98,10 +99,11 @@ const mono = Geist_Mono({
 });
 
 
-const SCREEN = `(()=>{const s=document.createElement("style"),r=()=>{s.textContent=":root{--screen:"+innerHeight+"px}"};let w=innerWidth;r();document.head.appendChild(s);addEventListener("resize",()=>{if(innerWidth!==w||!matchMedia("(pointer:coarse)").matches){w=innerWidth;r()}})})()`;
+const SCREEN = `(()=>{const s=document.createElement("style"),r=()=>{let h=innerHeight;if(matchMedia("(max-width:63.999rem),(pointer:coarse)").matches){const p=document.createElement("i");p.style.cssText="position:fixed;visibility:hidden;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)";document.documentElement.appendChild(p);const c=getComputedStyle(p);h-=parseFloat(c.paddingTop)+parseFloat(c.paddingBottom);p.remove()}s.textContent=":root{--screen:"+h+"px}"};let w=innerWidth;r();document.head.appendChild(s);addEventListener("resize",()=>{if(innerWidth!==w||!matchMedia("(pointer:coarse)").matches){w=innerWidth;r()}})})()`;
 
 export const viewport: Viewport = {
-  themeColor: "#dfe1dc",
+  viewportFit: "cover",
+  themeColor: browserTheme("#dfe1dc"),
 };
 
 export const metadata: Metadata = {
@@ -166,12 +168,13 @@ export default function RootLayout({
       <body id="top" className="max-md:has-[.nav-open]:overflow-hidden">
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:inline-flex focus:min-h-11 focus:items-center focus:rounded-xs focus:bg-ink focus:px-lg focus:text-ui focus:text-canvas"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-[calc(var(--safe-top)+1rem)] focus:left-[calc(var(--safe-left)+1rem)] focus:z-50 focus:inline-flex focus:min-h-11 focus:items-center focus:rounded-xs focus:bg-ink focus:px-lg focus:text-ui focus:text-canvas"
         >
           Skip to content
         </a>
         <JsonLd />
         {children}
+        <div data-overlay aria-hidden="true" className="safe-areas" />
         <ScrollRail />
         <SmoothScroll />
         <PageTurn />
