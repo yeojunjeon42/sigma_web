@@ -7,14 +7,14 @@ const SET = {
     name: "text-[clamp(1.75rem,1.1rem+1.3vw,2.5rem)] leading-[1.05] tracking-[-0.02em] text-balance text-ink",
     pairs: "mt-lg",
     body: "prose flow flow-panel mt-xl",
-    media: "mt-xl columns-2 gap-sm [&>li]:mb-sm [&>li]:break-inside-avoid",
+    media: "mt-xl columns-2 gap-gutter [&>li]:mb-gutter [&>li]:break-inside-avoid",
     sizes: "(min-width: 1024px) 15vw, 46vw",
   },
   page: {
     name: "text-display-md text-balance text-ink",
     pairs: "mt-lg",
     body: "prose flow mt-xl",
-    media: "mt-xl columns-2 gap-sm [&>li]:mb-sm [&>li]:break-inside-avoid",
+    media: "mt-xl columns-2 gap-gutter [&>li]:mb-gutter [&>li]:break-inside-avoid",
     sizes: "46vw",
   },
 } as const;

@@ -31,7 +31,7 @@ export default function ArchiveGrid({
           ) : null}
 
           <ul
-            className={`grid grid-cols-2 gap-sm md:grid-cols-3 ${
+            className={`grid grid-cols-2 gap-x-gutter gap-y-sm md:grid-cols-3 ${
               g.label ? "mt-lg" : ""
             }`}
           >
@@ -57,7 +57,9 @@ export default function ArchiveGrid({
                       </span>
                     ) : null}
                   </h3>
-                  <Caption b={b} />
+                  {b.award ? (
+                    <p className="mt-xxs truncate text-caption text-accent-deep max-md:hidden">{b.award}</p>
+                  ) : null}
                 </Link>
               </li>
             ))}
@@ -66,19 +68,4 @@ export default function ArchiveGrid({
       ))}
     </div>
   );
-}
-
-function Caption({ b }: { b: ReelBuild }) {
-  const size = b.team?.length ?? 0;
-  const line = b.award ? (
-    <span className="text-accent-deep">
-      {b.award}
-    </span>
-  ) : size > 1 ? (
-    `${size} members`
-  ) : b.tags[0] ? (
-    b.tags[0]
-  ) : null;
-  if (!line) return null;
-  return <p className="mt-xxs truncate text-caption text-ink-muted max-md:hidden">{line}</p>;
 }

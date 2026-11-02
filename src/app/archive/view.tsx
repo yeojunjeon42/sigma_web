@@ -217,7 +217,7 @@ export default async function ArchiveView({
       </Suspense>
 
       <div className="relative z-10 bg-canvas">
-        <main id="main">
+        <main id="main" className="u-square">
           <GridField className="bg-canvas pb-section max-lg:pb-[8rem]">
             <Container as="header" className={`page-opening ${entryOpen ? "page-cover--flush" : ""}`}>
               {entryOpen ? (
@@ -226,18 +226,18 @@ export default async function ArchiveView({
                 </h1>
               ) : null}
               <div
-                className={`flex flex-wrap items-baseline justify-between gap-x-xl border-b lg:gap-x-lg xl:gap-x-xl border-rule pt-xl pb-sm text-body md:pt-xxl lg:flex-nowrap xl:text-title ${
+                className={`flex flex-wrap items-baseline justify-between gap-x-xl border-b border-rule pt-xl pb-sm text-body md:pt-xxl lg:grid lg:grid-cols-12 lg:gap-x-gutter min-[90rem]:text-title ${
                   entryOpen ? "max-lg:hidden" : ""
                 }`}
               >
-                <h1 className="flex shrink-0 items-baseline gap-x-sm text-ink">
+                <h1 className="flex shrink-0 items-baseline gap-x-sm text-ink lg:col-span-3">
                   Archive
                   <span className="tabular-nums text-ink-muted">{span}</span>
                 </h1>
 
                 <nav
                   aria-label="Era"
-                  className={`max-lg:order-last max-lg:w-full max-lg:min-w-0 lg:flex-1 ${feedWalk ? "max-md:hidden" : ""}`}
+                  className={`max-lg:order-last max-lg:w-full max-lg:min-w-0 lg:col-start-4 lg:col-end-13 lg:row-start-1 ${feedWalk ? "max-lg:hidden" : ""}`}
                 >
                   <ul className="u-scroll-x flex items-baseline gap-x-md whitespace-nowrap lg:gap-x-sm xl:gap-x-md max-lg:overflow-x-auto max-lg:pr-10 max-lg:[mask-image:linear-gradient(to_right,#000_calc(100%-2.5rem),transparent)] lg:flex-wrap">
                     <li className="shrink-0">
@@ -286,7 +286,7 @@ export default async function ArchiveView({
                   </ul>
                 </nav>
 
-                <div className="flex shrink-0 items-baseline gap-x-xl lg:gap-x-lg xl:gap-x-xl">
+                <div className="flex shrink-0 items-baseline gap-x-xl lg:col-start-4 lg:col-end-13 lg:row-start-1 lg:gap-x-md lg:justify-self-end xl:gap-x-xl">
                   <nav
                     aria-label="Sort"
                     className={`flex items-baseline gap-x-md lg:gap-x-sm xl:gap-x-md max-lg:hidden ${view === "list" ? "lg:hidden" : ""}`}

@@ -52,7 +52,7 @@ export default function ArchiveEntry({
         </span>
       </nav>
 
-      <div className="mt-lg max-w-content">
+      <div className="mt-lg">
         <EntryBody build={build} variant="page" />
       </div>
 

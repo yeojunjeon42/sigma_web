@@ -108,7 +108,7 @@ export default function PlateArt({
     <div
       ref={ref}
       style={{ aspectRatio: `${plate.w} / ${plate.h}`, ...style }}
-      className={`relative overflow-hidden u-corner ${screen ? "bg-canvas" : "bg-surface-sunken"} ${
+      className={`relative overflow-hidden ${screen ? "bg-canvas" : "bg-surface-sunken"} ${
         tile.kind === "none" ? HATCH : ""
       } ${className}`}
     >

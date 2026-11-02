@@ -16,7 +16,7 @@ interface CatalogueGroup {
 }
 
 const META = "text-caption tracking-normal leading-[1.35]";
-const COLS = "md:grid md:grid-cols-12 md:gap-x-lg";
+const COLS = "md:grid md:grid-cols-12 md:gap-x-gutter";
 const LIFT = "u-trim";
 
 function Preview({ project, look }: { project: ArchiveProject; look: Look }) {
@@ -24,7 +24,7 @@ function Preview({ project, look }: { project: ArchiveProject; look: Look }) {
   return (
     <span
       aria-hidden="true"
-      className="u-corner pointer-events-none absolute top-1/2 right-0 z-30 hidden w-[12rem] -translate-y-1/2 overflow-hidden lg:group-hover/row:block lg:group-focus-visible/row:block"
+      className="pointer-events-none absolute top-1/2 right-0 z-30 hidden w-[12rem] -translate-y-1/2 overflow-hidden lg:group-hover/row:block lg:group-focus-visible/row:block"
     >
       {tile.kind === "photo" && tile.src ? (
         <ResolvePlate tile={tile} sizes="256px" />
@@ -67,16 +67,16 @@ function Row({
     <div
       className={`relative grid grid-cols-[1fr_auto] items-center gap-x-md gap-y-xs py-md ${COLS} md:text-title lg:py-xs`}
     >
-      <p className={`hidden text-body md:col-span-1 md:block ${LIFT}`}>
+      <p className={`hidden text-body md:col-span-1 md:block lg:col-span-3 ${LIFT}`}>
         {era ? (
           <span className="text-body tabular-nums text-ink">{era}</span>
         ) : null}
       </p>
-      <div className="pointer-events-none absolute inset-y-0 hidden md:left-[calc((100%-11*var(--spacing-lg))/12+var(--spacing-lg))] md:right-[calc(4*(100%-11*var(--spacing-lg))/12+4*var(--spacing-lg))] lg:block" aria-hidden="true">
+      <div className="pointer-events-none absolute inset-y-0 hidden md:left-[calc((100%-11*var(--gutter))/12+var(--gutter))] md:right-[calc(4*(100%-11*var(--gutter))/12+4*var(--gutter))] lg:block" aria-hidden="true">
         <Preview project={project} look={look} />
       </div>
       <h3
-        className={`u-trim text-title text-ink transition-[translate] duration-200 ease-out motion-reduce:transition-none md:col-span-7 lg:group-hover/row:translate-x-sm lg:group-focus-visible/row:translate-x-sm`}
+        className={`u-trim text-title text-ink transition-[translate] duration-200 ease-out motion-reduce:transition-none md:col-span-7 lg:col-span-5 lg:group-hover/row:translate-x-sm lg:group-focus-visible/row:translate-x-sm`}
       >
         {name.en}
         <span className="text-ink-muted">{"\u00a0↗"}</span>
@@ -90,7 +90,7 @@ function Row({
         ) : null}
       </h3>
       <p
-        className={`hidden flex-wrap gap-x-sm text-ink md:col-span-2 md:flex md:h-[1lh] md:overflow-hidden ${META} ${LIFT}`}
+        className={`hidden flex-wrap gap-x-sm text-ink md:col-span-2 md:flex md:h-[1lh] md:overflow-hidden lg:col-start-10 lg:row-start-1 ${META} ${LIFT}`}
       >
         {tags.map((t) => (
           <span key={t.ko} className="md:my-[calc((1lh-1cap)/2)] md:[text-box:trim-both_cap_alphabetic]">
@@ -98,7 +98,7 @@ function Row({
           </span>
         ))}
       </p>
-      <p className={`hidden tabular-nums text-ink md:col-span-1 md:block ${META} ${LIFT}`}>
+      <p className={`hidden tabular-nums text-ink md:col-span-1 md:block lg:col-start-9 lg:row-start-1 ${META} ${LIFT}`}>
         {team ?? "—"}
       </p>
       <p
@@ -170,14 +170,14 @@ export default function ArchiveCatalogue({
     <section className="relative">
       <Container>
         <div className={`hidden border-b border-rule-strong pb-sm text-ink-muted ${COLS} ${META}`}>
-          <span className="md:col-span-1">
+          <span className="md:col-span-1 lg:col-span-3">
             Era
           </span>
-          {head("name", "Name", "md:col-span-7")}
-          <span className="md:col-span-2">
+          {head("name", "Name", "md:col-span-7 lg:col-span-5")}
+          <span className="md:col-span-2 lg:col-start-10 lg:row-start-1">
             Tags
           </span>
-          {head("team", "Team", "md:col-span-1")}
+          {head("team", "Team", "md:col-span-1 lg:col-start-9 lg:row-start-1")}
           {head("year", "Year", "md:col-span-1 md:text-right")}
         </div>
         <ul>
