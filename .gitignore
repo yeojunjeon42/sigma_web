@@ -17,6 +17,7 @@ npm-debug.log*
 
 # AI agent instruction files (the repo is public)
 CLAUDE.md
+CLAUDE-reference.md
 AGENTS.md
 .claude/
 
