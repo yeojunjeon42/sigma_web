@@ -118,6 +118,31 @@ export default function FieldPrint() {
         }
       }
 
+      // Calm wires, seams and tiny highlights before screening, without blurring the colour image.
+      // Filter premultiplied tones so transparent paper never bleeds white into an object's edge.
+      const soft = new Float32Array(lum.length);
+      const alpha = new Float32Array(solid.length);
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          let light = 0;
+          let ink = 0;
+          for (let yy = -1; yy <= 1; yy++) {
+            for (let xx = -1; xx <= 1; xx++) {
+              const k = clamp(y + yy, 0, rows - 1) * cols + clamp(x + xx, 0, cols - 1);
+              const weight = (xx === 0 ? 2 : 1) * (yy === 0 ? 2 : 1);
+              const a = solid[k] * weight;
+              light += lum[k] * a;
+              ink += a;
+            }
+          }
+          const k = y * cols + x;
+          soft[k] = ink ? light / ink : 1;
+          alpha[k] = ink / 16;
+        }
+      }
+      lum.set(soft);
+      solid.set(alpha);
+
       // Levels come from the object alone, and even its whitest part keeps a little ink.
       const sorted = Float32Array.from(lum.filter((_, i) => solid[i] > 0.45)).sort();
       if (!sorted.length) return null;
@@ -128,7 +153,7 @@ export default function FieldPrint() {
       for (let i = 0; i < light.length; i++) {
         if (solid[i] > 0.05) light[i] = 1 - (0.1 + 0.9 * (1 - clamp((lum[i] - lo) / (hi - lo), 0, 1)) ** 1.2);
       }
-      relief(light, cols, rows, solid);
+      relief(light, cols, rows, solid, 0.3);
       return { cols, rows, dark: light.map((v) => 1 - v), solid };
     };
 
@@ -170,9 +195,10 @@ export default function FieldPrint() {
           const c = v0 * tc + u1;
           const d = v1 * tc + u0;
           const e = v1 * tc + u1;
-          if (mix(solid, a, c, d, e, uf, vf) <= 0.45) continue;
+          const edge = smooth((mix(solid, a, c, d, e, uf, vf) - 0.2) / 0.6);
+          if (edge <= 0) continue;
           const tone = mix(dark, a, c, d, e, uf, vf);
-          size[k] = Math.sqrt(tone) * smooth((tone - 0.02) / 0.1);
+          size[k] = Math.sqrt(tone) * smooth((tone - 0.02) / 0.1) * edge;
           band[k] = Math.min(BANDS - 1, Math.round(tone * (BANDS - 1)));
         }
       }
