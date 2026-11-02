@@ -62,7 +62,7 @@ export default function ContactPage() {
               id="write"
               className="mt-xxl scroll-mt-[calc(var(--masthead)+var(--spacing-lg))] mb-section rounded-[2.5rem] bg-surface-sunken [corner-shape:squircle] lg:mt-xxxl"
             >
-              <div className="u-gutter mx-auto grid w-full max-w-wide gap-y-xxl py-xxl lg:grid-cols-12 lg:gap-x-lg lg:py-xxxl">
+              <div className="u-gutter mx-auto grid w-full max-w-wide gap-y-xxl py-xxl lg:grid-cols-12 lg:gap-x-gutter lg:py-xxxl">
                 <dl className="flex flex-col gap-y-lg lg:col-span-4">
                   <Fact label="Email">
                     <CopyEmail />

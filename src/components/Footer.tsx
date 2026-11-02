@@ -42,7 +42,7 @@ export default function Footer() {
     <div className="overflow-clip bg-canvas">
       <footer data-band className="u-card-rise overflow-hidden rounded-t-[2.5rem] bg-band text-ink [corner-shape:squircle]">
         <div className="u-gutter mx-auto w-full max-w-wide pt-xxl lg:pt-section">
-          <div className="grid grid-cols-2 gap-x-md gap-y-xxxl text-body lg:grid-cols-12 lg:gap-x-lg lg:gap-y-xl">
+          <div className="grid grid-cols-2 gap-x-gutter gap-y-xxxl text-body lg:grid-cols-12 lg:gap-y-xl">
             {/* Match the tagline/email line boxes to the adjacent labels/links. */}
             <div className="hidden lg:col-span-4 lg:block">
               <p className="mb-sm text-caption">
@@ -106,7 +106,7 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="mt-xxxl flex flex-col gap-y-xxs text-body text-ink-muted lg:mt-section lg:grid lg:grid-cols-12 lg:gap-x-lg lg:text-caption">
+          <div className="mt-xxxl flex flex-col gap-y-xxs text-body text-ink-muted lg:mt-section lg:grid lg:grid-cols-12 lg:gap-x-gutter lg:text-caption">
             <p className="lg:col-span-5">
               © {year} SIGMA INTELLIGENCE · {`EST. ${FOUNDED}`}
             </p>
@@ -120,15 +120,20 @@ export default function Footer() {
                 </Fragment>
               ))}
             </p>
-            <p className="lg:col-span-3 lg:col-start-10 lg:justify-self-end">
-              Made by{" "}
-              <a href="https://github.com/yeojunjeon42" target="_blank" rel="noopener noreferrer" className={LINK}>
-                Yeojun Jeon
-              </a>
-              {" & "}
-              <a href="https://xlaude2040.com/" target="_blank" rel="noopener noreferrer" className={LINK}>
-                Jin Myung Lee
-              </a>
+            <p className="lg:col-span-3 lg:col-start-10 lg:justify-self-end lg:text-right">
+              <span className="whitespace-nowrap">
+                Powered by{" "}
+                <a href="https://github.com/yeojunjeon42" target="_blank" rel="noopener noreferrer" className={LINK}>
+                  Yeojun Jeon
+                </a>
+                ,
+              </span>{" "}
+              <span className="whitespace-nowrap">
+                Designed by{" "}
+                <a href="https://xlaude2040.com/" target="_blank" rel="noopener noreferrer" className={LINK}>
+                  Jin Myung Lee
+                </a>
+              </span>
             </p>
           </div>
         </div>
