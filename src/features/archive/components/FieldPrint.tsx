@@ -3,27 +3,19 @@
 import { useEffect, useRef } from "react";
 import { SQUARE, relief, turnAt } from "@/lib/halftone";
 import { useMedia } from "@/lib/media";
-import { STRIDE, flatPrinter, printer, type Box, type Printer, type Slots, type Veil } from "@/lib/printer";
+import { flatPrinter, type Printer, type Slots } from "@/lib/printer";
 import { FIELD_CELL } from "../data/field";
 
 const STEPS = 32;
-// How far a dot can swell as the wave's front passes it.
-const SWELL = 8;
-const SPAN = STEPS + SWELL;
 const BANDS = 10;
-const SLOTS = SPAN * BANDS;
+const SLOTS = STEPS * BANDS;
 // At full tone a mark covers this share of its cell's width.
 const FULL = 0.94;
 // The ink's lightest tone; the darker two are the accent tokens.
 const LIGHT = "#ea5a5f";
-// The wave into the colour object: ms in, ms out, and its front's width in px.
-const IN = 620;
-const OUT = 420;
-const FRONT = 90;
 const NEAR = "700px 0px";
-const NO_LENS = { x: 0, y: 0, r: 0, power: 0 };
 
-// A plate's marks, worked out once: paints only read them, so a wave frame touches no layout or pixels.
+// A plate's marks, worked out once. Hover fades the cached print and DOM image through CSS.
 type Cells = {
   // The lattice over the picture, as its first index, its size, and its offset from the field.
   i0: number;
@@ -36,9 +28,6 @@ type Cells = {
   turn: Float32Array;
   size: Float32Array;
   band: Uint8Array;
-  // The object's box on the canvas, and the picture's rect covering it.
-  box: Box;
-  at: Box;
 };
 type Plate = {
   link: HTMLElement;
@@ -48,11 +37,6 @@ type Plate = {
   pr: Printer;
   cells: Cells | null;
   printed: boolean;
-  pressed: boolean;
-  w: number;
-  goal: number;
-  x: number;
-  y: number;
 };
 
 const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
@@ -63,7 +47,7 @@ const smooth = (v: number) => {
 const cssVar = (n: string, f: string) =>
   getComputedStyle(document.documentElement).getPropertyValue(n).trim() || f;
 
-// Resting plates print once. Waves share one viewport-sized printer, never a GL context per plate.
+// Plates print once; the browser composites their hover fade without a per-frame drawing loop.
 export default function FieldPrint() {
   const ref = useRef<HTMLSpanElement>(null);
   // No canvases are filled for the phone tree.
@@ -72,7 +56,6 @@ export default function FieldPrint() {
   useEffect(() => {
     const host = ref.current?.closest<HTMLElement>("[data-field]");
     if (!host || !wide) return;
-    const still = window.matchMedia("(prefers-reduced-motion: reduce)");
     // A half-pixel lattice beats against the pixels of a 1x screen.
     const CELL = (window.devicePixelRatio || 1) >= 2 ? FIELD_CELL : Math.ceil(FIELD_CELL);
     const RADIUS = ((CELL / 2) * FULL) / SQUARE;
@@ -84,10 +67,9 @@ export default function FieldPrint() {
       turn: new Float32Array(SLOTS << 11),
       held: new Int32Array(SLOTS),
       cap: 1 << 11,
-      radius: (slot) => (RADIUS * ((slot % SPAN) + 1)) / STEPS,
-      ink: (slot) => Math.floor(slot / SPAN),
+      radius: (slot) => (RADIUS * ((slot % STEPS) + 1)) / STEPS,
+      ink: (slot) => Math.floor(slot / STEPS),
     };
-    const veil: Veil = { data: new Float32Array(1 << 16), n: 0 };
 
     const plates = new Map<HTMLElement, Plate>();
     for (const link of host.querySelectorAll<HTMLElement>("[data-plate-link]")) {
@@ -96,25 +78,7 @@ export default function FieldPrint() {
       const canvas = link.querySelector("canvas");
       const pr = canvas && flatPrinter(canvas);
       if (!(art instanceof HTMLElement) || !img || !canvas || !pr) continue;
-      plates.set(link, { link, art, img, canvas, pr, cells: null, printed: false, pressed: false, w: 0, goal: 0, x: 0, y: 0 });
-    }
-
-    const overlay = document.createElement("canvas");
-    overlay.setAttribute("aria-hidden", "true");
-    overlay.setAttribute("data-offgrid", "");
-    overlay.className = "pointer-events-none absolute left-0";
-    host.append(overlay);
-    const shared = printer(overlay, () => {
-      for (const p of plates.values()) if (p.w > 0 && p.w < 1) live.add(p);
-      if (live.size && !raf) {
-        last = performance.now();
-        raf = requestAnimationFrame(frame);
-      }
-    });
-    if (!shared) {
-      overlay.remove();
-      for (const p of plates.values()) p.pr.dispose();
-      return;
+      plates.set(link, { link, art, img, canvas, pr, cells: null, printed: false });
     }
 
     const measure = (img: HTMLImageElement, w: number, h: number) => {
@@ -212,65 +176,43 @@ export default function FieldPrint() {
           band[k] = Math.min(BANDS - 1, Math.round(tone * (BANDS - 1)));
         }
       }
-      p.cells = { i0, j0, cols, rows, ox, oy, turn, size, band, box, at: cover(p.img, box) };
+      p.cells = { i0, j0, cols, rows, ox, oy, turn, size, band };
       return p.cells;
     };
 
-    const show = (p: Plate) => {
-      p.art.style.opacity = p.w >= 1 || p.pressed ? "1" : "";
-      p.canvas.style.visibility = p.w > 0 || p.pressed ? "hidden" : "";
-    };
-    const paint = (p: Plate, moving = false, dx = 0, dy = 0): boolean => {
-      const { img, canvas } = p;
-      const pr = moving ? shared : p.pr;
+    const paint = (p: Plate): boolean => {
+      const { img, canvas, pr } = p;
       const W = canvas.clientWidth;
       const H = canvas.clientHeight;
-      if (!W || !H) return false;
-      if (!img.complete || !img.naturalWidth) return false;
-
-      if (!moving) {
-        pr.size(W, H, Math.min(window.devicePixelRatio || 1, 2));
-        pr.clear();
-      }
+      if (!W || !H || !img.complete || !img.naturalWidth) return false;
+      pr.size(W, H, Math.min(window.devicePixelRatio || 1, 2));
+      pr.clear();
 
       const cells = p.cells ?? bake(p);
       if (!cells) return false;
-      const { i0, j0, cols, rows, ox, oy, turn, size, band, box, at } = cells;
-      const on = moving && p.w > 0;
-      const reach = Math.hypot(Math.max(p.x - box.x, box.x + box.w - p.x), Math.max(p.y - box.y, box.y + box.h - p.y));
-      const front = p.w * (reach + FRONT);
-
+      const { i0, j0, cols, rows, ox, oy, turn, size, band } = cells;
       slots.held.fill(0);
-      veil.n = 0;
-      if (veil.data.length < cols * rows * STRIDE) veil.data = new Float32Array(cols * rows * STRIDE);
       for (let j = 0, k = 0; j < rows; j++) {
         const py = (j + j0 + 0.5) * CELL - oy;
         for (let i = 0; i < cols; i++, k++) {
           const px = (i + i0 + 0.5) * CELL - ox;
-          let rest = size[k];
-          if (on) {
-            const f = smooth((front - Math.sqrt((px - p.x) ** 2 + (py - p.y) ** 2)) / FRONT);
-            if (f > 0.01) lay(veil, px + dx, py + dy, (CELL / 2) * 1.06 * f, turn[k]);
-            rest *= (1 - f * f) * (1 + 0.4 * Math.sin(Math.PI * f));
-          }
-          const step = Math.min(SPAN - 1, Math.round(rest * STEPS) - 1);
+          const step = Math.min(STEPS - 1, Math.round(size[k] * STEPS) - 1);
           if (step < 0) continue;
-          const slot = band[k] * SPAN + step;
+          const slot = band[k] * STEPS + step;
           const n = slots.held[slot];
           if (n >= slots.cap) {
             grow();
-            return paint(p, moving, dx, dy);
+            return paint(p);
           }
           const o = slot * slots.cap + n;
-          slots.x[o] = px + dx;
-          slots.y[o] = py + dy;
+          slots.x[o] = px;
+          slots.y[o] = py;
           slots.turn[o] = turn[k];
           slots.held[slot] = n + 1;
         }
       }
 
       pr.dots(slots, 0, SLOTS, ink);
-      if (veil.n) pr.photo(img, { ...at, x: at.x + dx, y: at.y + dy }, veil, NO_LENS);
       return true;
     };
 
@@ -315,99 +257,40 @@ export default function FieldPrint() {
       });
     };
 
-    const live = new Set<Plate>();
-    let raf = 0;
-    let last = 0;
-    const frame = (now: number) => {
-      raf = 0;
-      const dt = Math.min(50, Math.max(1, now - last));
-      last = now;
-      // The overlay follows the visible slice of the field, including while a wave scrolls away.
-      const r = host.getBoundingClientRect();
-      const height = Math.min(window.innerHeight, r.height);
-      const top = clamp(-r.top, 0, r.height - height);
-      overlay.style.top = `${top}px`;
-      overlay.style.width = `${r.width}px`;
-      overlay.style.height = `${height}px`;
-      shared.size(r.width, height, Math.min(window.devicePixelRatio || 1, 2));
-      shared.clear();
-      for (const p of live) {
-        p.w = p.goal > p.w ? Math.min(1, p.w + dt / IN) : Math.max(0, p.w - dt / OUT);
-        show(p);
-        if (!p.pressed && p.w > 0 && p.w < 1) {
-          const cells = p.cells ?? bake(p);
-          if (cells) paint(p, true, cells.ox, cells.oy - top);
-        }
-        if (p.w === p.goal) live.delete(p);
-      }
-      if (live.size) raf = requestAnimationFrame(frame);
-    };
-    const go = (p: Plate, goal: number) => {
-      p.goal = goal;
-      if (still.matches) {
-        p.w = goal;
-        show(p);
-        return;
-      }
-      live.add(p);
-      if (!raf) {
-        last = performance.now();
-        raf = requestAnimationFrame(frame);
-      }
-    };
-    const enter = (p: Plate, cx: number, cy: number) => {
-      // A wave under way keeps its origin.
-      if (p.w <= 0.001) {
-        const r = p.canvas.getBoundingClientRect();
-        p.x = clamp(cx - r.left, 0, r.width);
-        p.y = clamp(cy - r.top, 0, r.height);
-      }
-      go(p, 1);
-    };
     const plateOf = (t: EventTarget | null) => {
       const link = (t as HTMLElement | null)?.closest?.<HTMLElement>("[data-plate-link]");
       return link ? plates.get(link) : undefined;
     };
 
-    let lit: Plate | undefined;
-    const onOver = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse") return;
+    const release = (p: Plate) => {
+      p.art.style.transition = p.art.style.opacity = "";
+      p.canvas.style.transition = p.canvas.style.opacity = "";
+    };
+    const press = (p: Plate) => {
+      // The reel transition snapshots the link. Show its colour image immediately on activation.
+      p.art.style.transition = p.canvas.style.transition = "none";
+      p.art.style.opacity = "1";
+      p.canvas.style.opacity = "0";
+    };
+    const onPress = (e: PointerEvent) => {
       const p = plateOf(e.target);
-      if (!p || p === lit) return;
-      if (lit) leave(lit);
-      lit = p;
-      enter(p, e.clientX, e.clientY);
+      if (p && e.button === 0) press(p);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      const p = plateOf(e.target);
+      if (p && e.key === "Enter") press(p);
     };
     const onOut = (e: PointerEvent) => {
-      if (!lit || plateOf(e.relatedTarget) === lit) return;
-      leave(lit);
-      lit = undefined;
-    };
-    const leave = (p: Plate) => {
-      p.pressed = false;
-      go(p, 0);
-    };
-    let pressing = false;
-    const onPress = (e: PointerEvent) => {
-      pressing = true;
-      // The view transition takes its picture of the link: show the object in it, whatever the wave's done.
       const p = plateOf(e.target);
-      if (!p) return;
-      p.pressed = true;
-      show(p);
-    };
-    const onKey = () => {
-      pressing = false;
-    };
-    const onFocus = (e: FocusEvent) => {
-      const p = plateOf(e.target);
-      if (!p || pressing) return;
-      const r = p.canvas.getBoundingClientRect();
-      enter(p, r.left + r.width / 2, r.top + r.height / 2);
+      if (p && plateOf(e.relatedTarget) !== p) release(p);
     };
     const onBlur = (e: FocusEvent) => {
       const p = plateOf(e.target);
-      if (p && p !== lit) leave(p);
+      if (p) release(p);
+    };
+    const onCancel = (e: PointerEvent) => {
+      const p = plateOf(e.target);
+      if (p) release(p);
     };
     const onLoad = (e: Event) => {
       const p = (e.target as HTMLElement).tagName === "IMG" ? plateOf(e.target) : undefined;
@@ -429,10 +312,8 @@ export default function FieldPrint() {
             // Far away a plate gives its memory back, and prints again from its kept tones.
             near.delete(p);
             queue.delete(p);
-            if (!live.has(p)) {
-              p.canvas.width = p.canvas.height = 0;
-              p.printed = false;
-            }
+            p.canvas.width = p.canvas.height = 0;
+            p.printed = false;
           }
         }
       },
@@ -451,34 +332,28 @@ export default function FieldPrint() {
 
     for (const p of plates.values()) io.observe(p.link);
     ro.observe(host);
-    host.addEventListener("pointerover", onOver, { passive: true });
     host.addEventListener("pointerout", onOut, { passive: true });
     host.addEventListener("pointerdown", onPress, { passive: true, capture: true });
     window.addEventListener("keydown", onKey, true);
-    host.addEventListener("focusin", onFocus);
     host.addEventListener("focusout", onBlur);
+    host.addEventListener("pointercancel", onCancel);
     host.addEventListener("load", onLoad, true);
 
     return () => {
-      if (raf) cancelAnimationFrame(raf);
       if (pumping) cancelAnimationFrame(pumping);
       near.clear();
       io.disconnect();
       ro.disconnect();
-      host.removeEventListener("pointerover", onOver);
       host.removeEventListener("pointerout", onOut);
       host.removeEventListener("pointerdown", onPress, true);
       window.removeEventListener("keydown", onKey, true);
-      host.removeEventListener("focusin", onFocus);
       host.removeEventListener("focusout", onBlur);
+      host.removeEventListener("pointercancel", onCancel);
       host.removeEventListener("load", onLoad, true);
       for (const p of plates.values()) {
         p.pr.dispose();
-        p.art.style.opacity = "";
-        p.canvas.style.visibility = "";
+        release(p);
       }
-      shared.dispose();
-      overlay.remove();
     };
   }, [wide]);
 
@@ -495,15 +370,6 @@ function cover(img: HTMLImageElement, box: { x: number; y: number; w: number; h:
   const w = img.naturalWidth * s;
   const h = img.naturalHeight * s;
   return { x: box.x + (box.w - w) / 2, y: box.y + (box.h - h) / 2, w, h };
-}
-
-function lay(v: Veil, x: number, y: number, r: number, turn: number) {
-  const o = v.n++ * STRIDE;
-  v.data[o] = x;
-  v.data[o + 1] = y;
-  v.data[o + 2] = r;
-  v.data[o + 3] = 1;
-  v.data[o + 4] = turn;
 }
 
 function ramp(stops: string[], n: number) {
