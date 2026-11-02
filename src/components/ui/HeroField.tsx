@@ -79,7 +79,7 @@ export default function HeroField({
       )}
       <HeroPlate builds={builds} />
 
-      <div className="u-sheet relative z-10 flex min-h-[var(--screen)] flex-col pt-[var(--masthead)] desk:grid desk:min-h-[max(var(--screen),38rem)] desk:grid-rows-[auto_repeat(4,minmax(min-content,1fr))_auto] desk:pt-[calc(var(--masthead)+1.5rem)] desk:pb-lg lg:pb-16">
+      <div className="u-sheet relative z-10 flex min-h-[calc(var(--screen)+var(--below))] flex-col pt-[var(--masthead)] [--below:8rem] desk:grid desk:min-h-[max(var(--screen),38rem)] desk:grid-rows-[auto_repeat(4,minmax(min-content,1fr))_auto] desk:pt-[calc(var(--masthead)+1.5rem)] desk:pb-lg lg:pb-16">
         <div className="flex items-start justify-between pt-md desk:contents">
           <span
             aria-hidden="true"
@@ -92,47 +92,46 @@ export default function HeroField({
           </Stmt>
         </div>
 
-        <div
-          data-plate
-          className="pointer-events-none absolute inset-x-[var(--gutter)] top-1/2 h-[max(13rem,calc(var(--screen)-14rem))] -translate-y-1/2 desk:inset-auto desk:top-[17%] desk:right-[26%] desk:bottom-[20%] desk:left-[22%] desk:h-auto desk:translate-y-0"
-        >
-          {builds[0] ? (
-            <noscript>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={builds[0].src} alt="" className="h-full w-full object-contain" />
-            </noscript>
-          ) : null}
-        </div>
-
-        <div className="mt-md grid min-h-[13rem] flex-1 [contain:size] grid-cols-2 grid-rows-5 gap-x-gutter desk:mt-0 desk:contents">
+        <div className="mt-lg grid min-h-[27rem] flex-1 [contain:size] grid-cols-6 grid-rows-[auto_auto_minmax(0,1fr)_auto_auto] gap-x-gutter desk:mt-0 desk:contents">
+          <div
+            data-plate
+            className="pointer-events-none col-span-6 col-start-1 row-start-3 my-sm min-h-0 desk:absolute desk:col-auto desk:row-auto desk:top-[17%] desk:right-[26%] desk:bottom-[20%] desk:left-[22%] desk:my-0"
+          >
+            {builds[0] ? (
+              <noscript>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={builds[0].src} alt="" className="h-full w-full object-contain" />
+              </noscript>
+            ) : null}
+          </div>
           <Stmt
-            className="col-start-1 row-start-1 self-start desk:col-span-4 desk:col-start-6 desk:row-start-1 desk:[text-box:trim-both_cap_alphabetic]"
+            className="col-span-3 col-start-4 row-start-1 self-start desk:col-span-4 desk:col-start-6 desk:row-start-1 desk:[text-box:trim-both_cap_alphabetic]"
           >
             Seoul National University
           </Stmt>
           <Stmt
-            className="col-start-2 row-start-2 self-center justify-self-end text-right desk:col-span-3 desk:col-start-10 desk:row-start-2 desk:self-end desk:justify-self-start desk:text-left"
+            className="hidden desk:col-span-3 desk:col-start-10 desk:row-start-2 desk:block desk:self-end"
           >
             Room 215‑2, Mabang
           </Stmt>
           <Stmt
-            className="col-start-1 row-start-3 self-center desk:col-span-3 desk:col-start-1 desk:row-start-3 desk:self-end"
+            className="col-span-4 col-start-2 row-start-2 mt-lg self-start desk:col-span-3 desk:col-start-1 desk:row-start-3 desk:mt-0 desk:self-end"
           >
             Undergraduate research community
           </Stmt>
           <Stmt
-            className="col-start-2 row-start-4 self-center justify-self-end text-right desk:col-span-3 desk:col-start-4 desk:row-start-4 desk:self-end desk:justify-self-start desk:text-left"
+            className="col-span-3 col-start-1 row-start-4 self-start desk:col-span-3 desk:col-start-4 desk:row-start-4 desk:self-end"
           >
             Media and kinetic art
           </Stmt>
           <Stmt
-            className="col-start-1 row-start-5 self-end desk:col-span-3 desk:col-start-10 desk:row-start-4 desk:self-end"
+            className="col-span-3 col-start-4 row-start-5 mt-lg self-start desk:col-span-3 desk:col-start-10 desk:row-start-4 desk:mt-0 desk:self-end"
           >
             Korea’s first university robotics club
           </Stmt>
         </div>
 
-        <div data-sponsors className="mt-xl grid grid-cols-6 gap-x-gutter desk:col-span-5 desk:col-start-1 desk:row-start-6 desk:mt-0 desk:grid-cols-subgrid desk:self-end">
+        <div data-sponsors className="order-last grid h-[var(--below)] grid-cols-6 content-center gap-x-gutter desk:order-none desk:h-auto desk:content-normal desk:col-span-5 desk:col-start-1 desk:row-start-6 desk:mt-0 desk:grid-cols-subgrid desk:self-end">
           <Logos label="Sponsors" items={sponsors} className="col-span-3" />
           <Logos label="Co-founder of" items={cofounded} className="col-span-3 desk:col-span-2" />
         </div>

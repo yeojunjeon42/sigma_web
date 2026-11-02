@@ -12,7 +12,7 @@ export type HeroBuild = {
   year: number | null;
 };
 
-const PHONE_SCREEN = 5;
+const PHONE_SCREEN = 3;
 const SIZES = 40;
 const BANDS = 10;
 const SWELL = 1.6;
@@ -149,6 +149,8 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     let a = -1;
     let b = -1;
     let want: { i: number; at?: { x: number; y: number }; quick?: boolean } | null = null;
+    let queued: { at?: { x: number; y: number } } | null = null;
+    let timer = 0;
     let t = 1;
     let t0 = 0;
     let origin = { x: 0, y: 0 };
@@ -389,7 +391,18 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       }
     };
 
+    // Every plate gets a full CYCLE from the moment it starts, however it was asked for.
+    const schedule = () => {
+      window.clearTimeout(timer);
+      if (still || frozen) return;
+      timer = window.setTimeout(() => {
+        if (seen && !ptr.in && !hold && !document.hidden) next();
+        else schedule();
+      }, CYCLE);
+    };
+
     const start = (i: number, at?: { x: number; y: number }, quick = false) => {
+      schedule();
       a = b;
       b = i;
       want = null;
@@ -425,6 +438,14 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       want = { i, at };
       void prepare(i);
       kick();
+    };
+
+    // A press during a wave waits for it to end instead of being lost.
+    const press = (at?: { x: number; y: number }) => {
+      if (t < 1 || want) {
+        queued = { at };
+        kick();
+      } else next(at);
     };
 
     const draw = () => {
@@ -588,6 +609,10 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       if (t < 1) {
         t = Math.min(1, (now - t0) / wave);
         if (t > 0.5) show(all[b]);
+      } else if (queued && !want) {
+        const { at } = queued;
+        queued = null;
+        next(at);
       } else if (b >= 0 && !want) void prepare(after(curated));
 
       if (!still) {
@@ -614,7 +639,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
 
       draw();
 
-      if (seen && !document.hidden && (t < 1 || want || (fine && !still && !frozen))) kick();
+      if (seen && !document.hidden && (t < 1 || want || queued || (fine && !still && !frozen))) kick();
     };
 
     function kick() {
@@ -655,7 +680,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       if (pressed || (e.target as HTMLElement).closest("a,button")) return;
       lens.boost = Math.min(PRESS, lens.boost + TAP);
       const r = host.getBoundingClientRect();
-      next({ x: e.clientX - r.left, y: e.clientY - r.top });
+      press({ x: e.clientX - r.left, y: e.clientY - r.top });
     };
 
     const asked = (e: Event) => {
@@ -664,6 +689,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       hold = true;
       let i = all.findIndex((x) => x.id === d.id);
       if (i < 0) i = all.push(d) - 1;
+      queued = null;
       if (i === b && !want) return;
       want = { i, at: { x: box.x + box.w / 2, y: box.y + box.h }, quick: true };
       void prepare(i);
@@ -691,7 +717,6 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     const turned = () => setLayout((n) => n + 1);
     md.addEventListener("change", turned);
 
-    let timer = 0;
     if (!frozen) {
       if (fine) {
         host.addEventListener("pointermove", at);
@@ -703,12 +728,8 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       host.addEventListener("click", click);
       window.addEventListener(PLATE_SHOW, asked);
       window.addEventListener(PLATE_RELEASE, released);
-      advance = () => next();
+      advance = () => press();
       if (fine && !still) host.style.cursor = "none";
-      if (!still)
-        timer = window.setInterval(() => {
-          if (seen && !ptr.in && !hold && !document.hidden) next();
-        }, CYCLE);
     }
 
     return () => {
@@ -717,7 +738,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       md.removeEventListener("change", turned);
       for (const img of imgs.values()) img.onload = img.onerror = null;
       if (raf) cancelAnimationFrame(raf);
-      window.clearInterval(timer);
+      window.clearTimeout(timer);
       ro.disconnect();
       io.disconnect();
       host.removeEventListener("pointermove", at);
