@@ -12,6 +12,8 @@ import PlateHandoff from "./PlateHandoff";
 
 const MARGIN: CSSProperties = { scrollMarginTop: "calc(var(--masthead) + var(--spacing-lg))" };
 const SQUARE: CSSProperties = { aspectRatio: "1 / 1" };
+const FADE =
+  "transition-opacity duration-[420ms] ease-in-out group-hover/plate:duration-[620ms] group-focus-visible/plate:duration-[620ms] motion-reduce:transition-none";
 // Centres a cut-out with room for the name at the plate's foot. No tile is drawn, so it can run larger than the phone's.
 const OBJECT: Tile["box"] = [0.05, 0.05, 0.9, 0.9];
 const BIG =
@@ -128,9 +130,12 @@ export default function ArchiveField({
                         eager={eager && n === 0 && i < 3}
                         plain
                         style={SQUARE}
-                        className="w-full opacity-0"
+                        className={`w-full opacity-0 group-hover/plate:opacity-100 group-focus-visible/plate:opacity-100 ${FADE}`}
                       />
-                      <canvas aria-hidden="true" className="pointer-events-none absolute inset-0 size-full" />
+                      <canvas
+                        aria-hidden="true"
+                        className={`pointer-events-none absolute inset-0 size-full opacity-100 group-hover/plate:opacity-0 group-focus-visible/plate:opacity-0 ${FADE}`}
+                      />
                       <h3 className="u-trim absolute inset-x-0 bottom-0 z-10 font-[family-name:var(--f-display)] font-semibold [font-stretch:125%] text-body-sm text-ink transition-colors group-hover/plate:text-ink-muted">
                         {splitTitle(p.title).en}
                       </h3>
