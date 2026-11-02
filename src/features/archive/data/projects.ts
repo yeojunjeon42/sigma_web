@@ -87,7 +87,7 @@ export const ARCHIVE: ArchiveProject[] = [
   },
   {
     id: "interactive-architecture",
-    title: "Interactive Architecture — Garden of Light",
+    title: "Interactive Architecture",
     year: 2013,
     era: "2007-2014",
     photosOnly: true,
@@ -399,7 +399,7 @@ export const ARCHIVE: ArchiveProject[] = [
   },
   {
     id: "pet-robot",
-    title: "Pet Feeding – Cleaning Autonomous Robot",
+    title: "Pet Feeding",
     year: 2020,
     era: "2020",
   },

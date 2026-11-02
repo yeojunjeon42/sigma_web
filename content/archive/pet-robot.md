@@ -1,5 +1,5 @@
 ---
-title: Pet Feeding – Cleaning Autonomous Robot
+title: Pet Feeding
 titleKo: 애완동물에게 먹이를 주는 청소 로봇
 year: 2020
 date: 2020
