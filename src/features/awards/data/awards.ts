@@ -1,7 +1,7 @@
 import type { Award } from "../types";
 
 export const AWARDS: Award[] = [
-  { id: "2026-1", year: 2026, contest: { en: "Roboticus Robot Hackathon (1st)", ko: "제1회 로보티쿠스 로봇 해커톤" }, result: { en: "Grand Prize", ko: "최우수상" } },
+  { id: "2026-1", year: 2026, contest: { en: "Roboticus Robot Hackathon (1st)", ko: "제1회 로보틱어스 로봇 해커톤" }, result: { en: "Grand Prize", ko: "최우수상" } },
 
   { id: "2025-1", year: 2025, contest: { en: "SNU Creative Design Festival (14th)", ko: "서울대 제14회 창의설계축전" }, result: { en: "Silver", ko: "은상" } },
   { id: "2025-2", year: 2025, contest: { en: "SNU Creative Design Festival (14th)", ko: "서울대 제14회 창의설계축전" }, result: { en: "Bronze", ko: "동상" } },
