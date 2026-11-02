@@ -14,7 +14,7 @@ const NAV = [
   { label: "Contact", href: "/contact" },
 ];
 
-const INVERT = "text-white before:bg-white/[0.14]";
+const INVERT = "text-white";
 
 // Desktop scroll thresholds (px).
 const STEP = 6;
@@ -230,8 +230,9 @@ const follow = (bar: HTMLElement, Scroll: Timeline) => {
   };
 };
 
-const BOX =
-  "relative isolate before:absolute before:inset-x-[4px] lg:before:inset-x-[-2px] before:top-1/2 before:-z-10 before:h-[30px] before:-translate-y-1/2 before:rounded-[2px] before:opacity-0 before:transition-opacity before:duration-250 before:ease-[ease] before:content-[''] hover:before:opacity-100 focus-visible:before:opacity-100 aria-[current=page]:before:opacity-100 motion-reduce:before:transition-none";
+// A line exactly as wide as the label: the label sits on the grid and nothing reaches past it.
+const LINE =
+  "relative before:absolute before:inset-x-xs before:top-[calc(50%+0.75em)] before:h-px before:origin-right before:scale-x-0 before:bg-current before:transition-transform before:duration-350 before:ease-[cubic-bezier(0.22,1,0.36,1)] before:content-[''] hover:before:origin-left hover:before:scale-x-100 focus-visible:before:origin-left focus-visible:before:scale-x-100 aria-[current=page]:before:scale-x-100 motion-reduce:before:transition-none";
 
 const TONE = {
   overlay: {
@@ -373,10 +374,10 @@ export default function Navbar({
         }`}
       >
 
-        <div className="u-gutter relative mx-auto flex h-14 max-w-wide items-center justify-between gap-lg md:h-16">
+        <div className="u-sheet relative mx-auto h-14 max-w-wide items-center max-md:flex max-md:justify-between md:h-16">
           <Link
             href="/"
-            className={`-mx-sm -my-sm flex shrink-0 items-center gap-sm px-sm py-sm ${open ? t.mark : "text-white"}`}
+            className={`-mx-sm -my-sm flex shrink-0 items-center gap-sm justify-self-start px-sm py-sm md:col-span-3 ${open ? t.mark : "text-white"}`}
           >
             <Image
               src="/logo-mark.svg"
@@ -390,15 +391,17 @@ export default function Navbar({
             <span className="sr-only">Sigma Intelligence</span>
           </Link>
 
-          <nav aria-label="Primary" className="hidden md:block">
-            <ul className="flex items-center gap-md lg:gap-lg">
+          <nav
+            aria-label="Primary"
+            className="hidden md:col-span-9 md:col-start-4 md:block lg:col-span-7 lg:col-start-6"
+          >
+            <ul className="flex items-center gap-md xl:gap-lg">
               {NAV.map((item) => (
-                // Inset the last label so its hover background ends at the gutter.
-                <li key={item.href} className="md:last:pr-[4px] lg:last:pr-[calc(var(--spacing-xs)+2px)]">
+                <li key={item.href} className="last:ml-auto">
                   <Link
                     href={item.href}
                     aria-current={isCurrent(item.href) ? "page" : undefined}
-                    className={`${BOX} -mx-xs flex items-center px-xs py-md font-[family-name:var(--f-display)] text-ui font-semibold uppercase tracking-[0.02em] [font-stretch:125%] transition-colors duration-250 motion-reduce:transition-none ${INVERT}`}
+                    className={`${LINE} -mx-xs flex items-center px-xs py-md font-[family-name:var(--f-display)] text-ui font-semibold uppercase tracking-[0.02em] [font-stretch:125%] transition-colors duration-250 motion-reduce:transition-none ${INVERT}`}
                   >
                     {item.label}
                   </Link>
