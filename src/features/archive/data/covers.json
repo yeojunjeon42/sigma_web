@@ -21,11 +21,11 @@
     "slot": "land",
     "why": "the glove on the tablet, not the slide",
     "feature": "2020's clearest picture of a build in use",
-    "lift": "02.jpg"
+    "lift": "02.jpeg"
   },
   "artisma": {
     "slot": "std",
-    "lift": "01.jpg"
+    "lift": "01-2.jpeg"
   },
   "atlas": {
     "slot": "port",
@@ -35,10 +35,10 @@
     "lift": "01.jpg"
   },
   "atlas-2016": {
-    "file": "02.jpg",
+    "file": "02.jpeg",
     "slot": "std",
     "why": "the close three-quarter render, not the small one in a white field",
-    "lift": "01.jpg"
+    "lift": "01-3.jpeg"
   },
   "ballboy": {
     "file": "03.jpg",
@@ -58,10 +58,10 @@
     "lift": "02.jpg"
   },
   "braille-block": {
-    "file": "03.jpg",
+    "file": "03-2.jpeg",
     "slot": "wide",
     "why": "two blocks side by side",
-    "lift": "03.jpg"
+    "lift": "03-2.jpeg"
   },
   "cobra": {
     "file": "02.jpg",
@@ -106,13 +106,13 @@
   },
   "hexapod": {
     "slot": "std",
-    "lift": "01.jpg"
+    "lift": "01.jpeg"
   },
   "hexapod-2": {
     "slot": "big",
     "why": "the studio hexapod, a hero",
     "feature": "2016's studio photograph",
-    "lift": "01.jpg"
+    "lift": "01.jpeg"
   },
   "iden": {
     "slot": "std",
@@ -150,28 +150,27 @@
     "lift": "02.jpg"
   },
   "mapangi": {
-    "file": "07.jpg",
+    "file": "07.jpeg",
     "slot": "tall",
     "why": "the wand, upright",
     "lift": "02.jpg"
   },
   "medicine-management": {
-    "file": "03.jpg",
+    "file": "03.jpeg",
     "slot": "sq",
     "why": "the box, uncaptioned",
-    "focus": "80% 50%",
-    "lift": "03.jpg"
+    "lift": "03.jpeg"
   },
   "microplastic-robot": {
-    "file": "04.jpg",
+    "file": "04.jpeg",
     "slot": "sq",
     "why": "the robot, not the water",
-    "lift": "04.jpg"
+    "lift": "04.jpeg"
   },
   "neptunus": {
     "slot": "wide",
     "why": "a long low render",
-    "lift": "01.jpg"
+    "lift": "01.jpeg"
   },
   "open-noise-control": {
     "slot": "tall",
@@ -179,7 +178,7 @@
   },
   "pet-robot": {
     "slot": "std",
-    "lift": "02.jpg"
+    "lift": "02.jpeg"
   },
   "poclainger": {
     "slot": "std",
@@ -192,9 +191,9 @@
     "lift": "01.jpg"
   },
   "pygmalion": {
-    "file": "02.jpg",
+    "file": "02.jpeg",
     "slot": "tall",
-    "lift": "02.jpg"
+    "lift": "02.jpeg"
   },
   "quri": {
     "file": "02.jpg",
@@ -259,13 +258,13 @@
     "slot": "port",
     "focus": "50% 35%",
     "why": "the robot and its screen, tall",
-    "lift": "06.jpg"
+    "lift": "06.jpeg"
   },
   "swarm-tracking": {
     "file": "07.jpg",
     "slot": "std",
     "why": "the maze with the robots in it",
-    "lift": "02.jpg"
+    "lift": "02.jpeg"
   },
   "syncope-device": {
     "file": "03.jpg",
@@ -289,9 +288,8 @@
   },
   "tic-mask": {
     "slot": "strip",
-    "focus": "50% 32%",
     "why": "the sensor and the earpieces; only a 3:1 strip crops off both the black bar above and the caption below",
-    "lift": "01.jpg"
+    "lift": "01.jpeg"
   },
   "turtlebot": {
     "slot": "sq",
@@ -312,7 +310,7 @@
   },
   "untitled": {
     "slot": "tall",
-    "lift": "01.jpg"
+    "lift": "01.jpeg"
   },
   "useless-but-cute": {
     "slot": "land",
@@ -341,6 +339,6 @@
   "walknine": {
     "slot": "sq",
     "why": "square, so its row isn't four of the same",
-    "lift": "01.jpg"
+    "lift": "01.jpeg"
   }
 }
