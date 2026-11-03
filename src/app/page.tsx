@@ -16,8 +16,8 @@ import { ALUMNI_TOTAL, COHORT_COUNT } from "@/features/alumni/data/cohorts";
 import { CURRICULUM, EQUIPMENT } from "@/features/site/data/about";
 
 const FOUNDED = 1984;
-const FIGURE = "block text-[clamp(8rem,44vw,22rem)] leading-[0.8] tracking-[-0.055em] tabular-nums md:text-[clamp(8rem,24vw,22rem)]";
-const LIST = "text-title text-ink [&>li+li]:mt-xxs";
+const FIGURE = "block font-[family-name:var(--f-display)] font-bold [font-stretch:125%] text-[calc((100vw-2*var(--gutter))/2.85)] leading-[0.8] tracking-[-0.02em] tabular-nums md:text-[min(21vw,19rem)]";
+const LIST = "text-title text-ink max-[359px]:text-lead [&>li+li]:mt-xxs";
 
 const DESCRIPTION =
   "SIGMA INTELLIGENCE is the robotics club of Seoul National University — Korea's first university robotics club, founded 1984. 서울대학교 로봇동아리 시그마 인텔리전스.";
@@ -87,13 +87,13 @@ export default async function Home() {
               <span className="text-body text-ink">
                 Founded
               </span>
-              <span className={`${FIGURE} mt-sm`}><CountUp from={new Date().getFullYear()} to={FOUNDED} /></span>
+              <span className={`${FIGURE} mt-sm -ml-[0.108em]`}><CountUp from={new Date().getFullYear()} to={FOUNDED} /></span>
             </p>
-            <p className="u-drift [--drift-from:32px] [--drift-to:-32px] text-right md:col-span-4">
+            <p data-offgrid className="u-drift [--drift-from:32px] [--drift-to:-32px] text-right md:col-span-4">
               <span className="text-body text-ink">
                 Years
               </span>
-              <span className={`${FIGURE} mt-sm`}><CountUp to={years} /></span>
+              <span className={`${FIGURE} mt-sm -mr-[0.029em]`}><CountUp to={years} /></span>
             </p>
           </Container>
         </section>
@@ -123,7 +123,7 @@ export default async function Home() {
                         href={c.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="u-swipe relative before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 lg:before:hidden"
+                        className="u-swipe relative before:absolute before:-inset-x-1 before:top-1/2 before:h-11 before:-translate-y-1/2 lg:before:hidden"
                       >
                         {c.en}
                       </a>

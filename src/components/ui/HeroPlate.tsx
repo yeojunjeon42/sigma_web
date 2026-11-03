@@ -120,6 +120,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     let cols = 0;
     let rows = 0;
     let box: Box = { x: 0, y: 0, w: 0, h: 0 };
+    let plateScale = 1;
     let quiet = new Float32Array(0);
 
     const SLOTS = SIZES * BANDS;
@@ -198,7 +199,11 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     };
 
     const place = (img: HTMLImageElement): Box => {
-      const s = Math.min(box.w / img.naturalWidth, box.h / img.naturalHeight);
+      const fit = Math.min(box.w / img.naturalWidth, box.h / img.naturalHeight);
+      // Mobile plates may extend into their transparent margins, keeping the object prominent.
+      const s = plateScale > 1
+        ? Math.min(fit * plateScale, W * 1.02 / img.naturalWidth)
+        : fit;
       const w = img.naturalWidth * s;
       const h = img.naturalHeight * s;
       return { x: box.x + (box.w - w) / 2, y: box.y + (box.h - h) / 2, w, h };
@@ -309,6 +314,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       H = hr.height;
       if (!W || !H) return;
       box = { x: pb.left - hr.left, y: pb.top - hr.top, w: pb.width, h: pb.height };
+      plateScale = parseFloat(getComputedStyle(plate).getPropertyValue("--plate-scale")) || 1;
       pr.size(W, H, Math.min(window.devicePixelRatio || 1, 3));
       cols = Math.ceil(W / cell);
       rows = Math.ceil(H / cell);
