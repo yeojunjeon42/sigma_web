@@ -44,7 +44,7 @@ function Section({ post, className = "" }: { post: BlogItem; className?: string 
 
 function Grid({ posts }: { posts: BlogItem[] }) {
   return (
-    <ul className="grid gap-x-gutter gap-y-xxl md:grid-cols-2 lg:grid-cols-3 lg:gap-y-section">
+    <ul className="grid gap-x-gutter gap-y-xxl sm:grid-cols-2 lg:grid-cols-3 lg:gap-y-section">
       {posts.map((post, i) => (
         <li key={post.slug}>
           <Link href={`/blog/${post.slug}`} className="group/post flex flex-col">
@@ -100,7 +100,7 @@ function List({ posts }: { posts: BlogItem[] }) {
               className="u-scroll-fade relative border-b border-rule transition-colors lg:has-[a:hover]:z-20 lg:has-[a:hover]:border-ink lg:has-[a:focus-visible]:z-20"
             >
               <Link href={`/blog/${post.slug}`} className="group/row block">
-                <div className={`relative grid grid-cols-[1fr_auto] items-center gap-x-md gap-y-xs py-md ${COLS} md:text-title lg:py-xs`}>
+                <div className={`relative grid min-h-11 grid-cols-[1fr_auto] items-center gap-x-md gap-y-xs py-[13px] ${COLS} md:text-title lg:min-h-0 lg:py-xs`}>
                   <p className="u-trim hidden text-body tabular-nums text-ink md:col-span-1 md:block lg:col-span-3">{first ? post.year : null}</p>
                   <div
                     aria-hidden="true"
@@ -169,13 +169,13 @@ export default function BlogIndex({ posts, topics, span }: { posts: BlogItem[]; 
 
   return (
     <>
-      <div className="u-scroll-in flex flex-wrap items-baseline justify-between gap-x-xl border-b border-rule pt-xl pb-sm text-body md:pt-xxl lg:grid lg:grid-cols-12 lg:gap-x-gutter min-[90rem]:text-title">
-        <h1 className="flex shrink-0 items-baseline gap-x-sm text-ink lg:col-span-3">
+      <div className="u-scroll-in flex flex-nowrap items-baseline justify-between gap-x-md whitespace-nowrap border-b border-rule pt-xl pb-sm text-body md:pt-xxl md:grid md:grid-cols-12 md:gap-x-gutter min-[90rem]:text-title">
+        <h1 className="flex shrink-0 items-baseline gap-x-sm text-ink md:col-span-3 md:row-start-1">
           Blog
           <span className="tabular-nums text-ink-muted">{span}</span>
         </h1>
-        <nav aria-label="Sections" className="max-md:hidden max-lg:order-last max-lg:w-full max-lg:min-w-0 lg:col-start-4 lg:col-end-13 lg:row-start-1">
-          <ul className="u-scroll-x flex items-baseline gap-x-md whitespace-nowrap max-lg:overflow-x-auto max-lg:pr-10 max-lg:[mask-image:linear-gradient(to_right,#000_calc(100%-2.5rem),transparent)] lg:flex-wrap lg:gap-x-sm xl:gap-x-md">
+        <nav aria-label="Sections" className="u-scroll-x -my-3 min-w-0 overflow-x-auto py-3 max-md:hidden md:col-start-4 md:col-end-11 md:row-start-1">
+          <ul className="flex items-baseline gap-x-md lg:gap-x-sm xl:gap-x-md">
             <li className="shrink-0">{pick(null)}</li>
             {topics.map((t) => (
               <li key={t.key} className="shrink-0">
@@ -184,7 +184,7 @@ export default function BlogIndex({ posts, topics, span }: { posts: BlogItem[]; 
             ))}
           </ul>
         </nav>
-        <nav aria-label="View" className="flex shrink-0 items-baseline gap-x-md lg:col-start-4 lg:col-end-13 lg:row-start-1 lg:gap-x-sm lg:justify-self-end xl:gap-x-md">
+        <nav aria-label="View" className="flex shrink-0 items-baseline gap-x-md md:col-start-11 md:col-end-13 md:row-start-1 md:justify-self-end lg:gap-x-sm xl:gap-x-md">
           {views.map((v) => (
             <button
               key={v.key}
