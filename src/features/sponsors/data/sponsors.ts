@@ -13,7 +13,7 @@ const ALL: Sponsor[] = [
   {
     id: "hyundai-mobis",
     name: "Hyundai Mobis",
-    logo: { src: "/sponsors/hyundai-mobis.png", width: 640, height: 221, cap: 0.579, foot: 0.041 },
+    logo: { src: "/sponsors/hyundai-mobis.svg", width: 720, height: 248, cap: 0.581, foot: 0.036 },
     website: "https://www.mobis.com/",
   },
   {
@@ -32,7 +32,7 @@ export const COFOUNDED: Sponsor[] = [
   {
     id: "roboticus",
     name: "Roboticus",
-    logo: { src: "/sponsors/roboticus.svg", width: 775, height: 897, cap: 0.669, foot: 0.014 },
+    logo: { src: "/sponsors/roboticus-wordmark.svg", width: 1932, height: 371, cap: 0.784, foot: 0.011 },
     website: "https://robotic-us.com/",
   },
 ];

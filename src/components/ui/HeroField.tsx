@@ -22,33 +22,50 @@ function Stmt({ className, children }: { className: string; children: React.Reac
   return <p className={`${STMT} ${className}`}>{children}</p>;
 }
 
-// Logos are set like words of a statement: the letters of each are one capital high (1cap of the
-// statement's size) on one baseline, so what rises above (HYUNDAI, the U's dots) rises like an ascender.
-function Logos({ label, items, className = "" }: { label: string; items: Sponsor[]; className?: string }) {
-  return (
-    <div className={className}>
-      <p className={`${META} u-lift leading-none text-ink`}>{label}</p>
-      <ul className={`${STMT_SIZE} mt-md flex h-[1.75cap] items-end gap-x-lg`}>
+// Half the track must outrun the widest column it rolls in, and the row translates by half.
+const ROLL_COPIES = [0, 1, 2, 3, 4, 5];
+
+// The logos roll in one muted line. Each label travels with its logos, so a sponsor
+// never reads as a co-founder. Copies are hidden from readers and keyboards.
+function LogoRoll({ groups }: { groups: { label: string; items: Sponsor[] }[] }) {
+  const set = (copy: boolean) =>
+    groups.map(({ label, items }) => (
+      <li key={label} className="flex shrink-0 items-baseline gap-x-xl pr-xl">
+        {/* Centred on the logos' letters: a smaller word on their baseline reads as sitting low. */}
+        <span className={`${META} whitespace-nowrap text-ink-muted [translate:0_calc((1cap-var(--logo-cap))/2)]`}>{label}</span>
         {items.map((s) => (
-          <li key={s.id}>
-            <a
-              href={s.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="relative block transition-opacity before:absolute before:top-1/2 before:left-1/2 before:h-11 before:w-[max(100%,2.75rem)] before:-translate-1/2 before:content-[''] hover:opacity-60 lg:before:hidden"
-            >
-              <Image
-                src={s.logo.src}
-                alt={s.name}
-                width={s.logo.width}
-                height={s.logo.height}
-                style={{ "--cap": s.logo.cap, "--foot": s.logo.foot } as React.CSSProperties}
-                className="-mb-[calc(1cap/var(--cap)*var(--foot))] h-[calc(1cap/var(--cap))] w-auto max-w-none"
-              />
-            </a>
-          </li>
+          <a
+            key={s.id}
+            href={s.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={copy ? undefined : s.name}
+            tabIndex={copy ? -1 : undefined}
+            className="relative block shrink-0 opacity-55 grayscale transition-[opacity,filter] duration-200 before:absolute before:top-1/2 before:left-1/2 before:h-11 before:w-[max(100%,2.75rem)] before:-translate-1/2 before:content-[''] hover:opacity-100 hover:grayscale-0 active:opacity-100 active:grayscale-0 motion-reduce:transition-none"
+          >
+            <Image
+              src={s.logo.src}
+              alt=""
+              width={s.logo.width}
+              height={s.logo.height}
+              style={{ height: `calc(var(--logo-cap) / ${s.logo.cap})`, marginBottom: `calc(var(--logo-cap) / ${s.logo.cap} * ${-s.logo.foot})` }}
+              className="block w-auto max-w-none"
+            />
+          </a>
         ))}
-      </ul>
+      </li>
+    ));
+
+  return (
+    // From the desk, the bottom margin sets the logos on the baseline of INTELLIGENCE beside them.
+    <div data-offgrid className="-mx-[var(--gutter)] overflow-hidden py-2 [--logo-cap:1rem] motion-reduce:overflow-x-auto desk:mx-0 desk:-mb-[9.73px] desk:[--logo-cap:clamp(1rem,1.2vw,1.5rem)] desk:[mask-image:linear-gradient(90deg,transparent,#000_7%,#000_93%,transparent)]">
+      <div className="logo-roll flex w-max">
+        {ROLL_COPIES.map((n) => (
+          <ul key={n} aria-hidden={n > 0 || undefined} className={`flex shrink-0 items-baseline ${n > 0 ? "motion-reduce:hidden" : ""}`}>
+            {set(n > 0)}
+          </ul>
+        ))}
+      </div>
     </div>
   );
 }
@@ -79,7 +96,7 @@ export default function HeroField({
       )}
       <HeroPlate builds={builds} />
 
-      <div className="u-sheet relative z-10 flex min-h-[calc(var(--screen)+var(--below))] flex-col pt-[var(--masthead)] [--below:8rem] desk:grid desk:min-h-[max(var(--screen),38rem)] desk:grid-rows-[auto_repeat(4,minmax(min-content,1fr))_auto] desk:pt-[calc(var(--masthead)+1.5rem)] desk:pb-lg lg:pb-16">
+      <div className="u-sheet relative z-10 flex min-h-[calc(var(--screen)+var(--below))] flex-col pt-[var(--masthead)] [--below:5.5rem] desk:grid desk:min-h-[max(var(--screen),38rem)] desk:grid-rows-[auto_repeat(4,minmax(min-content,1fr))_auto] desk:pt-[calc(var(--masthead)+1.5rem)] desk:pb-lg lg:pb-16">
         <div className="flex items-start justify-between pt-md desk:contents">
           <span
             aria-hidden="true"
@@ -95,7 +112,7 @@ export default function HeroField({
         <div className="mt-lg grid min-h-[27rem] flex-1 [contain:size] grid-cols-6 grid-rows-[auto_auto_minmax(0,1fr)_auto_auto] gap-x-gutter desk:mt-0 desk:contents">
           <div
             data-plate
-            className="pointer-events-none col-span-6 col-start-1 row-start-3 my-sm min-h-0 desk:absolute desk:col-auto desk:row-auto desk:top-[17%] desk:right-[26%] desk:bottom-[20%] desk:left-[22%] desk:my-0"
+            className="pointer-events-none col-span-6 col-start-1 row-start-3 -mx-lg -my-xl min-h-0 [--plate-scale:1.3] desk:absolute desk:col-auto desk:row-auto desk:top-[17%] desk:right-[26%] desk:bottom-[20%] desk:left-[22%] desk:mx-0 desk:my-0 desk:[--plate-scale:1]"
           >
             {builds[0] ? (
               <noscript>
@@ -131,14 +148,13 @@ export default function HeroField({
           </Stmt>
         </div>
 
-        <div data-sponsors className="order-last grid h-[var(--below)] grid-cols-6 content-center gap-x-gutter desk:order-none desk:h-auto desk:content-normal desk:col-span-5 desk:col-start-1 desk:row-start-6 desk:mt-0 desk:grid-cols-subgrid desk:self-end">
-          <Logos label="Sponsors" items={sponsors} className="col-span-3" />
-          <Logos label="Co-founder of" items={cofounded} className="col-span-3 desk:col-span-2" />
+        <div data-sponsors className="order-last flex h-[var(--below)] flex-col justify-center desk:order-none desk:col-span-5 desk:col-start-1 desk:row-start-6 desk:mt-0 desk:block desk:h-auto desk:min-w-0 desk:self-end">
+          <LogoRoll groups={[{ label: "Sponsors", items: sponsors }, { label: "Co-founder of", items: cofounded }]} />
         </div>
 
         <HeroCaption
           builds={builds}
-          className={`${META} u-lift mt-xl flex items-center justify-between gap-x-lg desk:col-span-7 desk:mt-0 desk:mb-xl desk:col-start-6 desk:row-start-5 desk:self-end`}
+          className={`${META} u-lift mt-md flex items-center justify-between gap-x-lg desk:col-span-7 desk:mt-0 desk:mb-xl desk:col-start-6 desk:row-start-5 desk:self-end`}
         />
 
         <span
