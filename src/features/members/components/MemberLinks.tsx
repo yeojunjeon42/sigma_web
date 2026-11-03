@@ -63,11 +63,13 @@ export default function MemberLinks({
   name,
   links,
   dense = false,
+  variant = "icons",
   className = "-ml-xs",
 }: {
   name: string;
   links?: Links;
   dense?: boolean;
+  variant?: "icons" | "text";
   className?: string;
 }) {
   const present = ICONS.filter((i) => links?.[i.key]);
@@ -83,11 +85,15 @@ export default function MemberLinks({
             rel="noopener noreferrer"
             aria-label={`${name} on ${i.label}`}
             title={i.label}
-            className={`relative grid h-11 w-7 place-items-center text-ink-muted transition-colors before:absolute before:top-1/2 before:left-1/2 before:size-11 before:-translate-1/2 before:content-[''] hover:text-ink focus-visible:text-ink lg:h-8 lg:before:hidden ${dense ? "lg:w-6" : "lg:w-8"}`}
+            className={variant === "text"
+              ? `inline-flex min-h-11 items-center justify-center px-xs text-body text-ink-muted transition-[color,opacity] duration-200 hover:text-ink active:opacity-70 active:duration-0 focus-visible:underline focus-visible:underline-offset-4 motion-reduce:transition-none ${i.key === "site" ? "min-w-11" : ""}`
+              : `relative grid h-11 w-7 place-items-center text-ink-muted transition-colors before:absolute before:top-1/2 before:left-1/2 before:size-11 before:-translate-1/2 before:content-[''] hover:text-ink focus-visible:text-ink lg:h-8 lg:before:hidden ${dense ? "lg:w-6" : "lg:w-8"}`}
           >
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4">
-              {i.path}
-            </svg>
+            {variant === "text" && i.key !== "site" ? i.label : (
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4">
+                {i.path}
+              </svg>
+            )}
           </a>
         </li>
       ))}
