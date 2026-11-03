@@ -1,5 +1,7 @@
 "use client";
 
+import { pageY, pageScroller, scrollPage, onPageScroll } from "@/lib/pageScroll";
+
 import { useEffect, useRef } from "react";
 
 export function ScrollRail() {
@@ -20,16 +22,16 @@ export function ScrollRail() {
     const paint = () => {
       frame = 0;
       const viewport = window.innerHeight;
-      const page = document.documentElement.scrollHeight;
+      const page = pageScroller().scrollHeight;
       scrollRoom = Math.max(0, page - viewport);
       thumbHeight = scrollRoom ? Math.max(32, (viewport * viewport) / page) : viewport;
       travel = Math.max(0, viewport - thumbHeight);
-      const top = scrollRoom ? (window.scrollY / scrollRoom) * travel : 0;
+      const top = scrollRoom ? (pageY() / scrollRoom) * travel : 0;
       rail.dataset.on = scrollRoom > 1 ? "1" : "";
       thumb.style.height = `${thumbHeight}px`;
       thumb.style.transform = `translate3d(0,${top}px,0)`;
       rail.setAttribute("aria-valuemax", String(Math.round(scrollRoom)));
-      rail.setAttribute("aria-valuenow", String(Math.round(window.scrollY)));
+      rail.setAttribute("aria-valuenow", String(Math.round(pageY())));
     };
     const kick = () => {
       if (!frame) frame = requestAnimationFrame(paint);
@@ -40,9 +42,9 @@ export function ScrollRail() {
       e.preventDefault();
       if (e.target !== thumb) {
         const y = Math.max(0, Math.min(travel, e.clientY - thumbHeight / 2));
-        window.scrollTo({ top: travel ? (y / travel) * scrollRoom : 0, behavior: "instant" });
+        scrollPage({ top: travel ? (y / travel) * scrollRoom : 0, behavior: "instant" });
       }
-      drag = { id: e.pointerId, y: e.clientY, scroll: window.scrollY };
+      drag = { id: e.pointerId, y: e.clientY, scroll: pageY() };
       rail.dataset.dragging = "1";
       rail.setPointerCapture(e.pointerId);
     };
@@ -50,7 +52,7 @@ export function ScrollRail() {
       if (!drag || drag.id !== e.pointerId) return;
       e.preventDefault();
       const scale = travel ? scrollRoom / travel : 0;
-      window.scrollTo({ top: drag.scroll + (e.clientY - drag.y) * scale, behavior: "instant" });
+      scrollPage({ top: drag.scroll + (e.clientY - drag.y) * scale, behavior: "instant" });
     };
     const up = (e: PointerEvent) => {
       if (!drag || drag.id !== e.pointerId) return;
@@ -61,7 +63,7 @@ export function ScrollRail() {
 
     const ro = new ResizeObserver(kick);
     ro.observe(document.documentElement);
-    window.addEventListener("scroll", kick, { passive: true });
+    const stopPageScroll = onPageScroll(kick);
     window.addEventListener("resize", kick, { passive: true });
     rail.addEventListener("pointerdown", down);
     rail.addEventListener("pointermove", move, { passive: false });
@@ -72,7 +74,7 @@ export function ScrollRail() {
     return () => {
       if (frame) cancelAnimationFrame(frame);
       ro.disconnect();
-      window.removeEventListener("scroll", kick);
+      stopPageScroll();
       window.removeEventListener("resize", kick);
       rail.removeEventListener("pointerdown", down);
       rail.removeEventListener("pointermove", move);

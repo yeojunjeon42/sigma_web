@@ -1,5 +1,7 @@
 "use client";
 
+import { pageY, onPageScroll } from "@/lib/pageScroll";
+
 import { square, turnAt } from "@/lib/halftone";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
@@ -84,7 +86,7 @@ export default function RecordLines({
     let cx = 0;
     let cy = 0;
     let cur: HTMLElement | null = null;
-    let lastScroll = window.scrollY;
+    let lastScroll = pageY();
     const desk = window.matchMedia("(min-width: 64rem) and (pointer: fine)");
     let onPlate = false;
     const pk = { x: 0, y: 0, tx: 0, ty: 0, id: "", grow: 1 };
@@ -334,8 +336,8 @@ export default function RecordLines({
       v = clamp(-e.deltaX * 20, -THROW_MAX, THROW_MAX);
     };
     const scroll = () => {
-      const dy = window.scrollY - lastScroll;
-      lastScroll = window.scrollY;
+      const dy = pageY() - lastScroll;
+      lastScroll = pageY();
       const k = clamp(window.innerWidth / 1200, 0.4, 1);
       if (seen && !press && desk.matches) v = clamp(v - dy * PUSH * k, -PUSH_MAX * k, PUSH_MAX * k);
     };
@@ -377,7 +379,7 @@ export default function RecordLines({
     host.addEventListener("wheel", wheel, { passive: false });
     host.addEventListener("focusin", tab);
     host.addEventListener("focusout", blur);
-    window.addEventListener("scroll", scroll, { passive: true });
+    const stopPageScroll = onPageScroll(scroll);
 
     return () => {
       if (raf) cancelAnimationFrame(raf);
@@ -396,7 +398,7 @@ export default function RecordLines({
       host.removeEventListener("wheel", wheel);
       host.removeEventListener("focusin", tab);
       host.removeEventListener("focusout", blur);
-      window.removeEventListener("scroll", scroll);
+      stopPageScroll();
       if (onPlate) window.dispatchEvent(new Event(PLATE_RELEASE));
       delete host.dataset.live;
     };
@@ -433,11 +435,11 @@ export default function RecordLines({
     <ul aria-hidden={copy > 0 || undefined} className="inline">
       {results.map((r) => (
         <li key={r.key} className="mr-[2.4em] inline">
-          <span className="mr-[0.9em] text-[12px] text-ink tabular-nums">
+          <span className="mr-[0.9em] text-ink tabular-nums">
             {r.year}
           </span>
           {r.contest}
-          <span className="ml-[1em] text-[12px] text-ink">
+          <span className="ml-[1em] text-ink">
             {r.result}
           </span>
         </li>

@@ -1,10 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { MOBILE } from "@/lib/browserTheme";
 
 export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <html lang="en">
+      <head>
+        <meta name="theme-color" media={MOBILE} content="#000000" />
+        <style>{`@media ${MOBILE} { html { background: #000 } }`}</style>
+      </head>
       <body style={{ margin: 0, minHeight: "100vh", background: "#dfe1dc", color: "#0f110d", fontFamily: "ui-sans-serif, system-ui, sans-serif", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
         <main style={{ padding: "clamp(16px, 4vw, 48px)" }}>
           <p style={{ fontSize: "clamp(5rem, 22vw, 16rem)", fontWeight: 700, letterSpacing: "-0.04em", lineHeight: 0.8, margin: "0 0 2rem" }} aria-hidden="true">

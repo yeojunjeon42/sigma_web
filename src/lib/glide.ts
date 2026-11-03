@@ -1,3 +1,5 @@
+import { pageY, scrollPage } from "@/lib/pageScroll";
+
 // Spring toward a fixed or per-frame target after native momentum stops.
 // Cancel on external scroll or an unreachable target.
 
@@ -25,19 +27,19 @@ export function glide(to: number | (() => number)): Glide {
   const frame = (now: number) => {
     const to = goal();
     if (Number.isNaN(y0)) {
-      y0 = window.scrollY;
+      y0 = pageY();
       if (Math.abs(to - y0) < 1) {
         g.settling = false;
         return;
       }
       then = now;
-    } else if (Math.abs(window.scrollY - last) > 2) {
+    } else if (Math.abs(pageY() - last) > 2) {
       g.settling = false;
       return;
     }
     const dt = Math.min(0.032, Math.max(0.008, (now - then) / 1000));
     then = now;
-    const y = window.scrollY;
+    const y = pageY();
     stuck = Math.abs(y - prev) < 0.01 && Math.abs(last - y) > 0.1 ? stuck + 1 : 0;
     prev = y;
     if (stuck > 2) {
@@ -49,12 +51,12 @@ export function glide(to: number | (() => number)): Glide {
     const next = y + velocity * dt;
     if (Math.abs(to - next) < 0.35 && Math.abs(velocity) < 5) {
       last = to;
-      window.scrollTo({ top: to, behavior: "instant" });
+      scrollPage({ top: to, behavior: "instant" });
       g.settling = false;
       return;
     }
     last = next;
-    window.scrollTo({ top: next, behavior: "instant" });
+    scrollPage({ top: next, behavior: "instant" });
     raf = requestAnimationFrame(frame);
   };
   raf = requestAnimationFrame(frame);

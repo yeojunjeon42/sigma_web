@@ -131,7 +131,7 @@ export function ContactForm() {
 
   if (status === "sent") {
     return (
-      <div className="flex flex-col items-start gap-y-lg py-lg sm:flex-row sm:items-center sm:gap-x-xl">
+      <div className="flex flex-col-reverse items-start gap-y-lg py-lg sm:flex-row sm:items-center sm:gap-x-xl">
         <Receipt stamp={stamp} />
         <div>
           <p className="text-display-md text-ink">
