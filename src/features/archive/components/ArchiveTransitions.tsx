@@ -1,5 +1,7 @@
 "use client";
 
+import { pageY, scrollPage } from "@/lib/pageScroll";
+
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -88,9 +90,9 @@ export default function ArchiveTransitions() {
                   if (!el || !el.offsetParent) return;
                   if (b !== "reel") {
                     const r = el.getBoundingClientRect();
-                    window.scrollTo({ top: window.scrollY + r.top - (window.innerHeight - r.height) / 2, behavior: "instant" });
+                    scrollPage({ top: pageY() + r.top - (window.innerHeight - r.height) / 2, behavior: "instant" });
                   }
-                } else if (a !== b) window.scrollTo({ top: 0, behavior: "instant" });
+                } else if (a !== b) scrollPage({ top: 0, behavior: "instant" });
                 window.clearInterval(poll);
                 name(late && hero !== "all" ? null : hero);
                 resolve();

@@ -30,7 +30,7 @@ import { ERAS, eraLabel, type ArchiveProject, type Era } from "@/features/archiv
 import { getEntries } from "@/features/archive/api/getEntries";
 import { getIndex } from "@/features/content/api/getContent";
 import YearRuler, { type Mark } from "@/features/history/components/YearRuler";
-import AddBuild, { AddBuildRow } from "@/features/archive/components/AddBuild";
+import AddBuild from "@/features/archive/components/AddBuild";
 
 const DESCRIPTION = "Every machine SIGMA INTELLIGENCE has built, 2007–2025.";
 
@@ -218,7 +218,7 @@ export default async function ArchiveView({
 
       <div className="relative z-10 bg-canvas">
         <main id="main" className="u-square">
-          <GridField className="bg-canvas pb-section max-lg:pb-[8rem]">
+          <GridField className={`bg-canvas pb-section ${entryOpen ? "max-lg:pb-xl" : "max-lg:pb-[8rem]"}`}>
             <Container as="header" className={`page-opening ${entryOpen ? "page-cover--flush" : ""}`}>
               {entryOpen ? (
                 <h1 className="sr-only lg:hidden">
@@ -359,17 +359,13 @@ export default async function ArchiveView({
                 </>
               )}
             </div>
-            {!entryOpen ? (
-              <Container className="md:hidden">
-                <AddBuildRow className="mt-xxl" />
-              </Container>
-            ) : null}
           </GridField>
 
           {!entryOpen ? <AddBuild /> : null}
 
           {view === "list" || !entryOpen ? (
             <YearRuler
+              actionId="archive-action"
               marks={view === "list" ? archiveMarks.map((m) => ({ ...m, targetId: `l-${m.id}` })) : archiveMarks}
               ariaLabel="Archive builds, entry by entry"
             />

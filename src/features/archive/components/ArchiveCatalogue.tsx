@@ -65,7 +65,7 @@ function Row({
 
   const body = (
     <div
-      className={`relative grid grid-cols-[1fr_auto] items-center gap-x-md gap-y-xs py-md ${COLS} md:text-title lg:py-xs`}
+      className={`relative grid grid-cols-[1fr_auto] items-center gap-x-md gap-y-xs py-[13px] ${COLS} md:text-title lg:py-xs`}
     >
       <p className={`hidden text-body md:col-span-1 md:block lg:col-span-3 ${LIFT}`}>
         {era ? (

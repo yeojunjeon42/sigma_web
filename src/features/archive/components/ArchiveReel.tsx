@@ -1,5 +1,7 @@
 "use client";
 
+import { pageY, scrollPage, onPageScroll } from "@/lib/pageScroll";
+
 import { glide, type Glide } from "@/lib/glide";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
@@ -107,10 +109,10 @@ export default function ArchiveReel({
       return view === null || view === "reel";
     };
 
-    const top = () => section.getBoundingClientRect().top + window.scrollY;
-    const target = () => clamp((window.scrollY - top()) / STEP, 0, count - 1);
+    const top = () => section.getBoundingClientRect().top + pageY();
+    const target = () => clamp((pageY() - top()) / STEP, 0, count - 1);
     const within = () => {
-      const t = (window.scrollY - top()) / STEP;
+      const t = (pageY() - top()) / STEP;
       return t > -0.5 && t < count - 0.5;
     };
 
@@ -172,7 +174,7 @@ export default function ArchiveReel({
 
     const goTo = (i: number, smooth = true) => {
       from = clamp(i, 0, count - 1);
-      window.scrollTo({
+      scrollPage({
         top: top() + clamp(i, 0, count - 1) * STEP,
         behavior: smooth && !still.matches ? "smooth" : "instant",
       });
@@ -193,7 +195,7 @@ export default function ArchiveReel({
       pull?.stop();
       // The spring is desk only: after a touch fling it fights momentum, so touch gets one native scroll.
       if (still.matches || !fine.matches) {
-        window.scrollTo({ top: to, behavior: still.matches ? "instant" : "smooth" });
+        scrollPage({ top: to, behavior: still.matches ? "instant" : "smooth" });
         return;
       }
       pull = glide(to);
@@ -282,8 +284,8 @@ export default function ArchiveReel({
 
     const ro = new ResizeObserver(onResize);
     ro.observe(strip);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    if (hasScrollEnd) window.addEventListener("scrollend", soon);
+    const stopPageScroll = onPageScroll(onScroll);
+    const stopPageScrollEnd = hasScrollEnd ? onPageScroll(soon, "scrollend") : () => {};
     window.addEventListener("pointerdown", grab, { passive: true });
     window.addEventListener("pointerup", free, { passive: true });
     window.addEventListener("pointercancel", free, { passive: true });
@@ -297,8 +299,8 @@ export default function ArchiveReel({
       ro.disconnect();
       window.clearTimeout(settle);
       pull?.stop();
-      window.removeEventListener("scroll", onScroll);
-      if (hasScrollEnd) window.removeEventListener("scrollend", soon);
+      stopPageScroll();
+      stopPageScrollEnd();
       window.removeEventListener("pointerdown", grab);
       window.removeEventListener("pointerup", free);
       window.removeEventListener("pointercancel", free);

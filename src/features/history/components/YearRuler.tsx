@@ -1,5 +1,7 @@
 "use client";
 
+import { pageY, pageScroller, scrollPage, onPageScroll } from "@/lib/pageScroll";
+
 import { useEffect, useRef, type CSSProperties } from "react";
 import { glide, type Glide } from "@/lib/glide";
 import { spring } from "@/lib/spring";
@@ -21,6 +23,12 @@ const FRAME = 1000 / 60;
 const EDGE = [1, 2 / 3, 1 / 3, 1 / 12, 0].map((q) => q * ROOM);
 const PANES = ["past", "ahead", "past-pull", "ahead-pull"];
 const KEYS = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"];
+// Tabular digits sit unevenly in their advance, so a year's ink is off-centre by its outer digits.
+// Side bearings in em, Archivo 125% bold; re-measure if the face changes.
+const INK_LEFT = [0.0449, 0.1072, 0.0531, 0.0425, 0.0394, 0.0434, 0.0479, 0.0625, 0.0332, 0.0359];
+const INK_RIGHT = [0.0442, 0.0643, 0.0465, 0.0385, 0.0133, 0.0379, 0.0307, 0.0232, 0.0329, 0.0427];
+const inkShift = (year: string) =>
+  `${((INK_RIGHT[+year[3]] - INK_LEFT[+year[0]]) / 2).toFixed(4)}em`;
 
 type Line = "page" | "dial";
 type Timeline = new (options: {
@@ -38,21 +46,22 @@ export type Mark = {
 export default function YearRuler({
   marks,
   ariaLabel = "The record, entry by entry",
+  actionId,
 }: {
   marks: Mark[];
   ariaLabel?: string;
+  actionId?: string;
 }) {
   const valueRef = useRef<HTMLParagraphElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const pickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const value = valueRef.current;
     const bar = barRef.current;
     const scroller = scrollerRef.current;
-    const picker = pickerRef.current;
-    if (!value || !bar || !scroller || !picker || marks.length === 0) return;
+    if (!value || !bar || !scroller || marks.length === 0) return;
+    const action = actionId ? document.getElementById(actionId) : null;
 
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const tracks = Array.from(
@@ -71,7 +80,7 @@ export default function YearRuler({
       );
     };
     const bottom = () =>
-      Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      Math.max(0, pageScroller().scrollHeight - window.innerHeight);
 
     const last = marks.length - 1;
     const clamp = (d: number) => Math.min(last, Math.max(0, d));
@@ -94,6 +103,7 @@ export default function YearRuler({
     let foldDx = 0;
     let foldMid = 1;
     let foldLift = 0;
+    let actionStart = 1;
 
     const measure = () => {
       centre = bar.clientWidth / 2;
@@ -104,6 +114,10 @@ export default function YearRuler({
       foldS = CHIP_H / h;
       foldX = CHIP / w;
       foldDx = (w - CHIP) / 2;
+      if (action) {
+        // Reveal only once the shrinking dial clears the action and an 8px gap.
+        actionStart = Math.min(0.98, Math.max(0, (action.getBoundingClientRect().right + 8 - bar.getBoundingClientRect().left) / Math.max(1, foldDx)));
+      }
       foldMid = (CHIP - CHIP_H + 2) / Math.max(1, w - h + 2);
       foldLift = (h - CHIP_H) / 2;
       bar.style.setProperty("--fold-s", foldS.toFixed(4));
@@ -114,13 +128,13 @@ export default function YearRuler({
         marks[last].targetId ?? `e-${marks[last].id}`,
       );
       tailBottom = tail
-        ? tail.getBoundingClientRect().bottom + window.scrollY
+        ? tail.getBoundingClientRect().bottom + pageY()
         : Infinity;
       const foot = document.querySelector("footer")?.parentElement;
-      footTop = foot ? foot.getBoundingClientRect().top + window.scrollY : Infinity;
+      footTop = foot ? foot.getBoundingClientRect().top + pageY() : Infinity;
       const tops = marks.map((m) => {
         const el = document.getElementById(m.targetId ?? `e-${m.id}`);
-        return el ? el.getBoundingClientRect().top + window.scrollY : NaN;
+        return el ? el.getBoundingClientRect().top + pageY() : NaN;
       });
       const known = tops.filter((n) => !Number.isNaN(n));
       if (known.length < 2) return;
@@ -166,7 +180,7 @@ export default function YearRuler({
       const k = Math.min(last - 1, Math.max(0, Math.floor(d)));
       return at[k] + (d - k) * (at[k + 1] - at[k]);
     };
-    const here = () => dialAt((window.scrollY - from) / span);
+    const here = () => dialAt((pageY() - from) / span);
     const dialOf = () => scroller.scrollLeft / PITCH - ROOM;
     const xAt = (d: number) =>
       `translate3d(${(centre - (d + 0.5) * PITCH).toFixed(2)}px,0,0)`;
@@ -199,7 +213,7 @@ export default function YearRuler({
     let pageLine: AnimationTimeline | null = null;
     if (Scroll) {
       pageLine = new Scroll({
-        source: document.documentElement,
+        source: pageScroller(),
         axis: "block",
       });
       dialLine = new Scroll({ source: scroller, axis: "x" });
@@ -249,6 +263,7 @@ export default function YearRuler({
       const from = rolled.padStart(wheels.length, "0");
       const to = displayedYear.padStart(wheels.length, "0");
       rolled = displayedYear;
+      value.style.setProperty("--year-ink", inkShift(to));
       const runs: Animation[] = [];
       const mine = ++spin;
       wheels.forEach((wheel, position) => {
@@ -378,10 +393,9 @@ export default function YearRuler({
     let folded = false;
     let expanding = false;
     let tappedAt = -Infinity;
-    let open = false;
     let landing = NaN;
     let refitLater = false;
-    let lastY = window.scrollY;
+    let lastY = pageY();
     let turnY = lastY;
     let goingDown = false;
     let fit = 0;
@@ -391,7 +405,7 @@ export default function YearRuler({
 
     // Hide outside the record; defer footer dismissal while the dial is in use.
     const judge = (using: boolean) => {
-      const y = window.scrollY;
+      const y = pageY();
       const over =
         y + window.innerHeight * LIST < leadTop ||
         tailBottom - y <= 0 ||
@@ -406,7 +420,7 @@ export default function YearRuler({
     const aimPage = (y: number) => {
       target = y;
       if (still) {
-        if (Math.abs(window.scrollY - y) >= 0.5) window.scrollTo({ top: y, behavior: "instant" });
+        if (Math.abs(pageY() - y) >= 0.5) scrollPage({ top: y, behavior: "instant" });
         return;
       }
       if (!pulling()) pull = glide(() => target);
@@ -452,7 +466,7 @@ export default function YearRuler({
       const flow = flowOf();
       if (!flow.length) return;
       pull?.stop();
-      const base = window.scrollY;
+      const base = pageY();
       const px = 1 / window.devicePixelRatio;
       stops = marks.map((_, k) => Math.round(pageAt(k) / px) * px);
       // Fritsch–Carlson interpolation keeps speed continuous without overshooting entries.
@@ -516,9 +530,9 @@ export default function YearRuler({
       delete document.documentElement.dataset.slide;
       quick(false);
       target = y;
-      if (Math.abs(window.scrollY - y) >= 0.5) {
+      if (Math.abs(pageY() - y) >= 0.5) {
         landing = y;
-        window.scrollTo({ top: y, behavior: "instant" });
+        scrollPage({ top: y, behavior: "instant" });
       }
       if (refitLater) {
         refitLater = false;
@@ -534,6 +548,7 @@ export default function YearRuler({
       end: bar.querySelector<HTMLElement>('.year-ruler__pill > [data-end="end"]'),
       window: bar.querySelector<HTMLElement>(".year-ruler__window"),
       value,
+      action,
     };
     // p: 0 = open, 1 = collapsed. Linear transforms keep the capsule pieces joined.
     const look = (p: number): Record<keyof typeof parts, Keyframe> => {
@@ -547,6 +562,7 @@ export default function YearRuler({
           scale: `${1 + (foldX - 1) * p} ${s}`,
         },
         value: { translate: `0 ${foldLift * p}px`, scale: `${s}` },
+        action: { opacity: Math.max(0, Math.min(1, (p - actionStart) / (1 - actionStart))) },
       };
     };
     let folding: Animation[] = [];
@@ -556,6 +572,7 @@ export default function YearRuler({
       folding.forEach((run) => run.cancel());
       folding = [];
       foldRun = null;
+      delete bar.dataset.folding;
     };
     // Preserve velocity (progress/s) when reversing the fold.
     const foldSpeed = () => {
@@ -590,6 +607,7 @@ export default function YearRuler({
       // Restore the full hit area as opening starts; keep it until collapse finishes.
       if (!to && folded) state(false);
       if (still || (Math.abs(p - to) < 0.002 && Math.abs(velocity) < 0.05)) return commit(to);
+      bar.dataset.folding = "";
       const { values, duration } = to
         ? spring(p, 1, velocity, 0.38, 0.92)
         : spring(p, 0, velocity, 0.44, 0.78);
@@ -615,58 +633,8 @@ export default function YearRuler({
       );
     };
     const fold = (on: boolean) => {
-      if (on) years(false);
       if ((on ? 1 : 0) === foldGoal && (folding.length || folded === on)) return;
       settleFold(on ? 1 : 0);
-    };
-    const years = (on: boolean) => {
-      if (on === open) return;
-      open = on;
-      picker.dataset.open = on ? "1" : "";
-      picker.inert = !on;
-      if (!on) return;
-      picker.querySelectorAll<HTMLElement>("[data-k]").forEach((b) => {
-        if (b.dataset.year === displayedYear) b.setAttribute("aria-current", "true");
-        else b.removeAttribute("aria-current");
-      });
-    };
-    const jump = (k: number) => {
-      years(false);
-      halt();
-      land();
-      pull?.stop();
-      const y = pageAt(k);
-      const go = () => {
-        if (line === "dial") scroller.scrollTo({ left: (ROOM + k) * PITCH, behavior: "instant" });
-        target = y;
-        if (Math.abs(window.scrollY - y) >= 0.5) {
-          landing = y;
-          window.scrollTo({ top: y, behavior: "instant" });
-        }
-        read(k);
-      };
-      const flow = flowOf();
-      if (still || !flow.length) return go();
-      const out = flow.map((el) =>
-        el.animate([{ opacity: 1 }, { opacity: 0 }], {
-          duration: 140,
-          easing: "ease-in",
-          fill: "forwards",
-        }),
-      );
-      Promise.all(out.map((run) => run.finished)).then(
-        () => {
-          go();
-          flow.forEach((el) =>
-            el.animate([{ opacity: 0, translate: "0 14px" }, { opacity: 1, translate: "0 0" }], {
-              duration: 420,
-              easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-            }),
-          );
-          out.forEach((run) => run.cancel());
-        },
-        () => {},
-      );
     };
 
     const grab = () => {
@@ -919,7 +887,6 @@ export default function YearRuler({
         }
         touch.axis = "x";
         bar.dataset.dragging = "1";
-        years(false);
         slide();
       }
       if (touch.axis !== "x") return;
@@ -977,7 +944,6 @@ export default function YearRuler({
         dragged = true;
         bar.dataset.dragging = "1";
         bar.dataset.free = "1";
-        years(false);
         slide();
       }
       e.preventDefault();
@@ -1004,8 +970,7 @@ export default function YearRuler({
     const tapAt = (x: number) => {
       const r = bar.getBoundingClientRect();
       const off = x - (r.left + r.width / 2);
-      if (Math.abs(off) <= STATION / 2) return years(!open);
-      years(false);
+      if (Math.abs(off) <= STATION / 2) return;
       grab();
       choose(dialOf() + off / PITCH);
     };
@@ -1021,18 +986,12 @@ export default function YearRuler({
       if (performance.now() - tappedAt < 800) return;
       tapAt(e.clientX);
     };
-    const pick = (e: MouseEvent) => {
-      const b = (e.target as Element).closest<HTMLElement>("[data-k]");
-      if (b) jump(Number(b.dataset.k));
-    };
-
     const key = (e: KeyboardEvent) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         fold(false);
-        return years(!open);
+        return;
       }
-      if (e.key === "Escape") return years(false);
       if (!KEYS.includes(e.key)) return;
       e.preventDefault();
       grab();
@@ -1046,7 +1005,7 @@ export default function YearRuler({
     };
 
     const onScroll = () => {
-      const y = window.scrollY;
+      const y = pageY();
       // Ignore delayed scroll events from our own spring or slide landing.
       const ours =
         held() ||
@@ -1074,9 +1033,7 @@ export default function YearRuler({
       lastY = y;
     };
     const away = (e: Event) => {
-      if (e instanceof KeyboardEvent && e.key === "Escape") years(false);
-      if (bar.contains(e.target as Node) || picker.contains(e.target as Node)) return;
-      years(false);
+      if (bar.contains(e.target as Node)) return;
       drop();
     };
     const wheel = (e: WheelEvent) => {
@@ -1115,7 +1072,7 @@ export default function YearRuler({
 
     refit();
     window.addEventListener("resize", refitSoon);
-    window.addEventListener("scroll", onScroll, { passive: true });
+    const stopPageScroll = onPageScroll(onScroll);
     window.addEventListener("wheel", wheel, { passive: true });
     window.addEventListener("touchstart", away, { passive: true });
     window.addEventListener("keydown", away);
@@ -1131,7 +1088,6 @@ export default function YearRuler({
     bar.addEventListener("pointercancel", up);
     bar.addEventListener("click", tap);
     bar.addEventListener("keydown", key);
-    picker.addEventListener("click", pick);
 
     return () => {
       if (frame) cancelAnimationFrame(frame);
@@ -1153,7 +1109,7 @@ export default function YearRuler({
       ro.disconnect();
       host?.removeEventListener("animationend", arrived);
       window.removeEventListener("resize", refitSoon);
-      window.removeEventListener("scroll", onScroll);
+      stopPageScroll();
       window.removeEventListener("wheel", wheel);
       window.removeEventListener("touchstart", away);
       window.removeEventListener("keydown", away);
@@ -1169,19 +1125,11 @@ export default function YearRuler({
       bar.removeEventListener("pointercancel", up);
       bar.removeEventListener("click", tap);
       bar.removeEventListener("keydown", key);
-      picker.removeEventListener("click", pick);
     };
-  }, [marks]);
+  }, [marks, actionId]);
 
   if (marks.length === 0) return null;
 
-  // Keep first occurrences in record order; archive eras are not necessarily chronological.
-  const newest = marks[0].year >= marks[marks.length - 1].year;
-  const firsts = marks
-    .flatMap((mark, k) =>
-      marks.findIndex((m) => m.year === mark.year) === k ? [{ year: mark.year, k }] : [],
-    )
-    .sort((a, b) => (newest ? b.year - a.year : a.year - b.year));
   const ticks = (
     <span>
       {marks.map((mark, i) => (
@@ -1240,6 +1188,7 @@ export default function YearRuler({
             ref={valueRef}
             data-year={marks[0].year}
             className="year-ruler__value"
+            style={{ "--year-ink": inkShift(String(marks[0].year).padStart(4, "0")) } as CSSProperties}
           >
             {String(marks[0].year)
               .padStart(4, "0")
@@ -1271,27 +1220,6 @@ export default function YearRuler({
         </div>
       </div>
 
-      <div
-        ref={pickerRef}
-        data-overlay
-        data-open=""
-        inert
-        role="group"
-        aria-label="Years"
-        className="year-picker"
-      >
-        {firsts.map(({ year, k }) => (
-          <button
-            key={year}
-            type="button"
-            data-k={k}
-            data-year={year}
-            className="year-picker__year"
-          >
-            {year}
-          </button>
-        ))}
-      </div>
     </>
   );
 }
