@@ -2,7 +2,7 @@
 title: SNUEWheel
 year: 2015
 date: 2015
-tags: [2015, Electric bicycle, URP, Creative Design Festival]
+tags: [2015, Electric bicycle, URP, SNU Creative Design Fair]
 team: 김태형, 정재영, 김지강, 최혜린, 남기빈
 ---
 

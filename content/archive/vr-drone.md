@@ -3,7 +3,7 @@ title: VR Drone for Image Training
 titleKo: 이미지 트레이닝 VR 드론
 year: 2020
 date: 2020
-tags: [2020, Creative Design Festival, Drone, Sport]
+tags: [2020, SNU Creative Design Fair, Drone, Sport]
 team: 이성현, 정석철, 박진솔, 이주형
 ---
 

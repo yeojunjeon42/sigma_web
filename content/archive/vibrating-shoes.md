@@ -3,7 +3,7 @@ title: Object-Detecting Vibrating Shoes
 titleKo: 물체감지 진동 신발
 year: 2020
 date: 2020
-tags: [2020, Creative Design Festival, Accessibility]
+tags: [2020, SNU Creative Design Fair, Accessibility]
 team: 이유나, 김동휘, 양준원, 호원재
 ---
 

@@ -3,7 +3,7 @@ title: Ballboy Robot
 titleKo: 볼보이 로봇 (루카)
 year: 2020
 date: 2020
-tags: [2020, Creative Design Festival, Sport, Robot]
+tags: [2020, SNU Creative Design Fair, Sport, Robot]
 team: 조민규, 최영록, 김창동, 임세진
 ---
 

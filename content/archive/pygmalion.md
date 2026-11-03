@@ -3,7 +3,7 @@ title: Pygmalion
 titleKo: 피그말리온
 year: 2017
 date: 2017
-tags: [2017, URP, Creative Design Festival, Cultural heritage restoration]
+tags: [2017, URP, SNU Creative Design Fair, Cultural heritage restoration]
 team: 권창영, 박성현, 이건준, 이혜건
 ---
 

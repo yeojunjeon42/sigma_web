@@ -2,7 +2,7 @@
 title: Rammus
 year: 2016
 date: 2016
-tags: [2016, URP, Spherical wheel, Creative Design Festival]
+tags: [2016, URP, Spherical wheel, SNU Creative Design Fair]
 team: 유용재, 김지강, 박재연
 ---
 

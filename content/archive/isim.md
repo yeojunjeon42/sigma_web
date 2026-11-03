@@ -2,7 +2,7 @@
 title: ISIM
 year: 2015
 date: 2015
-tags: [2015, Swarm robotics, URP, Creative Design Festival]
+tags: [2015, Swarm robotics, URP, SNU Creative Design Fair]
 team: 김용혁, 박유진, 박동훈, 양준모
 ---
 

@@ -3,7 +3,7 @@ title: Copy Me
 titleKo: 날 따라해봐요
 year: 2017
 date: 2017
-tags: [2017, First-year project, Creative Design Festival, Robot arm]
+tags: [2017, First-year project, SNU Creative Design Fair, Robot arm]
 team: 임건호, 김창현, 김형주, 안형서
 ---
 

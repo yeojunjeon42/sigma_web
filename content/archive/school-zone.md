@@ -3,7 +3,7 @@ title: School Zone Safety Device
 titleKo: 스쿨존 안전장치
 year: 2020
 date: 2020
-tags: [2020, Creative Design Festival, Safety, Social problem]
+tags: [2020, SNU Creative Design Fair, Safety, Social problem]
 team: 이수미, 윤진희, 안서인, 김민권
 ---
 

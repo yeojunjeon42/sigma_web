@@ -3,7 +3,7 @@ title: Automatic Book Cart
 titleKo: 자동 책 수레
 year: 2020
 date: 2020
-tags: [2020, Creative Design Festival, Automation, Robot]
+tags: [2020, SNU Creative Design Fair, Automation, Robot]
 team: 차민호, 김현서, 장성민, 황창환
 ---
 

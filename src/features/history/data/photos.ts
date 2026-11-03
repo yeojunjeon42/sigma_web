@@ -11,10 +11,16 @@ const set = (dir: string, sizes: [number, number][]) =>
 
 export const HERO_PHOTO = { src: "/history-photos/creative-design-fair/01.jpg", w: 1600, h: 1200 };
 
+// One photograph leads a year on phones, where the collage is hidden.
+export const YEAR_PHOTOS: Record<number, { src: string; w: number; h: number; alt: string }> = {
+  2026: { src: "/history-photos/homecoming/01.jpg", w: 1600, h: 1200, alt: "Summer Homecoming, 2026" },
+  2025: { src: "/history-photos/creative-design-fair-2025/01.jpg", w: 1600, h: 900, alt: "SNU Creative Design Fair, 2025" },
+};
+
 export const CLUB_EVENTS: ClubEvent[] = [
   {
     id: "cdf",
-    name: "15th Creative Design Fair, 2026",
+    name: "15th SNU Creative Design Fair, 2026",
     when: "Fall 2026",
     photos: set("creative-design-fair", [[1600, 1200]]),
   },
@@ -41,7 +47,7 @@ export const CLUB_EVENTS: ClubEvent[] = [
   },
   {
     id: "cdf-2025",
-    name: "14th Creative Design Fair, 2025",
+    name: "14th SNU Creative Design Fair, 2025",
     when: "Fall 2025",
     photos: set("creative-design-fair-2025", [[1600, 900], [1600, 900]]),
   },
