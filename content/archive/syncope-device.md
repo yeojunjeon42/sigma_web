@@ -3,7 +3,7 @@ title: A Safety Device for Chronic Fainting Patients
 titleKo: 만성 실신 환자 안전 보조 장치
 year: 2020
 date: 2020
-tags: [2020, Creative Design Festival, Healthcare, Safety]
+tags: [2020, SNU Creative Design Fair, Healthcare, Safety]
 team: 김민석, 김동준, 이경렬, 최준호
 ---
 

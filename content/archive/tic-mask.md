@@ -3,7 +3,7 @@ title: Noise Cancellation Mask for Patients with Vocal Tics
 titleKo: 노이즈 캔슬링 마스크
 year: 2020
 date: 2020
-tags: [2020, Creative Design Festival, Healthcare, Accessibility]
+tags: [2020, SNU Creative Design Fair, Healthcare, Accessibility]
 team: 양민우, 김규희, 이광호, 이태경
 ---
 

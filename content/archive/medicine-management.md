@@ -3,7 +3,7 @@ title: Medicine Management for the Elderly
 titleKo: 노인 약 관리 시스템
 year: 2020
 date: 2020
-tags: [2020, Creative Design Festival, Healthcare, Ageing]
+tags: [2020, SNU Creative Design Fair, Healthcare, Ageing]
 team: 이성민, 박서연, 조규진
 ---
 

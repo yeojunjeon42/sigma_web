@@ -3,7 +3,7 @@ title: Marine Microplastic Cleaning Robot Imitating Shellfish
 titleKo: 해양 미세 플라스틱 청소 로봇
 year: 2020
 date: 2020
-tags: [2020, Creative Design Festival, Environment, Biomimicry]
+tags: [2020, SNU Creative Design Fair, Environment, Biomimicry]
 team: 박성준, 김지원, 유준석, 한수관
 ---
 

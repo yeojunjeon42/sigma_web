@@ -46,7 +46,7 @@ export const ARCHIVE: ArchiveProject[] = [
     year: 2014,
     era: "2007-2014",
     award: {
-      en: "3rd, Techwin Robot Membership · Silver, ECE Electronics Fair · KOFAC Outstanding Research",
+      en: "3rd, Samsung Techwin Robot Membership · Silver, ECE Electronics Fair · KOFAC Outstanding Research",
       ko: "테크윈 3위 · 전자전 은상 · 창의재단 우수 연구 선정",
     },
   },
@@ -63,7 +63,7 @@ export const ARCHIVE: ArchiveProject[] = [
     year: null,
     era: "2007-2014",
     award: {
-      en: "1st, campus Creative Design competition · Gold, Electronics Fair · 1st, ROBOTIS OpenCM Challenge",
+      en: "1st, Creative Design Contest · Gold, ECE Electronics Fair · 1st, ROBOTIS OpenCM Challenge",
       ko: "교내 창의설계 경진대회 최우수 · 전자전 금상 · ROBOTIS OpenCM Challenge 1위",
     },
   },
@@ -120,7 +120,7 @@ export const ARCHIVE: ArchiveProject[] = [
     year: null,
     era: "2007-2014",
     award: {
-      en: "1st, campus Creative Design Fair · Gold, Electronics Fair",
+      en: "1st, SNU Creative Design Fair · Gold, ECE Electronics Fair",
       ko: "교내 Creative Design Fair 최우수 · 전자전 금상",
     },
   },
@@ -130,7 +130,7 @@ export const ARCHIVE: ArchiveProject[] = [
     year: null,
     era: "2007-2014",
     award: {
-      en: "2nd, campus Creative Design Fair · 3rd, campus Electronics Fair",
+      en: "2nd, SNU Creative Design Fair · 3rd, ECE Electronics Fair",
       ko: "교내 Creative Design Fair 2위 · 전자전 3위",
     },
   },
@@ -142,7 +142,7 @@ export const ARCHIVE: ArchiveProject[] = [
     year: 2015,
     era: "2015",
     award: {
-      en: "SNU URP selected · 1st, Techwin · Excellence, Creative Design Festival",
+      en: "SNU URP selected · 1st, Hanwha Techwin Robot Membership · Excellence, 4th SNU Creative Design Fair",
       ko: "서울대 URP 선정 · 테크윈 1위 · 창의설계축전 우수",
     },
   },
@@ -153,7 +153,7 @@ export const ARCHIVE: ArchiveProject[] = [
     year: 2015,
     era: "2015",
     award: {
-      en: "SNU URP selected · Grand Prize, Creative Design Festival",
+      en: "SNU URP selected · Grand Prize, 4th SNU Creative Design Fair",
       ko: "서울대 URP 선정 · 창의설계축전 최우수",
     },
   },
@@ -162,7 +162,7 @@ export const ARCHIVE: ArchiveProject[] = [
     title: "ROVision",
     year: 2015,
     era: "2015",
-    award: { en: "2nd, Techwin Robot Membership", ko: "테크윈 2위" },
+    award: { en: "2nd, Hanwha Techwin Robot Membership", ko: "테크윈 2위" },
   },
   {
     id: "angelswing",
@@ -186,7 +186,7 @@ export const ARCHIVE: ArchiveProject[] = [
     year: 2016,
     era: "2016",
     award: {
-      en: "Outstanding Research, URP · Encouragement, Creative Design Festival · IE Competition",
+      en: "Outstanding Research, SNU URP · Encouragement, 5th SNU Creative Design Fair · IE Contest",
       ko: "URP 우수연구상 · 창의설계축전 장려상 · IE 경진대회",
     },
   },
@@ -208,7 +208,7 @@ export const ARCHIVE: ArchiveProject[] = [
     title: "Alpha-D",
     year: 2016,
     era: "2016",
-    award: { en: "Encouragement, URP", ko: "URP 장려상" },
+    award: { en: "Encouragement, SNU URP", ko: "URP 장려상" },
   },
   {
     id: "untitled",
@@ -241,14 +241,14 @@ export const ARCHIVE: ArchiveProject[] = [
     title: "피그말리온 / Pygmalion",
     year: 2017,
     era: "2017",
-    award: { en: "Honourable Mention, Creative Design Festival", ko: "창의설계축전 가작" },
+    award: { en: "Honourable Mention, 6th SNU Creative Design Fair", ko: "창의설계축전 가작" },
   },
   {
     id: "leam",
     title: "LEAM",
     year: 2017,
     era: "2017",
-    award: { en: "Encouragement, URP", ko: "URP 장려상" },
+    award: { en: "Encouragement, SNU URP", ko: "URP 장려상" },
   },
   {
     id: "screw-robot",
@@ -279,7 +279,7 @@ export const ARCHIVE: ArchiveProject[] = [
     title: "날 따라해봐요 / Copy Me",
     year: 2017,
     era: "2017",
-    award: { en: "Encouragement, Creative Design Festival", ko: "창의설계축전 장려상" },
+    award: { en: "Encouragement, 6th SNU Creative Design Fair", ko: "창의설계축전 장려상" },
   },
   {
     id: "unicycle",

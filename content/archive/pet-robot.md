@@ -3,7 +3,7 @@ title: Pet Feeding
 titleKo: 애완동물에게 먹이를 주는 청소 로봇
 year: 2020
 date: 2020
-tags: [2020, Creative Design Festival, Pets, Autonomous driving]
+tags: [2020, SNU Creative Design Fair, Pets, Autonomous driving]
 team: Alfred Cueva, Duygu Yenisoy, Minh Luong Do
 ---
 

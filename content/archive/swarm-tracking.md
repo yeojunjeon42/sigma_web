@@ -3,7 +3,7 @@ title: Collective Robot Tracking System in Urban Environment
 titleKo: 도심 집단로봇 추적 시스템
 year: 2020
 date: 2020
-tags: [2020, Creative Design Festival, Autonomous driving, Swarm robotics]
+tags: [2020, SNU Creative Design Fair, Autonomous driving, Swarm robotics]
 team: 서성민, 서정민, 김민석, 황민호
 ---
 

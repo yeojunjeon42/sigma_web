@@ -3,7 +3,7 @@ title: Universal Refrigerator Storage System for the Visually Impaired
 titleKo: 유니버설 냉장고 수납 시스템
 year: 2020
 date: 2020
-tags: [2020, Creative Design Festival, Accessibility, Everyday convenience]
+tags: [2020, SNU Creative Design Fair, Accessibility, Everyday convenience]
 team: 전혜성, 유윤아, 김소현, 박종해
 ---
 
