@@ -83,6 +83,7 @@ export function Print({
     const img = box?.querySelector("img");
     if (!box || !canvas || !img) return;
     const s = st.current;
+    const bmp = new window.Image();
     let sheet: Sheet | null = null;
     let frame = 0;
 
@@ -90,8 +91,7 @@ export function Print({
       const w = canvas.clientWidth;
       const h = canvas.clientHeight;
       if (!w || !h || !img.complete || !img.currentSrc) return null;
-      const bmp = new window.Image();
-      bmp.src = img.currentSrc;
+      if (bmp.src !== img.currentSrc) bmp.src = img.currentSrc;
       if (!bmp.complete || !bmp.naturalWidth) {
         bmp.addEventListener("load", redraw, { once: true });
         return null;
@@ -207,6 +207,8 @@ export function Print({
     ro.observe(canvas);
     return () => {
       ro.disconnect();
+      bmp.removeEventListener("load", redraw);
+      img.removeEventListener("load", ready);
       cancelAnimationFrame(frame);
       cancelAnimationFrame(s.raf);
       s.raf = 0;
