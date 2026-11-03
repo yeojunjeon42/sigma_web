@@ -25,20 +25,21 @@ export default function ArchiveGrid({
             <h2
               id={`feed-era-${g.label.replace("–", "-")}`}
               style={MARGIN}
-              className="archive-era u-trim text-display-md tabular-nums text-ink"
+              className="archive-era u-trim font-[family-name:var(--f-display)] text-[length:clamp(3rem,14vw,4.5rem)] font-bold tracking-[-0.02em] tabular-nums text-ink [font-stretch:125%]"
             >
               {g.label}
             </h2>
           ) : null}
 
           <ul
-            className={`grid grid-cols-2 gap-gutter md:grid-cols-3 ${
+            data-offgrid
+            className={`grid grid-cols-2 gap-xs sm:grid-cols-3 ${
               g.label ? "mt-lg" : ""
             }`}
           >
             {builds.slice(g.from, g.to).map((b, i) => (
               <li key={b.id} id={`b-${b.id}`} style={MARGIN}>
-                <Link href={open(b.id)} prefetch={false} className="group relative block transition-opacity has-[[data-pending]]:opacity-50 has-[[data-pending]]:delay-150">
+                <Link href={open(b.id)} prefetch={false} className="group relative block transition-opacity [--color-surface-sunken:var(--color-canvas)] after:pointer-events-none after:absolute after:inset-0 after:border after:border-rule has-[[data-pending]]:opacity-50 has-[[data-pending]]:delay-150">
                   <Pending />
                   <PlateArt
                     tile={b.tile.kind === "lift" ? { ...b.tile, box: CLEAR } : b.tile}

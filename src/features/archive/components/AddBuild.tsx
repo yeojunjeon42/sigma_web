@@ -1,11 +1,5 @@
-import ContactPill, { ContactRow } from "@/components/ContactPill";
-
-const PILL = "Built something in the club? Add it to the archive";
+import ContactPill from "@/components/ContactPill";
 
 export default function AddBuild() {
-  return <ContactPill about="archive" pill={PILL} />;
-}
-
-export function AddBuildRow({ className = "" }: { className?: string }) {
-  return <ContactRow about="archive" pill={PILL} className={className} />;
+  return <ContactPill about="archive" pill="Add a build" showOnMobile id="archive-action" className="archive-action" />;
 }

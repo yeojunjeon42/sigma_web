@@ -13,11 +13,12 @@ function linkProps({ href, about }: ContactLinkProps) {
   };
 }
 
-export default function ContactPill({ showOnMobile = false, ...props }: ContactLinkProps & { showOnMobile?: boolean }) {
+export default function ContactPill({ showOnMobile = false, className = "", id, ...props }: ContactLinkProps & { showOnMobile?: boolean; className?: string; id?: string }) {
   return (
     <div
       data-overlay
-      className={`pointer-events-none fixed left-[calc(var(--gutter)+var(--safe-left))] z-50 bottom-[max(1rem,env(safe-area-inset-bottom))] max-w-[calc(100vw-var(--safe-left)-var(--safe-right)-2*var(--gutter))] ${showOnMobile ? "" : "max-md:hidden"}`}
+      id={id}
+      className={`pointer-events-none fixed left-[var(--gutter)] z-50 bottom-[max(1rem,env(safe-area-inset-bottom))] max-w-[calc(100vw-2*var(--gutter))] ${showOnMobile ? "" : "max-md:hidden"} ${className}`}
     >
       <Link
         {...linkProps(props)}
@@ -27,17 +28,5 @@ export default function ContactPill({ showOnMobile = false, ...props }: ContactL
         <span aria-hidden="true" className="shrink-0">↗</span>
       </Link>
     </div>
-  );
-}
-
-export function ContactRow({ className = "", ...props }: ContactLinkProps & { className?: string }) {
-  return (
-    <Link
-      {...linkProps(props)}
-      className={`flex min-h-11 items-center justify-between gap-x-md border-t border-rule pt-sm text-body text-ink md:hidden ${className}`}
-    >
-      <span className="text-balance">{props.pill}</span>
-      <span aria-hidden="true">↗</span>
-    </Link>
   );
 }
