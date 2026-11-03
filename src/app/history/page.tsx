@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Container, GridField } from "@/components/ui";
 import { getTimeline } from "@/features/history/api/getTimeline";
+import { rowsOf } from "@/features/history/components/Chronology";
 import Chronology from "@/features/history/components/Chronology";
 import YearRuler, { type Mark } from "@/features/history/components/YearRuler";
 import HistoryHero from "@/features/history/components/HistoryHero";
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
 export default async function ClubLifePage() {
   const nodes = await getTimeline();
   const marks: Mark[] = nodes.flatMap((n) =>
-    n.events.map((e, i) => ({
+    rowsOf(n.events).map((e, i) => ({
       id: e.id,
       year: n.year,
       first: i === 0,

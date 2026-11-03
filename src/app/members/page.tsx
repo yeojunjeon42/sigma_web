@@ -66,7 +66,7 @@ export default async function MembersPage() {
             <h1 className="sr-only">Members</h1>
             <Container className="page-opening pb-section">
               <section aria-labelledby="crew">
-                <div className="u-scroll-in flex items-baseline pt-xl pb-sm text-body md:pt-xxl min-[90rem]:text-title">
+                <div className="u-scroll-in flex items-baseline border-b border-rule pt-xl pb-sm text-body md:pt-xxl min-[90rem]:text-title">
                   <h2 id="crew" className="flex items-baseline gap-x-sm text-ink">
                     Members
                     <span className="tabular-nums text-ink-muted">{new Date().getFullYear()}</span>

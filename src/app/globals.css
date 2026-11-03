@@ -12,6 +12,7 @@
 
 @theme {
   --font-sans: var(--f-marks), var(--f-sans), var(--f-kr), ui-sans-serif, system-ui, sans-serif;
+  --font-member-name: var(--f-member-name), var(--font-sans);
   --font-mono: var(--f-mono), var(--f-kr), ui-monospace, SFMono-Regular, monospace;
   --font-serif: var(--f-serif), var(--f-serif-kr), ui-serif, Georgia, "Times New Roman", serif;
   --default-font-family: var(--font-sans);
@@ -118,10 +119,6 @@
   --gutter: clamp(1rem, 2vw, 1.5rem);
   --masthead: 3.5rem;
   --screen: 100svh;
-  --safe-top: 0px;
-  --safe-right: 0px;
-  --safe-bottom: 0px;
-  --safe-left: 0px;
 }
 
 @media (min-width: 768px) {
@@ -157,7 +154,8 @@
     font-variant-numeric: tabular-nums;
   }
 
-  :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+  :focus,
+  :focus-visible {
     outline: none;
   }
 
@@ -341,8 +339,7 @@
       0 0 14px var(--color-canvas);
   }
 
-  .year-ruler,
-  .year-picker {
+  .year-ruler {
     --ruler-h: 4rem;
     /* Safari samples this surface for its tab bar. Avoid shadows near that edge. */
     --ruler-paper: var(--color-canvas);
@@ -613,60 +610,6 @@
     cursor: pointer;
   }
 
-  .year-picker {
-    position: fixed;
-    inset-inline: 0;
-    z-index: 30;
-    width: min(calc(100% - var(--gutter) - var(--gutter)), 36rem);
-    margin-inline: auto;
-    bottom: calc(max(var(--gutter), env(safe-area-inset-bottom)) + var(--ruler-h) + 8px);
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(4.25rem, 1fr));
-    gap: 2px;
-    padding: 6px;
-    border: 1px solid var(--ruler-line);
-    border-radius: 28px;
-    background: var(--ruler-paper);
-    box-shadow: var(--ruler-light);
-    transform-origin: 50% 100%;
-    opacity: 0;
-    translate: 0 12px;
-    scale: 0.92;
-    visibility: hidden;
-    pointer-events: none;
-    transition:
-      opacity 140ms ease-in,
-      translate 240ms cubic-bezier(0.45, 0, 0.8, 0.4),
-      scale 240ms cubic-bezier(0.45, 0, 0.8, 0.4),
-      visibility 0s linear 240ms;
-  }
-  .year-picker[data-open="1"] {
-    opacity: 1;
-    translate: 0 0;
-    scale: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transition:
-      opacity 200ms ease-out,
-      translate 520ms cubic-bezier(0.3, 1.3, 0.5, 1),
-      scale 520ms cubic-bezier(0.3, 1.3, 0.5, 1),
-      visibility 0s;
-  }
-  .year-picker__year {
-    min-height: 2.75rem;
-    border-radius: 22px;
-    font-size: var(--text-title);
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    color: var(--color-ink-muted);
-    transition: background-color 120ms ease;
-  }
-  .year-picker__year:active {
-    background: var(--color-surface);
-  }
-  .year-picker__year[aria-current="true"] {
-    color: var(--color-accent);
-  }
   .year-ruler__value {
     position: absolute;
     inset: 0;
@@ -676,14 +619,20 @@
     margin: 0;
     pointer-events: none;
     text-align: center;
-    font-family: var(--font-sans);
-    /* The station's width is fixed, so the year can't keep growing with the fluid scale. */
-    font-size: min(var(--text-display-lg), 2.25rem);
+    font-family: var(--f-display);
+    font-stretch: 125%;
+    font-weight: 700;
+    /* The station's width is fixed, so the year's size is too. */
+    font-size: 1.75rem;
     line-height: 1;
     font-variant-numeric: tabular-nums;
     color: var(--color-accent);
     text-box: trim-both cap alphabetic;
     transform-origin: 50% 50%;
+    /* Applied inside the fold's scale, so the shift shrinks with the year. Paced with the digit roll.
+       The face's digits sit 0.011em above the middle of its line box. */
+    transform: translate(var(--year-ink), 0.011em);
+    transition: transform 260ms cubic-bezier(0.45, 0, 0.55, 1);
   }
   /* Keep the year centred as the capsule shrinks from its bottom edge. */
   .year-ruler[data-mini="1"] .year-ruler__value {
@@ -693,7 +642,8 @@
   .year-ruler__digit {
     position: relative;
     display: inline-block;
-    width: 0.62em;
+    /* The tabular advance less the display style's 0.02em tracking. */
+    width: 0.738em;
     height: 1em;
     overflow: hidden;
     perspective: 3em;
@@ -702,7 +652,8 @@
     position: absolute;
     inset: 0;
     display: grid;
-    place-items: center;
+    /* The glyph is wider than its cell, and only centring the track keeps it centred. */
+    place-content: center;
     backface-visibility: hidden;
     transform-origin: 50% 50%;
   }
@@ -732,8 +683,7 @@
   }
 
   @media (min-width: 768px) {
-    .year-ruler,
-    .year-picker {
+    .year-ruler {
       display: none;
     }
   }
@@ -744,9 +694,8 @@
     .year-ruler__pill > span,
     .year-ruler__window,
     .year-ruler__value-slot,
-    .year-ruler[data-on=""] :is(.year-ruler__window, .year-ruler__value-slot),
-    .year-picker,
-    .year-picker[data-open="1"] {
+    .year-ruler__value,
+    .year-ruler[data-on=""] :is(.year-ruler__window, .year-ruler__value-slot) {
       animation: none;
       transition: none;
     }
@@ -799,12 +748,25 @@
     translate: 0 12px;
   }
 }
-html[data-turn] body > :not(header) {
-  opacity: 0;
-  transition: opacity 160ms ease-out;
+/* Keep the mobile page painted while the next route loads; its black backdrop is browser chrome. */
+@media (min-width: 64rem) and (pointer: fine) {
+  html[data-turn] body > :not(header) {
+    opacity: 0;
+    transition: opacity 160ms ease-out;
+  }
 }
-.u-arrive > * {
+.u-arrive > *,
+.member-profile [data-profile-part] {
   animation: arrive var(--duration-arrive) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.member-profile [data-profile-part="details"] {
+  animation-delay: 30ms;
+}
+.member-profile [data-profile-part="bio"] {
+  animation-delay: 60ms;
+}
+.member-profile [data-profile-part="actions"] {
+  animation-delay: 90ms;
 }
 .u-arrive > :nth-child(2) {
   animation-delay: 30ms;
@@ -826,6 +788,11 @@ html[data-turn] body > :not(header) {
   from {
     opacity: 0;
     translate: 0 -6px;
+  }
+}
+@keyframes logo-roll {
+  to {
+    translate: -50% 0;
   }
 }
 @media (width < 64rem) {
@@ -857,8 +824,27 @@ html[data-turn] body > :not(header) {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .u-arrive > * {
+  .u-arrive > *,
+  .member-profile [data-profile-part] {
     animation: none;
+  }
+}
+
+@media (width < 48rem) {
+  .archive-action {
+    opacity: 0;
+    visibility: hidden;
+  }
+  body:has(.year-ruler[data-on="1"]:is([data-mini="1"], [data-folding])) .archive-action {
+    visibility: visible;
+  }
+  body:has(.year-ruler[data-mini="1"][data-on="1"]) .archive-action {
+    opacity: 1;
+  }
+}
+@media (width >= 48rem) {
+  .archive-action {
+    opacity: 1 !important;
   }
 }
 
@@ -867,38 +853,79 @@ html:has([data-terminal]) {
   background-color: var(--color-canvas-inverse);
 }
 
-/* Keep page pixels out of the device's unsafe strips, even while scrolling or turning a page. */
-.safe-areas {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  pointer-events: none;
-  border: solid #000;
-  border-width: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
-}
+/* Keep the document still and black behind Safari's status and toolbar areas.
+   Native mobile scrolling belongs to the body, clipped to the visible viewport. */
 @media (max-width: 63.999rem), (pointer: coarse) {
-  :root {
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-right: env(safe-area-inset-right, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-    --safe-left: env(safe-area-inset-left, 0px);
-  }
   html,
   html:has([data-terminal]),
   body {
     background-color: #000;
   }
+  html {
+    height: 100dvh;
+    overflow: hidden;
+  }
   body {
-    padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: none;
   }
-  .navbar-chrome {
-    top: var(--safe-top);
-    left: var(--safe-left);
-    right: var(--safe-right);
-    width: auto;
+  body:has(.member-profile[open]) {
+    overflow: hidden;
   }
-  .nav-sheet {
-    max-height: calc(100dvh - var(--masthead) - var(--safe-top) - var(--safe-bottom));
+  /* The document never scrolls here, so absolute pins like fixed. iOS 26 Safari tints its bars
+     from the colour of any wide fixed or sticky box at the screen's edge, and keeps it. */
+  .navbar-chrome,
+  .member-profile {
+    position: absolute;
+  }
+  @media (width < 48rem) {
+    body:has(.nav-open) {
+      overflow: hidden;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    body {
+      scroll-behavior: smooth;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .logo-roll {
+    animation: logo-roll 45s linear infinite;
+  }
+  .logo-roll:has(a:active) {
+    animation-play-state: paused;
+  }
+  @media (hover: hover) {
+    .logo-roll:has(a:hover) {
+      animation-play-state: paused;
+    }
+  }
+}
+/* The dim follows the member sheet's entrance and dismissal. */
+.member-profile::backdrop {
+  opacity: 0;
+  transition: opacity var(--duration-arrive) var(--ease-magnify);
+}
+.member-profile[open]::backdrop {
+  opacity: 1;
+}
+.member-profile[data-closing]::backdrop {
+  opacity: 0;
+  transition-duration: var(--duration-chrome);
+  transition-timing-function: ease-in;
+}
+@starting-style {
+  .member-profile[open]::backdrop {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .member-profile::backdrop {
+    transition-duration: var(--duration-chrome);
   }
 }
 @keyframes term-blink {

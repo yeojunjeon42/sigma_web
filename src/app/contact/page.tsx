@@ -85,7 +85,7 @@ export default function ContactPage() {
                     ))}
                   </Fact>
                 </dl>
-                <div className="lg:col-span-7 lg:col-start-6">
+                <div className="border-t border-rule-strong pt-xl lg:col-span-7 lg:col-start-6 lg:border-t-0 lg:pt-0">
                   <ContactForm />
                 </div>
               </div>

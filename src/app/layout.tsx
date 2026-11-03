@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
@@ -10,7 +11,7 @@ import PageTurn from "@/components/PageTurn";
 import "lenis/dist/lenis.css";
 import "./globals.css";
 import { SITE_URL } from "@/features/site/data/site";
-import { browserTheme } from "@/lib/browserTheme";
+import { browserTheme, MOBILE } from "@/lib/browserTheme";
 
 const sans = localFont({
   src: [
@@ -60,6 +61,21 @@ const kr = localFont({
   ],
 });
 
+const memberName = localFont({
+  src: "../fonts/gmarket-sans-medium.woff2",
+  weight: "500",
+  style: "normal",
+  variable: "--f-member-name",
+  display: "swap",
+  preload: false,
+  adjustFontFallback: false,
+  declarations: [
+    { prop: "ascent-override", value: "95%" },
+    { prop: "descent-override", value: "25%" },
+    { prop: "line-gap-override", value: "0%" },
+  ],
+});
+
 const display = Archivo({
   subsets: ["latin"],
   axes: ["wdth"],
@@ -99,10 +115,11 @@ const mono = Geist_Mono({
 });
 
 
-const SCREEN = `(()=>{const s=document.createElement("style"),r=()=>{let h=innerHeight;if(matchMedia("(max-width:63.999rem),(pointer:coarse)").matches){const p=document.createElement("i");p.style.cssText="position:fixed;visibility:hidden;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)";document.documentElement.appendChild(p);const c=getComputedStyle(p);h-=parseFloat(c.paddingTop)+parseFloat(c.paddingBottom);p.remove()}s.textContent=":root{--screen:"+h+"px}"};let w=innerWidth;r();document.head.appendChild(s);addEventListener("resize",()=>{if(innerWidth!==w||!matchMedia("(pointer:coarse)").matches){w=innerWidth;r()}})})()`;
+const SCREEN = `(()=>{const s=document.createElement("style"),r=()=>{s.textContent=":root{--screen:"+innerHeight+"px}"};let w=innerWidth;r();document.head.appendChild(s);addEventListener("resize",()=>{if(innerWidth!==w||!matchMedia("(pointer:coarse)").matches){w=innerWidth;r()}})})()`;
 
 export const viewport: Viewport = {
-  viewportFit: "cover",
+  // Let Safari fit the page inside the safe area, as on non-linear.studio.
+  viewportFit: "auto",
   themeColor: browserTheme("#dfe1dc"),
 };
 
@@ -160,24 +177,26 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${marks.variable} ${sans.variable} ${kr.variable} ${mono.variable} ${display.variable} ${hand.variable} ${serif.variable} ${serifKr.variable}`}
+      className={`${marks.variable} ${sans.variable} ${kr.variable} ${memberName.variable} ${mono.variable} ${display.variable} ${hand.variable} ${serif.variable} ${serifKr.variable}`}
     >
       <head>
+        <meta name="theme-color" media={MOBILE} content="#000000" />
         <script dangerouslySetInnerHTML={{ __html: SCREEN }} />
       </head>
       <body id="top" className="max-md:has-[.nav-open]:overflow-hidden">
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-[calc(var(--safe-top)+1rem)] focus:left-[calc(var(--safe-left)+1rem)] focus:z-50 focus:inline-flex focus:min-h-11 focus:items-center focus:rounded-xs focus:bg-ink focus:px-lg focus:text-ui focus:text-canvas"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:inline-flex focus:min-h-11 focus:items-center focus:rounded-xs focus:bg-ink focus:px-lg focus:text-ui focus:text-canvas"
         >
           Skip to content
         </a>
         <JsonLd />
         {children}
-        <div data-overlay aria-hidden="true" className="safe-areas" />
         <ScrollRail />
         <SmoothScroll />
-        <PageTurn />
+        <Suspense fallback={null}>
+          <PageTurn />
+        </Suspense>
         <Analytics />
         <SpeedInsights />
       </body>

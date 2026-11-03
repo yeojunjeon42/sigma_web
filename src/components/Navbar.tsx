@@ -1,5 +1,7 @@
 "use client";
 
+import { pageY, pageScroller, onPageScroll } from "@/lib/pageScroll";
+
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -36,29 +38,29 @@ const look = (p: number, h: number): Keyframe => ({
 });
 
 const flip = (bar: HTMLElement, top: number) => {
-  let last = window.scrollY;
+  let last = pageY();
   const onScroll = () => {
-    const y = window.scrollY;
+    const y = pageY();
     if (Math.abs(y - last) <= STEP) return;
     if (y > last && y > top) bar.dataset.away = "";
     else delete bar.dataset.away;
     last = y;
   };
-  window.addEventListener("scroll", onScroll, { passive: true });
-  return () => window.removeEventListener("scroll", onScroll);
+  const stopPageScroll = onPageScroll(onScroll);
+  return () => stopPageScroll();
 };
 
 const follow = (bar: HTMLElement, Scroll: Timeline) => {
-  const line = new Scroll({ source: document.documentElement, axis: "block" });
+  const line = new Scroll({ source: pageScroller(), axis: "block" });
   const percent = (window.CSS as { percent?: (n: number) => CSSNumberish } | undefined)?.percent;
-  const limit = () => Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  const limit = () => Math.max(0, pageScroller().scrollHeight - window.innerHeight);
   const now = () => {
     const t = line.currentTime;
     if (typeof CSSUnitValue !== "undefined" && t instanceof CSSUnitValue && t.unit === "percent") {
       return clamp01(t.value / 100);
     }
     const end = limit();
-    return end > 0 ? clamp01(window.scrollY / end) : 0;
+    return end > 0 ? clamp01(pageY() / end) : 0;
   };
 
   let run: Animation | null = null;
@@ -71,7 +73,7 @@ const follow = (bar: HTMLElement, Scroll: Timeline) => {
   let shown = 0;
   let gone = 1;
   let heading = 0;
-  let lastY = Math.min(end, Math.max(0, window.scrollY));
+  let lastY = Math.min(end, Math.max(0, pageY()));
   let edge = lastY;
   let touching = false;
   let quiet = 0;
@@ -163,7 +165,7 @@ const follow = (bar: HTMLElement, Scroll: Timeline) => {
   const onScroll = () => {
     window.clearTimeout(quiet);
     quiet = window.setTimeout(rested, QUIET);
-    const y = Math.min(limit(), Math.max(0, window.scrollY));
+    const y = Math.min(limit(), Math.max(0, pageY()));
     if (y <= 0) {
       heading = 0;
       lastY = edge = 0;
@@ -214,7 +216,7 @@ const follow = (bar: HTMLElement, Scroll: Timeline) => {
 
   const ro = new ResizeObserver(refit);
   ro.observe(document.body);
-  window.addEventListener("scroll", onScroll, { passive: true });
+  const stopPageScroll = onPageScroll(onScroll);
   window.addEventListener("resize", refit);
   window.addEventListener("touchstart", down, { passive: true });
   window.addEventListener("touchend", up, { passive: true });
@@ -222,7 +224,7 @@ const follow = (bar: HTMLElement, Scroll: Timeline) => {
   return () => {
     window.clearTimeout(quiet);
     ro.disconnect();
-    window.removeEventListener("scroll", onScroll);
+    stopPageScroll();
     window.removeEventListener("resize", refit);
     window.removeEventListener("touchstart", down);
     window.removeEventListener("touchend", up);
@@ -417,7 +419,7 @@ export default function Navbar({
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
               aria-controls="masthead-nav"
-              className={`-mr-2 flex size-11 items-center justify-center ${open ? t.mark : "text-white"}`}
+              className={`-mr-3 flex size-11 items-center justify-center ${open ? t.mark : "text-white"}`}
             >
               <span className="sr-only">
                 Menu
