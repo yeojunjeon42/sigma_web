@@ -1,13 +1,14 @@
 import Image from "next/image";
+import { splitResult } from "../splitResult";
 import type { HistoryEvent } from "../types";
 import type { ClubEvent } from "../data/photos";
-import { when } from "./Chronology";
+import { season, when } from "./Chronology";
 import RollingDate from "./RollingDate";
 
 const BIG =
   "font-[family-name:var(--f-display)] [font-stretch:125%] font-bold tabular-nums tracking-[-0.02em] leading-[0.699] text-ink [writing-mode:vertical-rl] text-[length:var(--Y)]";
 const CAP = "text-caption text-ink-muted";
-const FIGURE = "text-[clamp(2.75rem,1.6rem+2.6vw,4.5rem)] leading-[0.85] tracking-[-0.04em] tabular-nums text-ink";
+const FIGURE = "whitespace-nowrap font-[family-name:var(--f-display)] font-bold [font-stretch:125%] text-[clamp(2.25rem,9vw,4rem)] leading-[0.85] tracking-[-0.02em] tabular-nums text-ink md:text-[clamp(2.75rem,1.6rem+2.6vw,4.5rem)]";
 
 const MOTION = `
 @media (prefers-reduced-motion: no-preference) {
@@ -44,7 +45,7 @@ export default function HistoryHero({
           className={`${BIG} u-away [--away:-12svh] col-span-2 col-start-1 row-start-1 self-start justify-self-start lg:row-span-2`}
         >
           <span className="hy-in-a block">
-            <span className="-ml-[0.022em] block rotate-180">1984</span>
+            <span className="-ml-[0.022em] block rotate-180 max-md:ml-[0.02em]">1984</span>
           </span>
         </span>
       </h1>
@@ -53,13 +54,15 @@ export default function HistoryHero({
         <ul className="flex flex-col gap-y-lg">
           {now.slice(0, 2).map((e) => {
             const w = when(e.date);
+            const [event, result] = splitResult(e.title.en.replaceAll("-", "\u2011"));
             return (
               <li key={e.id} className="flex flex-col gap-y-xs">
                 <span className={CAP}>
-                  {w ? `${w} ${latest}` : e.award ? "Award" : latest}
+                  {w ? `${season(w)} ${latest}` : e.award ? "Award" : latest}
                 </span>
-                <span className="text-balance text-lead text-ink lg:text-title">
-                  {e.title.en.replaceAll("-", "\u2011")}
+                <span className="flex flex-wrap gap-x-sm text-balance text-lead text-ink lg:text-title">
+                  <span className="min-w-0">{event}</span>
+                  {result ? <span className="whitespace-nowrap text-ink-muted">{result}</span> : null}
                 </span>
               </li>
             );
@@ -80,17 +83,17 @@ export default function HistoryHero({
       <div className="col-span-4 row-start-3 flex flex-col gap-y-lg self-end md:col-span-9 md:grid md:grid-cols-subgrid lg:col-span-6 lg:col-start-1">
         <dl className="grid grid-cols-2 gap-x-gutter md:col-span-full md:grid-cols-subgrid">
           {facts.map((f) => (
-            <div key={f.label} className="flex flex-col-reverse gap-y-xs md:col-span-3">
-              <dt className={CAP}>
+            <div key={f.label} className="flex min-w-0 flex-col-reverse justify-end gap-y-xs md:col-span-3">
+              <dt className={`${CAP} max-md:whitespace-nowrap`}>
                 {f.label}
               </dt>
               <dd className={FIGURE}>{f.value}</dd>
             </div>
           ))}
         </dl>
-        <p className={`${CAP} md:col-span-full`}>
-          Running for
-          <span className="ml-sm text-lead text-ink [&>span]:inline">
+        <p className={`${CAP} flex flex-col-reverse gap-y-xs md:col-span-full md:block`}>
+          <span>Running for</span>
+          <span className="text-lead text-ink md:ml-sm [&>span]:inline">
             <RollingDate />
           </span>
         </p>
