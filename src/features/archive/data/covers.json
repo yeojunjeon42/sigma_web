@@ -41,10 +41,10 @@
     "lift": "01-3.jpeg"
   },
   "ballboy": {
-    "file": "03.jpg",
+    "file": "03-4d479968.jpg",
     "slot": "sq",
     "why": "the robot on the floor, not held up under a caption",
-    "lift": "03.jpg"
+    "lift": "03-4d479968.jpg"
   },
   "board-game-bot": {
     "file": "04.jpg",
@@ -55,7 +55,7 @@
   "book-cart": {
     "slot": "tall",
     "why": "the cart among the white towers, upright",
-    "lift": "02.jpg"
+    "lift": "02-2538f98c.jpg"
   },
   "braille-block": {
     "file": "03-2.jpeg",
@@ -64,11 +64,11 @@
     "lift": "03-2.jpeg"
   },
   "cobra": {
-    "file": "02.jpg",
+    "file": "02-2b2f3a43.jpg",
     "slot": "wide",
     "focus": "50% 45%",
     "why": "a snake wants a long frame",
-    "lift": "02.jpg"
+    "lift": "02-2b2f3a43.jpg"
   },
   "copy-me": {
     "file": "03.jpg",
@@ -170,11 +170,11 @@
   "neptunus": {
     "slot": "wide",
     "why": "a long low render",
-    "lift": "01.jpeg"
+    "lift": "01-5e3c6813.jpg"
   },
   "open-noise-control": {
     "slot": "tall",
-    "lift": "02.jpg"
+    "lift": "02-6c2ff72e.jpg"
   },
   "pet-robot": {
     "slot": "std",
@@ -188,7 +188,7 @@
   },
   "pov-display": {
     "slot": "land",
-    "lift": "01.jpg"
+    "lift": "01-229b4505.jpg"
   },
   "pygmalion": {
     "file": "02.jpeg",
@@ -206,7 +206,7 @@
     "lift": "01.jpg"
   },
   "rc-submarine": {
-    "file": "08.jpg",
+    "file": "08-b21db509.jpg",
     "slot": "land",
     "why": "in the sea — the one frame that says submarine",
     "feature": "2025 opens under water — the one build photographed where it works",
@@ -246,7 +246,7 @@
   "smart-car-2013": {
     "slot": "sq",
     "why": "square, so the two Smart Cars stop reading as one entry twice",
-    "lift": "01.jpg"
+    "lift": "01-61c02e16.jpg"
   },
   "snuewheel": {
     "slot": "land",
@@ -280,7 +280,7 @@
     "slot": "sq",
     "why": "a glowing disc",
     "feature": "the one lit object in 2024",
-    "lift": "01.jpg"
+    "lift": "01-a2624e55.jpg"
   },
   "techwin-2011": {
     "slot": "std",
@@ -289,7 +289,7 @@
   "tic-mask": {
     "slot": "strip",
     "why": "the sensor and the earpieces; only a 3:1 strip crops off both the black bar above and the caption below",
-    "lift": "01.jpeg"
+    "lift": "01-cc24efb6.jpg"
   },
   "turtlebot": {
     "slot": "sq",
