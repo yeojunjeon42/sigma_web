@@ -3,7 +3,7 @@ import { getPosts } from "@/app/ai/corpus";
 import { page, postsList } from "@/app/ai/ld";
 import { Chips, DIM, Ext, Head, Items, Ld, Section } from "@/app/ai/terminal";
 
-const DESCRIPTION = "Every published post, with its date, tags and address.";
+const DESCRIPTION = "Every post, with its date and tags.";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -16,7 +16,7 @@ export default function TerminalBlog() {
 
   return (
     <>
-      <Ld data={page("/ai/blog", "Blog — published posts", DESCRIPTION)} />
+      <Ld data={page("/ai/blog", "Blog", DESCRIPTION)} />
       <Ld data={postsList(posts)} />
       <Head
         name="blog"
@@ -34,11 +34,6 @@ export default function TerminalBlog() {
                 {p.date}
               </time>{" "}
               <Ext href={`/blog/${p.slug}`}>{p.title.en}</Ext>
-              {p.title.ko && p.title.ko !== p.title.en && (
-                <span lang="ko" className={`block ${DIM}`}>
-                  {p.title.ko}
-                </span>
-              )}
               <Chips items={p.tags.map((t) => t.en)} />
               {p.team.length > 0 && <span className={`block ${DIM}`}>team: {p.team.join(", ")}</span>}
             </li>

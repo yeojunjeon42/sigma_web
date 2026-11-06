@@ -3,7 +3,7 @@ import { getHistory } from "@/app/ai/corpus";
 import { awardsOf, eventsList, page } from "@/app/ai/ld";
 import { DIM, Ext, Head, Items, Ld, Section } from "@/app/ai/terminal";
 
-const DESCRIPTION = "The club's dated record, 1984–2026: events and awards by year.";
+const DESCRIPTION = "Events and awards by year, since 1984.";
 
 export const metadata: Metadata = {
   title: "History",
@@ -17,15 +17,12 @@ export default async function TerminalHistory() {
 
   return (
     <>
-      <Ld data={page("/ai/history", "History — 1984 to 2026", DESCRIPTION)} />
+      <Ld data={page("/ai/history", "History", DESCRIPTION)} />
       <Ld data={eventsList(history)} />
       <Ld data={awardsOf(history)} />
       <Head
         name="history"
-        notes={[
-          "the club's record by year, 1984–2026.",
-          "dates in ISO 8601. where only the year is known, the part of it follows in brackets. an award won more than once in a year is listed once, with its count.",
-        ]}
+        notes={["events and awards by year.", "dates in ISO 8601."]}
         facts={[{ k: "Entries", v: String(entries) }]}
         md="/ai/history.md"
         human="/history"
@@ -40,20 +37,13 @@ export default async function TerminalHistory() {
                   {e.iso}
                 </time>
                 {e.period && <span className={DIM}> ({e.period})</span>}{" "}
-                {e.kind === "award" && `Award${e.count > 1 ? ` ×${e.count}` : ""} — `}
+                {e.kind === "award" && <span className={DIM}>[award{e.count > 1 ? ` ×${e.count}` : ""}] </span>}
                 {e.title.en}
-                {e.title.ko && e.title.ko !== e.title.en && (
-                  <span lang="ko" className={`block ${DIM}`}>
-                    {e.title.ko}
-                  </span>
-                )}
-                {e.build ? (
+                {e.build && (
                   <span className={`block ${DIM}`}>
                     build: <Ext href={`/archive?view=reel&at=${e.build.id}`}>{e.build.id}</Ext>
                   </span>
-                ) : e.work ? (
-                  <span className={`block ${DIM}`}>{e.work}</span>
-                ) : null}
+                )}
               </li>
             ))}
           </Items>

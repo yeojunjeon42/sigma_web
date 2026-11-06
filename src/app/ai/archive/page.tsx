@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { getBuilds } from "@/app/ai/corpus";
+import { ARCHIVE_SPAN, getBuilds } from "@/app/ai/corpus";
 import { buildsList, page } from "@/app/ai/ld";
 import { Chips, DIM, Ext, Head, Items, Ld, Section } from "@/app/ai/terminal";
 
-const DESCRIPTION = "Every build, 2007–2025: year, bilingual title, award, tags and team.";
+const DESCRIPTION = `Every build, ${ARCHIVE_SPAN}, with its award, tags and team.`;
 
 export const metadata: Metadata = {
   title: "Archive",
@@ -17,11 +17,11 @@ export default function TerminalArchive() {
 
   return (
     <>
-      <Ld data={page("/ai/archive", "Archive — builds 2007–2025", DESCRIPTION)} />
+      <Ld data={page("/ai/archive", "Archive", DESCRIPTION)} />
       <Ld data={buildsList(builds)} />
       <Head
         name="archive"
-        notes={["every build since 2007, newest first.", "full entry texts, in Korean: /llms-full.txt"]}
+        notes={["builds by year, newest first.", "full texts: /llms-full.txt"]}
         facts={[{ k: "Builds", v: String(builds.length) }]}
         md="/ai/archive.md"
         human="/archive"
@@ -35,12 +35,6 @@ export default function TerminalArchive() {
               .map((b) => (
                 <li key={b.id} id={b.id} className="scroll-mt-6">
                   <Ext href={`/archive?view=reel&at=${b.id}`}>{b.title.en}</Ext>
-                  {b.title.ko && b.title.ko !== b.title.en && (
-                    <span lang="ko" className={DIM}>
-                      {" "}
-                      {b.title.ko}
-                    </span>
-                  )}
                   {b.award && <span className="block">{b.award.en}</span>}
                   <Chips items={b.tags.map((t) => t.en)} />
                   {b.team.length > 0 && <span className={`block ${DIM}`}>team: {b.team.join(", ")}</span>}
