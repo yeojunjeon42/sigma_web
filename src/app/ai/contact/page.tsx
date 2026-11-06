@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { MAPS, ORG, SOCIAL } from "@/app/ai/corpus";
 import { page } from "@/app/ai/ld";
-import { Bil, Ext, Facts, Head, Ld, Section } from "@/app/ai/terminal";
+import { Ext, Facts, Head, Ld, Section } from "@/app/ai/terminal";
 
-const DESCRIPTION = "How to reach Sigma Intelligence: email, the club room and its channels.";
+const DESCRIPTION = "Email, the club room, maps and channels.";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -21,7 +21,7 @@ export default function TerminalContact() {
         <Facts
           rows={[
             { k: "Email", v: <Ext href={`mailto:${ORG.email}`}>{ORG.email}</Ext> },
-            { k: "Club room", v: <Bil v={{ en: ORG.address, ko: ORG.addressKo }} /> },
+            { k: "Club room", v: ORG.address },
             ...MAPS.map((m) => ({ k: m.name, v: <Ext href={m.href}>{m.href}</Ext> })),
           ]}
         />

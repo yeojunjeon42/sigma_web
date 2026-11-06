@@ -29,21 +29,24 @@ export const ORG = {
   department: FACTS[0].value,
   room: FACTS[1].value,
   address: "Building 302, Room 215-2, Seoul National University, Gwanak-gu, Seoul, KR",
-  addressKo: "서울대학교 302동 215-2호",
   email: EMAIL,
   summary:
     "Sigma Intelligence is the robotics club of Seoul National University. Founded in 1984, it is Korea's first university robotics club.",
 };
 
 export const PAGES = [
-  { key: "index", title: "Index", ai: "/ai", md: "/ai/index.md", human: "/", note: "identity, facts, every page" },
-  { key: "about", title: "About", ai: "/ai/about", md: "/ai/about.md", human: "/", note: "curriculum, equipment" },
-  { key: "archive", title: "Archive", ai: "/ai/archive", md: "/ai/archive.md", human: "/archive", note: "every build, 2007–2025; entry texts in the full corpus" },
-  { key: "history", title: "History", ai: "/ai/history", md: "/ai/history.md", human: "/history", note: "events and awards by year, 1984–2026" },
-  { key: "members", title: "Members", ai: "/ai/members", md: "/ai/members.md", human: "/members", note: "the executive team" },
-  { key: "blog", title: "Blog", ai: "/ai/blog", md: "/ai/blog.md", human: "/blog", note: "published posts" },
+  { key: "index", title: "Index", ai: "/ai", md: "/ai/index.md", human: "/", note: "facts and pages" },
+  { key: "about", title: "About", ai: "/ai/about", md: "/ai/about.md", human: "/", note: "curriculum and equipment" },
+  { key: "archive", title: "Archive", ai: "/ai/archive", md: "/ai/archive.md", human: "/archive", note: "builds by year" },
+  { key: "history", title: "History", ai: "/ai/history", md: "/ai/history.md", human: "/history", note: "events and awards by year" },
+  { key: "members", title: "Members", ai: "/ai/members", md: "/ai/members.md", human: "/members", note: "this year's executives" },
+  { key: "blog", title: "Blog", ai: "/ai/blog", md: "/ai/blog.md", human: "/blog", note: "posts" },
   { key: "contact", title: "Contact", ai: "/ai/contact", md: "/ai/contact.md", human: "/contact", note: "email, club room, maps, channels" },
 ] as const;
+
+const span = (years: number[]) => `${Math.min(...years)}–${Math.max(...years)}`;
+export const ARCHIVE_SPAN = span(ARCHIVE.flatMap((p) => (p.year ? [p.year] : [])));
+export const AWARD_SPAN = span(AWARDS.map((a) => a.year));
 
 type PageKey = (typeof PAGES)[number]["key"];
 
@@ -170,7 +173,6 @@ export interface Entry {
   kind: "event" | "award";
   count: number;
   build?: { id: string; url: string };
-  work?: string;
 }
 
 export async function getHistory(): Promise<{ year: number; entries: Entry[] }[]> {
@@ -188,7 +190,6 @@ export async function getHistory(): Promise<{ year: number; entries: Entry[] }[]
         kind: e.award ? "award" : "event",
         count: e.count ?? 1,
         build: id ? { id, url: `${SITE}/archive?view=reel&at=${id}` } : undefined,
-        work: e.work,
       } satisfies Entry;
     }),
   }));
@@ -209,7 +210,6 @@ export async function getMembers() {
 
 export { ALUMNI_TOTAL, COHORT_COUNT, FIRST_INTAKE, LAST_INTAKE, AWARDS, CURRICULUM, EQUIPMENT, FACTS, MAPS, SOCIAL };
 
-const bi = (b: Bi) => (b.ko && b.ko !== b.en ? `${b.en} (${b.ko})` : b.en);
 const abs = (p: string) => (p.startsWith("http") ? p : `${SITE}${p}`);
 const cell = (s: string) => s.replace(/\|/g, "\\|").replace(/\n+/g, " ");
 
@@ -239,9 +239,9 @@ function mdIdentity(): string {
       ["Name", `${ORG.name} (${ORG.nameKo})`],
       ["Type", "University robotics club"],
       ["Founded", ORG.founded],
-      ["Institution", `${ORG.institution} (${ORG.institutionKo})`],
-      ["Department", bi(FACTS[0].value)],
-      ["Club room", `${ORG.room.en} (${ORG.room.ko})`],
+      ["Institution", ORG.institution],
+      ["Department", ORG.department.en],
+      ["Club room", ORG.room.en],
       ["Email", ORG.email],
       ["Website", SITE],
       ["Channels", SOCIAL.map((s) => `${s.name}: ${s.href}`).join("; ")],
@@ -249,11 +249,9 @@ function mdIdentity(): string {
   );
 }
 
-async function mdIndex(): Promise<string> {
-  const history = await getHistory();
-  const entries = history.reduce((n, y) => n + y.entries.reduce((m, e) => m + e.count, 0), 0);
+function mdIndex(): string {
   return [
-    heading("SIGMA INTELLIGENCE — terminal", "index"),
+    heading("SIGMA INTELLIGENCE", "index"),
     "",
     "## About",
     "",
@@ -264,11 +262,10 @@ async function mdIndex(): Promise<string> {
     table(
       ["Measure", "Value"],
       [
-        ["Builds in the archive", `${ARCHIVE.length} (2007–2025)`],
-        ["Awards", `${AWARDS.length} (${Math.min(...AWARDS.map((a) => a.year))}–${Math.max(...AWARDS.map((a) => a.year))})`],
-        ["Timeline entries", String(entries)],
+        ["Builds", `${ARCHIVE.length} (${ARCHIVE_SPAN})`],
+        ["Awards", `${AWARDS.length} (${AWARD_SPAN})`],
         ["Cohorts", `${COHORT_COUNT} (${FIRST_INTAKE}–${LAST_INTAKE}), ${ALUMNI_TOTAL} members and alumni`],
-        ["Published posts", String(getPosts().length)],
+        ["Posts", String(getPosts().length)],
       ],
     ),
     "",
@@ -291,28 +288,27 @@ function mdAbout(): string {
     "",
     "## Curriculum",
     "",
-    ...CURRICULUM.map((c) => `- ${c.href ? `[${c.en}](${c.href})` : c.en}${c.ko !== c.en ? ` (${c.ko})` : ""}`),
+    ...CURRICULUM.map((c) => `- ${c.href ? `[${c.en}](${c.href})` : c.en}`),
     "",
     "## Equipment",
     "",
-    ...EQUIPMENT.map((e) => `- ${bi(e)}`),
+    ...EQUIPMENT.map((e) => `- ${e.en}`),
   ].join("\n");
 }
 
 function mdArchive(full = false): string {
   const builds = getBuilds();
   const out = [
-    heading("Archive — builds 2007–2025", "archive"),
+    heading("Archive", "archive"),
     "",
-    `${builds.length} builds, newest first. Each has its own section below; its site page opens the build in the archive reel.`,
+    `${builds.length} builds, newest first.`,
     "",
     table(
-      ["ID", "Year", "Title", "Korean title", "Award", "Tags", "Team size"],
+      ["ID", "Year", "Title", "Award", "Tags", "Team size"],
       builds.map((b) => [
         b.id,
         b.year ? String(b.year) : "unknown",
         b.title.en,
-        b.title.ko ?? "",
         b.award?.en ?? "",
         b.tags.map((t) => t.en).join(", "),
         b.team.length ? String(b.team.length) : "",
@@ -326,14 +322,13 @@ function mdArchive(full = false): string {
       "",
       `- ID: ${b.id}`,
       `- Year: ${b.year ?? "unknown"} · Era: ${b.era}`,
-      ...(b.title.ko ? [`- Korean title: ${b.title.ko}`] : []),
-      ...(b.award ? [`- Award: ${bi(b.award)}`] : []),
-      ...(b.tags.length ? [`- Tags: ${b.tags.map(bi).join(", ")}`] : []),
+      ...(b.award ? [`- Award: ${b.award.en}`] : []),
+      ...(b.tags.length ? [`- Tags: ${b.tags.map((t) => t.en).join(", ")}`] : []),
       ...(b.team.length ? [`- Team: ${b.team.join(", ")}`] : []),
       `- URL: ${b.url}`,
       "",
     );
-    if (full && b.body) out.push("Entry text (Korean):", "", b.body, "");
+    if (full && b.body) out.push(b.body, "");
   }
   return out.join("\n");
 }
@@ -341,9 +336,9 @@ function mdArchive(full = false): string {
 async function mdHistory(): Promise<string> {
   const history = await getHistory();
   const out = [
-    heading("History — 1984 to 2026", "history"),
+    heading("History", "history"),
     "",
-    "Dates are ISO 8601. Where the record gives only a year, the Period column says which part of it (first half, second half, a season). An award counted more than once appears once with its count.",
+    "Dates are ISO 8601. Period is the half or season when only the year is known.",
     "",
   ];
   for (const y of history) {
@@ -351,14 +346,13 @@ async function mdHistory(): Promise<string> {
       `## ${y.year}`,
       "",
       table(
-        ["Date", "Period", "Kind", "Entry", "Korean", "Build"],
+        ["Date", "Period", "Kind", "Entry", "Build"],
         y.entries.map((e) => [
           e.iso,
           e.period ?? "",
           e.kind === "award" ? `award${e.count > 1 ? ` ×${e.count}` : ""}` : "event",
           e.title.en,
-          e.title.ko ?? "",
-          e.build ? e.build.url : e.work ?? "",
+          e.build?.url ?? "",
         ]),
       ),
       "",
@@ -370,17 +364,16 @@ async function mdHistory(): Promise<string> {
 async function mdMembers(): Promise<string> {
   const members = await getMembers();
   return [
-    heading("Members — executive team", "members"),
+    heading("Members", "members"),
     "",
-    "The current executive team. Names are given in Korean, as the members write them; they are not romanised. Only the executive team is published.",
+    "This year's executives. Names are in Korean.",
     "",
     table(
-      ["Name", "Role", "Role (Korean)", "Also", "Department", "Bio", "Links"],
+      ["Name", "Role", "Also", "Department", "Bio", "Links"],
       members.map((m) => [
         m.name,
         m.role.en,
-        m.role.ko,
-        m.duty ? `${m.duty.en} (${m.duty.ko})` : "",
+        m.duty?.en ?? "",
         m.department.en,
         m.bio ?? "",
         m.links.map(([k, v]) => `${k}: ${v}`).join("; "),
@@ -392,11 +385,11 @@ async function mdMembers(): Promise<string> {
 function mdBlog(full = false): string {
   const posts = getPosts();
   const out = [
-    heading("Blog — published posts", "blog"),
+    heading("Blog", "blog"),
     "",
     table(
-      ["Date", "Title", "Korean title", "Tags", "URL"],
-      posts.map((p) => [p.date, p.title.en, p.title.ko ?? "", p.tags.map((t) => t.en).join(", "), p.url]),
+      ["Date", "Title", "Tags", "URL"],
+      posts.map((p) => [p.date, p.title.en, p.tags.map((t) => t.en).join(", "), p.url]),
     ),
     "",
   ];
@@ -405,13 +398,12 @@ function mdBlog(full = false): string {
       `## ${p.title.en}`,
       "",
       `- Date: ${p.date}`,
-      ...(p.title.ko ? [`- Korean title: ${p.title.ko}`] : []),
-      ...(p.tags.length ? [`- Tags: ${p.tags.map(bi).join(", ")}`] : []),
+      ...(p.tags.length ? [`- Tags: ${p.tags.map((t) => t.en).join(", ")}`] : []),
       ...(p.team.length ? [`- Team: ${p.team.join(", ")}`] : []),
       `- URL: ${p.url}`,
       "",
     );
-    if (full && p.body) out.push("Post text (Korean):", "", p.body, "");
+    if (full && p.body) out.push(p.body, "");
   }
   return out.join("\n");
 }
@@ -424,7 +416,7 @@ function mdContact(): string {
       ["Field", "Value"],
       [
         ["Email", ORG.email],
-        ["Club room", `${ORG.address} (${ORG.addressKo})`],
+        ["Club room", ORG.address],
         ...MAPS.map((m) => [m.name, m.href]),
         ...SOCIAL.map((s) => [s.name, s.href]),
       ],
@@ -455,33 +447,31 @@ export function llmsTxt(): string {
   return [
     "# SIGMA INTELLIGENCE",
     "",
-    `> ${ORG.summary} This site is its archive of builds, its dated record, its members, its writing and how to reach it. Every page has a plain Markdown twin listed below.`,
+    `> ${ORG.summary}`,
     "",
     `Korean name: ${ORG.nameKo}. Founded ${ORG.founded} at ${ORG.institution} (${ORG.department.en}). Club room: ${ORG.room.en}. Email: ${ORG.email}. Dates in these files are ISO 8601.`,
     "",
     "## Pages",
     "",
-    ...PAGES.map((p) => `- [${p.title}](${abs(p.md)}): ${p.note}. Human page: ${abs(p.human)}`),
+    ...PAGES.map((p) => `- [${p.title}](${abs(p.md)}): ${p.note}. Site: ${abs(p.human)}`),
     "",
     "## Full text",
     "",
-    `- [Complete corpus](${SITE}/llms-full.txt): Every page above in one file, including the full text of every archive entry and post`,
+    `- [Full text](${SITE}/llms-full.txt): every page above in one file, with the text of each build and post`,
     "",
     "## Optional",
     "",
-    `- [Terminal (HTML)](${SITE}/ai): The same content as semantic HTML with schema.org JSON-LD`,
-    `- [Sitemap](${SITE}/sitemap.xml): Every site page, including one address per build`,
+    `- [Terminal](${SITE}/ai): the same pages as HTML, with schema.org JSON-LD`,
+    `- [Sitemap](${SITE}/sitemap.xml): every page on the site, one address per build`,
   ].join("\n");
 }
 
 export async function llmsFull(): Promise<string> {
   const parts = await Promise.all(PAGES.map((p) => mdPage(p.key, true)));
   return [
-    `# SIGMA INTELLIGENCE — complete corpus`,
+    "# SIGMA INTELLIGENCE",
     "",
     `> ${ORG.summary}`,
-    "",
-    `Generated from the same data as ${SITE}. Sections follow; each starts with its own H1.`,
     "",
     ...parts.flatMap((p) => ["---", "", p, ""]),
   ].join("\n");

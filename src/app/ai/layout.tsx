@@ -44,12 +44,11 @@ export default function TerminalLayout({
             </a>
           </p>
           <p>
-            # full corpus:{" "}
+            # full text:{" "}
             <a href="/llms-full.txt" className="relative underline underline-offset-4 before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] lg:before:hidden">
               /llms-full.txt
             </a>
           </p>
-          <p># built from the same data as the site.</p>
           <p aria-hidden="true" className="mt-6">
             <Prompt />
             <span className="term-cursor ml-[1ch] inline-block h-[1.15em] w-[1ch] translate-y-[0.2em] bg-ink-inverse" />
