@@ -32,7 +32,7 @@ export const COFOUNDED: Sponsor[] = [
   {
     id: "roboticus",
     name: "Roboticus",
-    logo: { src: "/sponsors/roboticus-wordmark.svg", width: 1932, height: 371, cap: 0.784, foot: 0.011 },
+    logo: { src: "/sponsors/roboticus-wordmark.svg", width: 1932, height: 382, cap: 0.762, foot: 0.039 },
     website: "https://robotic-us.com/",
   },
 ];
