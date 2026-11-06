@@ -46,7 +46,7 @@ export default function Arcade({ word, label, extra }: { word: string; label: st
     if (!ctx) return;
     const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const tones = readInk();
-    const rule = getComputedStyle(document.documentElement).getPropertyValue("--color-rule-strong").trim() || "#979b91";
+    const rule = getComputedStyle(document.documentElement).getPropertyValue("--color-rule-strong").trim() || "#a3a79d";
     const kit = createPrinter(tones);
     const mouth = createFace();
     const base = document.createElement("canvas");
