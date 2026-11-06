@@ -265,7 +265,7 @@ export function Print({
 
 function press(g: CanvasRenderingContext2D, { tone, spin, cols, rows, cell, w, h }: Sheet) {
   const css = getComputedStyle(document.documentElement);
-  g.fillStyle = css.getPropertyValue("--color-canvas").trim() || "#dfe1dc";
+  g.fillStyle = css.getPropertyValue("--color-canvas").trim() || "#e9eae5";
   g.fillRect(0, 0, w, h);
   g.fillStyle = css.getPropertyValue("--color-ink").trim() || "#0f110d";
   g.beginPath();

@@ -18,13 +18,13 @@
   --default-font-family: var(--font-sans);
   --radius-photo: clamp(10px, 0.6rem + 0.5vw, 16px);
 
-  --color-canvas: #dfe1dc;
-  --color-surface: #d7d9d3;
-  --color-surface-sunken: #cfd2cb;
+  --color-canvas: #e9eae5;
+  --color-surface: #e1e3dd;
+  --color-surface-sunken: #d9dbd4;
   --color-ink: #0f110d;
   --color-ink-muted: #4b4f47;
-  --color-rule: #b6bab0;
-  --color-rule-strong: #979b91;
+  --color-rule: #c3c6be;
+  --color-rule-strong: #a3a79d;
   --color-rule-field: #76767a;
 
   --color-band: #f0d8d1;

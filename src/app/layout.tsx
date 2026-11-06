@@ -120,7 +120,7 @@ const SCREEN = `(()=>{const s=document.createElement("style"),r=()=>{s.textConte
 export const viewport: Viewport = {
   // Let Safari fit the page inside the safe area, as on non-linear.studio.
   viewportFit: "auto",
-  themeColor: browserTheme("#dfe1dc"),
+  themeColor: browserTheme("#e9eae5"),
 };
 
 export const metadata: Metadata = {
