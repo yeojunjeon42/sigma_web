@@ -30,8 +30,6 @@ export function ScrollRail() {
       rail.dataset.on = scrollRoom > 1 ? "1" : "";
       thumb.style.height = `${thumbHeight}px`;
       thumb.style.transform = `translate3d(0,${top}px,0)`;
-      rail.setAttribute("aria-valuemax", String(Math.round(scrollRoom)));
-      rail.setAttribute("aria-valuenow", String(Math.round(pageY())));
     };
     const kick = () => {
       if (!frame) frame = requestAnimationFrame(paint);
@@ -86,13 +84,7 @@ export function ScrollRail() {
   return (
     <div
       ref={railRef}
-      role="scrollbar"
-      aria-label="Page scroll"
-      aria-controls="top"
-      aria-orientation="vertical"
-      aria-valuemin={0}
-      aria-valuemax={0}
-      aria-valuenow={0}
+      aria-hidden="true"
       className="site-scroll-rail"
     >
       <div ref={thumbRef} className="site-scroll-thumb" />

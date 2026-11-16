@@ -42,8 +42,7 @@ export default async function MembersPage() {
     links: m.links,
   }));
 
-  const alumni: CrewMember[] = [...ALUMNI]
-    .sort((a, b) => a.entryYear - b.entryYear)
+  const alumni: CrewMember[] = ALUMNI.toSorted((a, b) => a.entryYear - b.entryYear)
     .map((a) => ({
       id: a.id,
       group: "alumni",

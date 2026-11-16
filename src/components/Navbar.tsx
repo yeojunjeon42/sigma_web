@@ -265,6 +265,7 @@ export default function Navbar({
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const bar = useRef<HTMLElement>(null);
+  const menu = useRef<HTMLButtonElement>(null);
   const [onDark, setOnDark] = useState(tone === "overlay");
   const t = TONE[onDark ? "overlay" : "solid"];
 
@@ -281,6 +282,7 @@ export default function Navbar({
       if (e.key !== "Escape") return;
       e.preventDefault();
       setOpen(false);
+      menu.current?.focus();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -415,6 +417,7 @@ export default function Navbar({
 
           <div className="flex items-center md:hidden">
             <button
+              ref={menu}
               type="button"
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}

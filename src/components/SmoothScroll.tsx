@@ -58,6 +58,10 @@ export default function SmoothScroll() {
       lenis.scrollTo(el.getBoundingClientRect().top + window.scrollY - margin);
       wake();
       history.replaceState(null, "", `#${id}`);
+      // A native jump moves the keyboard's place with it; this one must too, or "Skip to
+      // content" leaves the next Tab in the navigation.
+      if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "-1");
+      el.focus({ preventScroll: true });
     };
     sync();
     window.addEventListener("wheel", wake, { passive: true });

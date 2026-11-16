@@ -32,7 +32,7 @@ export default async function ClubLifePage() {
   );
 
   const latest = nodes[0];
-  const now = [...latest.events].reverse().slice(0, 3);
+  const now = latest.events.toReversed().slice(0, 3);
   const facts = [
     { label: "Cohorts", value: String(COHORT_COUNT) },
     { label: "Members and alumni", value: String(ALUMNI_TOTAL) },

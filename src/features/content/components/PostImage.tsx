@@ -46,7 +46,7 @@ export default function PostImage({
   if (src) {
     return (
       <div style={{ aspectRatio: ratio }} className={`relative overflow-hidden bg-ink/5 ${className}`}>
-        <Image src={src} alt="" fill sizes={sizes} priority={eager} className="object-cover" />
+        <Image src={src} alt="" fill sizes={sizes} preload={eager} fetchPriority={eager ? "high" : undefined} className="object-cover" />
       </div>
     );
   }

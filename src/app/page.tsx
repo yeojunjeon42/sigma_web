@@ -45,7 +45,7 @@ export default async function Home() {
     return p && src ? [{ id, src, name: splitTitle(p.title).en, year: p.year }] : [];
   });
 
-  const line = [...builds].reverse().map((p) => ({
+  const line = builds.toReversed().map((p) => ({
     id: p.id,
     name: splitTitle(p.title).en,
     year: p.year,

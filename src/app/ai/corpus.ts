@@ -108,8 +108,7 @@ export interface Build {
 }
 
 export function getBuilds(): Build[] {
-  return [...ARCHIVE]
-    .sort((a, b) => (b.year ?? 0) - (a.year ?? 0) || a.title.localeCompare(b.title))
+  return ARCHIVE.toSorted((a, b) => (b.year ?? 0) - (a.year ?? 0) || a.title.localeCompare(b.title))
     .map((p) => {
       const doc = readMd(path.join(process.cwd(), "content", "archive", `${p.id}.md`));
       const t = splitTitle(p.title);

@@ -724,14 +724,19 @@
   opacity: 1;
   translate: 0 0;
 }
-[data-reveal] > *:nth-child(1) { --i: 0 }
-[data-reveal] > *:nth-child(2) { --i: 1 }
-[data-reveal] > *:nth-child(3) { --i: 2 }
-[data-reveal] > *:nth-child(4) { --i: 3 }
-[data-reveal] > *:nth-child(5) { --i: 4 }
-[data-reveal] > *:nth-child(6) { --i: 5 }
-[data-reveal] > *:nth-child(7) { --i: 6 }
-[data-reveal] > *:nth-child(8) { --i: 7 }
+@supports (transition-delay: calc(sibling-index() * 1ms)) {
+  [data-reveal] > * { --i: calc(sibling-index() - 1) }
+}
+@supports not (transition-delay: calc(sibling-index() * 1ms)) {
+  [data-reveal] > *:nth-child(1) { --i: 0 }
+  [data-reveal] > *:nth-child(2) { --i: 1 }
+  [data-reveal] > *:nth-child(3) { --i: 2 }
+  [data-reveal] > *:nth-child(4) { --i: 3 }
+  [data-reveal] > *:nth-child(5) { --i: 4 }
+  [data-reveal] > *:nth-child(6) { --i: 5 }
+  [data-reveal] > *:nth-child(7) { --i: 6 }
+  [data-reveal] > *:nth-child(8) { --i: 7 }
+}
 
 @media (prefers-reduced-motion: reduce) {
   [data-reveal] > * {
@@ -755,10 +760,6 @@
     transition: opacity 160ms ease-out;
   }
 }
-/* A post's cards (an Instagram carousel) as a strip: every card is --card high and as wide as
-   its own shape makes it (--own, width over height), never wider than --max, so portrait and
-   landscape cards sit side by side with even gaps. The track is full bleed; --lead is the article
-   column's left line, and the last card's margin lets it rest on that line too. */
 .card-reel {
   container-type: inline-size;
 }
@@ -806,10 +807,6 @@
     --lead: calc(3 * var(--c) + 4 * var(--gutter));
   }
 }
-/* Home's opening. Each letter of the two big words rises through a mask on its own baseline:
-   the clip is in the letter's box, so it shrinks as fast as the letter climbs and the line holds
-   still. The rest of the hero sets in after. HeroPlate's hush() seeks these to their end to
-   measure the words at rest, so keep the names on the hero- prefix. */
 @keyframes hero-letter {
   from {
     translate: 0 105%;
@@ -856,20 +853,27 @@
 .member-profile [data-profile-part="actions"] {
   animation-delay: 90ms;
 }
-.u-arrive > :nth-child(2) {
-  animation-delay: 30ms;
+@supports (animation-delay: calc(sibling-index() * 1ms)) {
+  .u-arrive > * {
+    animation-delay: min(calc((sibling-index() - 1) * 30ms), 150ms);
+  }
 }
-.u-arrive > :nth-child(3) {
-  animation-delay: 60ms;
-}
-.u-arrive > :nth-child(4) {
-  animation-delay: 90ms;
-}
-.u-arrive > :nth-child(5) {
-  animation-delay: 120ms;
-}
-.u-arrive > :nth-child(n + 6) {
-  animation-delay: 150ms;
+@supports not (animation-delay: calc(sibling-index() * 1ms)) {
+  .u-arrive > :nth-child(2) {
+    animation-delay: 30ms;
+  }
+  .u-arrive > :nth-child(3) {
+    animation-delay: 60ms;
+  }
+  .u-arrive > :nth-child(4) {
+    animation-delay: 90ms;
+  }
+  .u-arrive > :nth-child(5) {
+    animation-delay: 120ms;
+  }
+  .u-arrive > :nth-child(n + 6) {
+    animation-delay: 150ms;
+  }
 }
 
 @keyframes sheet-in {
@@ -984,7 +988,8 @@ html:has([data-terminal]) {
   .logo-roll {
     animation: logo-roll 45s linear infinite;
   }
-  .logo-roll:has(a:active) {
+  .logo-roll:has(a:active),
+  .logo-roll:has(a:focus-visible) {
     animation-play-state: paused;
   }
   @media (hover: hover) {
@@ -992,6 +997,12 @@ html:has([data-terminal]) {
       animation-play-state: paused;
     }
   }
+}
+/* A scroll that reaches the sheet's end stays in the sheet. Safari ignores this on a dialog, so
+   the body lock above stays. */
+.member-profile:modal,
+.member-profile::backdrop {
+  overscroll-behavior: contain;
 }
 /* The dim follows the member sheet's entrance and dismissal. */
 .member-profile::backdrop {
@@ -1375,7 +1386,8 @@ html[data-rules] .u-rule-in[data-in]::before {
     opacity: var(--away-fade, 1);
   }
 }
-@supports (animation-timeline: view()) {
+/* Both tests: some browsers have the timeline without the named ranges. */
+@supports ((animation-timeline: view()) and (animation-range: entry)) {
   @media (prefers-reduced-motion: no-preference) {
     .u-scroll-in {
       animation: scroll-rise linear both;

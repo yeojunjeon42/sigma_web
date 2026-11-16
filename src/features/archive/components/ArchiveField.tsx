@@ -86,7 +86,7 @@ export default function ArchiveField({
     (p.award ? 100 : 0) + (teamSize.get(p.id) ?? 0) - (tileFor(p, look).kind === "none" ? 1000 : 0);
   const bands = bandsOf(groups, sort, teamSize).map((b) => ({
     ...b,
-    projects: [...b.projects].sort((x, y) => weight(y) - weight(x)),
+    projects: b.projects.toSorted((x, y) => weight(y) - weight(x)),
   }));
   const printKey = `${look}|${bands.flatMap((b) => b.projects.map((p) => p.id)).join()}`;
 

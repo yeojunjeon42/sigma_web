@@ -16,6 +16,18 @@ const nextConfig: NextConfig = {
     qualities: [75],
     formats: ["image/webp"],
   },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
+        ],
+      },
+    ];
+  },
   async rewrites() {
     return {
       beforeFiles: [

@@ -43,7 +43,7 @@ export const ARCHIVE_META: Metadata = {
 const ON = "text-ink";
 const OFF = "text-ink-muted transition-colors hover:text-ink";
 
-const NEWEST = [...ERAS].reverse();
+const NEWEST = ERAS.toReversed();
 
 type View = "depth" | "reel" | "list";
 

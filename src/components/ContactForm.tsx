@@ -131,10 +131,10 @@ export function ContactForm() {
 
   if (status === "sent") {
     return (
-      <div className="flex flex-col-reverse items-start gap-y-lg py-lg sm:flex-row sm:items-center sm:gap-x-xl">
+      <div role="status" className="flex flex-col-reverse items-start gap-y-lg py-lg sm:flex-row sm:items-center sm:gap-x-xl">
         <Receipt stamp={stamp} />
         <div>
-          <p className="text-display-md text-ink">
+          <p ref={(el) => el?.focus({ preventScroll: true })} tabIndex={-1} className="text-display-md text-ink outline-none">
             Message sent
           </p>
           <p className="mt-md text-body text-ink">
@@ -180,6 +180,8 @@ export function ContactForm() {
           type="email"
           required
           autoComplete="email"
+          autoCapitalize="none"
+          spellCheck={false}
           aria-invalid={!!errors.email}
           aria-describedby={errors.email ? "contact-email-error" : undefined}
           className={ENTRY}

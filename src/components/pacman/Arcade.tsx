@@ -228,7 +228,7 @@ export default function Arcade({ word, label, extra }: { word: string; label: st
         }
       }
       const reachable = q.map((k) => [k % cols, Math.floor(k / cols)] as [number, number]);
-      const far = reachable.slice().sort((a, b) => reach[idx(...b)] - reach[idx(...a)]);
+      const far = reachable.toSorted((a, b) => reach[idx(...b)] - reach[idx(...a)]);
       homes = [far[0], far[Math.floor(far.length * 0.05)], far[Math.floor(far.length * 0.1)], far[Math.floor(far.length * 0.15)]];
       const away = reachable.filter((p) => Math.abs(p[0] - start[0]) + Math.abs(p[1] - start[1]) > 3);
       const byCorner = (fx: number, fy: number) =>

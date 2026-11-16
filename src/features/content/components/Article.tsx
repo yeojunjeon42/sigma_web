@@ -89,7 +89,8 @@ export default function Article({
                 height={leadPhoto.height}
                 sizes={imageSizes}
                 className="u-corner h-auto w-full"
-                priority
+                preload
+                fetchPriority="high"
               />
             ) : (
               <PostImage src={cover} ratio="16 / 9" sizes={imageSizes} eager className="u-corner w-full" />
