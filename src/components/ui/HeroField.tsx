@@ -18,41 +18,50 @@ const STMT = `${STMT_SIZE} u-lift max-w-[19ch] leading-[1.25] tracking-[-0.01em]
 
 const META = "text-ui tracking-normal";
 
-function Stmt({ className, children }: { className: string; children: React.ReactNode }) {
-  return <p className={`${STMT} ${className}`}>{children}</p>;
+const at = (ms: number) => ({ "--at": `${ms}ms` }) as React.CSSProperties;
+
+function Stmt({ className, delay, children }: { className: string; delay: number; children: React.ReactNode }) {
+  return (
+    <p style={at(delay)} className={`${STMT} hero-set ${className}`}>
+      {children}
+    </p>
+  );
+}
+
+// One span a letter, so each can rise on its own (`hero-letters` in globals.css).
+function Letters({ children }: { children: string }) {
+  return [...children].map((c, i) => (
+    <span key={i} style={{ "--i": i } as React.CSSProperties}>
+      {c}
+    </span>
+  ));
 }
 
 // Half the track must outrun the widest column it rolls in, and the row translates by half.
-const ROLL_COPIES = [0, 1, 2, 3, 4, 5];
+const ROLL_COPIES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-// The logos roll in one muted line. Each label travels with its logos, so a sponsor
-// never reads as a co-founder. Copies are hidden from readers and keyboards.
-function LogoRoll({ groups }: { groups: { label: string; items: Sponsor[] }[] }) {
+// The logos roll in one muted line, with no labels. Copies are hidden from readers and keyboards.
+function LogoRoll({ items }: { items: Sponsor[] }) {
   const set = (copy: boolean) =>
-    groups.map(({ label, items }) => (
-      <li key={label} className="flex shrink-0 items-baseline gap-x-xl pr-xl">
-        {/* Centred on the logos' letters: a smaller word on their baseline reads as sitting low. */}
-        <span className={`${META} whitespace-nowrap text-ink-muted [translate:0_calc((1cap-var(--logo-cap))/2)]`}>{label}</span>
-        {items.map((s) => (
-          <a
-            key={s.id}
-            href={s.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={copy ? undefined : s.name}
-            tabIndex={copy ? -1 : undefined}
-            className="relative block shrink-0 opacity-55 grayscale transition-[opacity,filter] duration-200 before:absolute before:top-1/2 before:left-1/2 before:h-11 before:w-[max(100%,2.75rem)] before:-translate-1/2 before:content-[''] hover:opacity-100 hover:grayscale-0 active:opacity-100 active:grayscale-0 motion-reduce:transition-none"
-          >
-            <Image
-              src={s.logo.src}
-              alt=""
-              width={s.logo.width}
-              height={s.logo.height}
-              style={{ height: `calc(var(--logo-cap) / ${s.logo.cap})`, marginBottom: `calc(var(--logo-cap) / ${s.logo.cap} * ${-s.logo.foot})` }}
-              className="block w-auto max-w-none"
-            />
-          </a>
-        ))}
+    items.map((s) => (
+      <li key={s.id} className="shrink-0 pr-xxl desk:pr-xxxl">
+        <a
+          href={s.website}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={copy ? undefined : s.name}
+          tabIndex={copy ? -1 : undefined}
+          className="relative block shrink-0 opacity-55 grayscale transition-[opacity,filter] duration-200 before:absolute before:top-1/2 before:left-1/2 before:h-11 before:w-[max(100%,2.75rem)] before:-translate-1/2 before:content-[''] hover:opacity-100 hover:grayscale-0 active:opacity-100 active:grayscale-0 motion-reduce:transition-none"
+        >
+          <Image
+            src={s.logo.src}
+            alt=""
+            width={s.logo.width}
+            height={s.logo.height}
+            style={{ height: `calc(var(--logo-cap) / ${s.logo.cap})`, marginBottom: `calc(var(--logo-cap) / ${s.logo.cap} * ${-s.logo.foot})` }}
+            className="block w-auto max-w-none"
+          />
+        </a>
       </li>
     ));
 
@@ -100,11 +109,12 @@ export default function HeroField({
         <div className="flex items-start justify-between pt-md desk:contents">
           <span
             aria-hidden="true"
-            className={`${BIG} -ml-[0.046em] desk:col-span-5 desk:col-start-1 desk:row-start-1 desk:self-start`}
+            style={at(60)}
+            className={`${BIG} hero-letters -ml-[0.046em] desk:col-span-5 desk:col-start-1 desk:row-start-1 desk:self-start`}
           >
-            Sigma
+            <Letters>Sigma</Letters>
           </span>
-          <Stmt className="u-trim desk:col-span-3 desk:col-start-10 desk:row-start-1 desk:self-start">
+          <Stmt delay={380} className="u-trim desk:col-span-3 desk:col-start-10 desk:row-start-1 desk:self-start">
             Est. 1984
           </Stmt>
         </div>
@@ -122,46 +132,53 @@ export default function HeroField({
             ) : null}
           </div>
           <Stmt
+            delay={320}
             className="col-span-3 col-start-4 row-start-1 self-start desk:col-span-4 desk:col-start-6 desk:row-start-1 desk:[text-box:trim-both_cap_alphabetic]"
           >
             Seoul National University
           </Stmt>
           <Stmt
+            delay={440}
             className="hidden desk:col-span-3 desk:col-start-10 desk:row-start-2 desk:block desk:self-end"
           >
             Room 215‑2, Mabang
           </Stmt>
           <Stmt
+            delay={500}
             className="col-span-4 col-start-2 row-start-2 mt-lg self-start desk:col-span-3 desk:col-start-1 desk:row-start-3 desk:mt-0 desk:self-end"
           >
             Undergraduate research community
           </Stmt>
           <Stmt
+            delay={560}
             className="col-span-3 col-start-1 row-start-4 self-start desk:col-span-3 desk:col-start-4 desk:row-start-4 desk:self-end"
           >
             Media and kinetic art
           </Stmt>
           <Stmt
+            delay={620}
             className="col-span-3 col-start-4 row-start-5 mt-lg self-start desk:col-span-3 desk:col-start-10 desk:row-start-4 desk:mt-0 desk:self-end"
           >
             Korea’s first university robotics club
           </Stmt>
         </div>
 
-        <div data-sponsors className="order-last flex h-[var(--below)] flex-col justify-center desk:order-none desk:col-span-5 desk:col-start-1 desk:row-start-6 desk:mt-0 desk:block desk:h-auto desk:min-w-0 desk:self-end">
-          <LogoRoll groups={[{ label: "Sponsors", items: sponsors }, { label: "Co-founder of", items: cofounded }]} />
+        <div data-sponsors style={at(820)} className="hero-set order-last flex h-[var(--below)] flex-col justify-center desk:order-none desk:col-span-5 desk:col-start-1 desk:row-start-6 desk:mt-0 desk:block desk:h-auto desk:min-w-0 desk:self-end">
+          <LogoRoll items={[...sponsors, ...cofounded]} />
         </div>
 
         <HeroCaption
           builds={builds}
-          className={`${META} u-lift mt-md flex items-center justify-between gap-x-lg desk:col-span-7 desk:mt-0 desk:mb-xl desk:col-start-6 desk:row-start-5 desk:self-end`}
+          style={at(720)}
+          className={`${META} hero-set u-lift mt-md flex items-center justify-between gap-x-lg desk:col-span-7 desk:mt-0 desk:mb-xl desk:col-start-6 desk:row-start-5 desk:self-end`}
         />
 
         <span
           aria-hidden="true"
-          className={`${BIG} mt-auto -mr-[0.035em] self-end pb-[var(--gutter)] desk:col-span-7 desk:col-start-6 desk:row-start-6 desk:mt-0 desk:self-end desk:justify-self-end desk:pb-0`}
+          style={at(180)}
+          className={`${BIG} hero-letters mt-auto -mr-[0.035em] self-end pb-[var(--gutter)] desk:col-span-7 desk:col-start-6 desk:row-start-6 desk:mt-0 desk:self-end desk:justify-self-end desk:pb-0`}
         >
-          Intelligence
+          <Letters>Intelligence</Letters>
         </span>
       </div>
     </section>

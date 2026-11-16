@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { share } from "@/app/share";
 import HeroField from "@/components/ui/HeroField";
 import Navbar from "@/components/Navbar";
+import DotThread from "@/components/DotThread";
 import Footer from "@/components/Footer";
 import { Container, GridField, Reveal } from "@/components/ui";
 import { getCofounded, getSponsors } from "@/features/sponsors/api/getSponsors";
@@ -51,31 +52,13 @@ export default async function Home() {
     src: objectSrc(p.id),
   }));
 
-  const merged = new Map<string, { year: number; contest: typeof awards[number]["contest"]; got: typeof awards[number]["result"][] }>();
-  for (const a of awards) {
-    const key = `${a.year}|${a.contest.en}`;
-    const row = merged.get(key);
-    if (row) row.got.push(a.result);
-    else merged.set(key, { year: a.year, contest: a.contest, got: [a.result] });
-  }
-  const tally = (got: { en: string }[]) => {
-    const n = new Map<string, number>();
-    for (const r of got) n.set(r.en, (n.get(r.en) ?? 0) + 1);
-    return [...n].map(([k, c]) => (c > 1 ? `${k} ×${c}` : k)).join(", ");
-  };
-  const results = [...merged].map(([key, r]) => ({
-    key,
-    year: r.year,
-    contest: r.contest.en,
-    result: tally(r.got),
-  }));
-
   return (
     <>
       <Navbar />
 
       <div className="relative z-10 bg-canvas">
         <HeroField sponsors={sponsors} cofounded={cofounded} builds={plates} />
+        <DotThread builds={plates} />
 
       <main id="main">
         <section
@@ -102,7 +85,6 @@ export default async function Home() {
           <Container className="pt-xxxl">
             <RecordLines
               builds={line}
-              results={results}
               total={awards.length}
               cohorts={COHORT_COUNT}
               people={ALUMNI_TOTAL}

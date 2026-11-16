@@ -8,7 +8,6 @@ import { useEffect, useRef } from "react";
 import { PLATE_RELEASE, PLATE_SHOW } from "@/components/ui/HeroPlate";
 
 type LineBuild = { id: string; name: string; year: number | null; src: string | null };
-type LineResult = { key: string; year: number; contest: string; result: string };
 
 const DRIFT = -42;
 const CRAWL = -5;
@@ -44,13 +43,11 @@ type Press = {
 
 export default function RecordLines({
   builds,
-  results,
   total,
   cohorts,
   people,
 }: {
   builds: LineBuild[];
-  results: LineResult[];
   total: number;
   cohorts: number;
   people: number;
@@ -60,11 +57,10 @@ export default function RecordLines({
   useEffect(() => {
     const host = root.current;
     const t1 = host?.querySelector<HTMLElement>("[data-track='1']");
-    const t2 = host?.querySelector<HTMLElement>("[data-track='2']");
     const peek = host?.querySelector<HTMLElement>("[data-peek]");
     const canvas = peek?.querySelector("canvas");
     const g = canvas?.getContext("2d");
-    if (!host || !t1 || !t2 || !peek || !canvas || !g) return;
+    if (!host || !t1 || !peek || !canvas || !g) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     host.dataset.live = "";
@@ -74,7 +70,6 @@ export default function RecordLines({
     let v = DRIFT;
     let lean = 0;
     let w1 = 0;
-    let w2 = 0;
     let last = 0;
     let raf = 0;
     let seen = false;
@@ -95,7 +90,6 @@ export default function RecordLines({
     const clamp = (a: number, lo: number, hi: number) => (a < lo ? lo : a > hi ? hi : a);
     const measure = () => {
       w1 = t1.firstElementChild?.getBoundingClientRect().width ?? 0;
-      w2 = t2.firstElementChild?.getBoundingClientRect().width ?? 0;
     };
 
     const plateShows = () => {
@@ -222,8 +216,6 @@ export default function RecordLines({
       lean += (clamp(-v / 2600, -LEAN, LEAN) - lean) * (1 - Math.exp(-dt * 10));
       if (w1 > 0)
         t1.style.transform = `translate3d(${(-mod(-x, w1)).toFixed(2)}px,0,0) skewX(${(lean * 57.3).toFixed(2)}deg)`;
-      if (w2 > 0)
-        t2.style.transform = `translate3d(${(-mod(x * 0.5, w2)).toFixed(2)}px,0,0) skewX(${(-lean * 28).toFixed(2)}deg)`;
 
       if (!held && inside && !press) {
         const hit = document.elementFromPoint(cx, cy);
@@ -365,7 +357,6 @@ export default function RecordLines({
     });
     measure();
     ro.observe(t1);
-    ro.observe(t2);
     io.observe(host);
     host.addEventListener("pointerenter", enter);
     host.addEventListener("pointerleave", leave);
@@ -431,22 +422,6 @@ export default function RecordLines({
     </ul>
   );
 
-  const awards = (copy: number) => (
-    <ul aria-hidden={copy > 0 || undefined} className="inline">
-      {results.map((r) => (
-        <li key={r.key} className="mr-[2.4em] inline">
-          <span className="mr-[0.9em] text-ink tabular-nums">
-            {r.year}
-          </span>
-          {r.contest}
-          <span className="ml-[1em] text-ink">
-            {r.result}
-          </span>
-        </li>
-      ))}
-    </ul>
-  );
-
   const fade =
     "[mask-image:linear-gradient(90deg,transparent,#000_7%,#000_93%,transparent)] overflow-hidden whitespace-nowrap motion-reduce:overflow-x-auto";
 
@@ -480,18 +455,6 @@ export default function RecordLines({
         <Link href="/history" className={`${META} ${ALL}`}>
           {`All ${total} ↗`}
         </Link>
-      </div>
-      <div data-offgrid className={`${fade} mt-sm`}>
-        <div
-          data-track="2"
-          className="inline-block origin-bottom text-[length:clamp(0.9375rem,1.5vw,1.1875rem)] leading-[1.3] tracking-[-0.01em] text-ink will-change-transform"
-        >
-          {awards(0)}
-          <span className="motion-reduce:hidden">
-            {awards(1)}
-            {awards(2)}
-          </span>
-        </div>
       </div>
 
       <div className="mt-lg flex items-baseline justify-between gap-x-lg">

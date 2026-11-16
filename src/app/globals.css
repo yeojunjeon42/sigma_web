@@ -806,6 +806,43 @@
     --lead: calc(3 * var(--c) + 4 * var(--gutter));
   }
 }
+/* Home's opening. Each letter of the two big words rises through a mask on its own baseline:
+   the clip is in the letter's box, so it shrinks as fast as the letter climbs and the line holds
+   still. The rest of the hero sets in after. HeroPlate's hush() seeks these to their end to
+   measure the words at rest, so keep the names on the hero- prefix. */
+@keyframes hero-letter {
+  from {
+    translate: 0 105%;
+    clip-path: inset(0 0 105% 0);
+  }
+  to {
+    translate: 0 0;
+    clip-path: inset(-0.5em -0.5em 0 -0.5em);
+  }
+}
+@keyframes hero-set {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+}
+.hero-letters {
+  white-space: nowrap;
+}
+.hero-letters > span {
+  display: inline-block;
+  text-box: trim-both cap alphabetic;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-letters > span {
+    animation: hero-letter 950ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    animation-delay: calc(var(--at, 0ms) + var(--i, 0) * 34ms);
+  }
+  .hero-set {
+    animation: hero-set 700ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation-delay: var(--at, 0ms);
+  }
+}
 .u-arrive > *,
 .member-profile [data-profile-part] {
   animation: arrive var(--duration-arrive) cubic-bezier(0.22, 1, 0.36, 1) both;

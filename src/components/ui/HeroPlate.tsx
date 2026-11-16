@@ -62,7 +62,30 @@ const show = (b: HeroBuild) => {
 export const PLATE_SHOW = "plate:show";
 export const PLATE_RELEASE = "plate:release";
 
-export function HeroCaption({ builds, className = "" }: { builds: HeroBuild[]; className?: string }) {
+// DotThread carries the plate's dots down the page. As the page starts to move it shuts the lens
+// (`near`, 0 to 1); once shut it takes the dots as they stand (`plateDots`) and the plate stops
+// drawing (`gone`), so the handover shows nothing. Positions are in the hero's own box.
+export type PlateDots = { n: number; x: Float32Array; y: Float32Array; r: Float32Array; band: Uint8Array };
+let leave = { near: 0, gone: false };
+let dotsNow: (() => PlateDots | null) | null = null;
+let wake: (() => void) | null = null;
+export const plateDots = () => dotsNow?.() ?? null;
+export const plateShown = { subscribe, get: () => shown };
+export function plateLeave(near: number, gone: boolean) {
+  if (leave.near === near && leave.gone === gone) return;
+  leave = { near, gone };
+  wake?.();
+}
+
+export function HeroCaption({
+  builds,
+  className = "",
+  style,
+}: {
+  builds: HeroBuild[];
+  className?: string;
+  style?: React.CSSProperties;
+}) {
   const b =
     useSyncExternalStore(
       subscribe,
@@ -71,7 +94,7 @@ export function HeroCaption({ builds, className = "" }: { builds: HeroBuild[]; c
     ) ?? builds[0];
   if (!b) return null;
   return (
-    <p className={className}>
+    <p style={style} className={className}>
       <Link
         href={`/archive?view=reel&at=${b.id}`}
         className="inline-flex min-h-11 items-center gap-x-xs leading-none text-ink transition-opacity hover:opacity-60 lg:min-h-0"
@@ -355,6 +378,12 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       const g = c.getContext("2d", { willReadFrequently: true });
       if (!g) return;
       const range = document.createRange();
+      // The opening is still moving the words: seek it to its end, measure them at rest, seek back.
+      const opening = host
+        .getAnimations({ subtree: true })
+        .filter((a) => a instanceof CSSAnimation && a.animationName.startsWith("hero-") && a.currentTime !== null);
+      const was = opening.map((a) => a.currentTime);
+      for (const a of opening) a.currentTime = Number(a.effect?.getComputedTiming().endTime ?? 0);
       for (const el of host.querySelectorAll<HTMLElement>(".u-lift")) {
         const cs = getComputedStyle(el);
         g.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
@@ -372,6 +401,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
           }
         }
       }
+      opening.forEach((a, i) => (a.currentTime = was[i]));
       const px = g.getImageData(0, 0, c.width, c.height).data;
       const inked = new Uint8Array(cols * rows);
       for (let y = 0; y < c.height; y++) {
@@ -397,12 +427,57 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       }
     };
 
+    // A cell's ink at rest, before the wave and the lens: 0 where nothing prints.
+    const inkAt = (tone: number, k: number, py: number) => {
+      let r = (1 - GROUND * (0.12 + 0.88 * tone)) * top;
+      if (r <= rGround + 0.06) return 0;
+      const hushed = quiet[k];
+      if (hushed > 0) r = rGround + (r - rGround) * (1 - KNOCK * hushed);
+      r *= smooth(clamp((r - rGround) / (EBB * top), 0, 1));
+      return r * vignette(py / H, EDGE);
+    };
+    const slotOf = (r: number, tone: number) =>
+      Math.min(BANDS - 1, Math.round((1 - tone) * (BANDS - 1))) * SIZES + clamp(Math.round((r / rTop) * SIZES) - 1, 0, SIZES - 1);
+    const sizeOf = (slot: number) => (rTop * ((slot % SIZES) + 1)) / SIZES;
+
+    // The plate's dots as it prints them with the lens shut and no wave: what DotThread takes.
+    const standing = (): PlateDots | null => {
+      const img = b >= 0 ? load(b) : null;
+      if (!img || !W) return null;
+      const r = shift(place(img), -par.x * DRIFT[0], -par.y * DRIFT[1]);
+      const tones = measure(b, img, r);
+      if (!tones) return null;
+      const i0 = Math.max(0, Math.floor(r.x / cell));
+      const i1 = Math.min(cols - 1, Math.ceil((r.x + r.w) / cell));
+      const j0 = Math.max(0, Math.floor(r.y / cell));
+      const j1 = Math.min(rows - 1, Math.ceil((r.y + r.h) / cell));
+      const max = (i1 - i0 + 1) * (j1 - j0 + 1);
+      const out = { n: 0, x: new Float32Array(max), y: new Float32Array(max), r: new Float32Array(max), band: new Uint8Array(max) };
+      for (let j = j0; j <= j1; j++) {
+        const py = (j + 0.5) * cell;
+        for (let i = i0; i <= i1; i++) {
+          const px = (i + 0.5) * cell;
+          const tone = sample(tones, r, px, py);
+          const ink = inkAt(tone, j * cols + i, py);
+          if (ink < 0.25) continue;
+          const slot = slotOf(ink, tone);
+          out.x[out.n] = px;
+          out.y[out.n] = py;
+          out.r[out.n] = sizeOf(slot);
+          out.band[out.n++] = Math.floor(slot / SIZES);
+        }
+      }
+      return out;
+    };
+    dotsNow = standing;
+    wake = () => kick();
+
     // Every plate gets a full CYCLE from the moment it starts, however it was asked for.
     const schedule = () => {
       window.clearTimeout(timer);
       if (still || frozen) return;
       timer = window.setTimeout(() => {
-        if (seen && !ptr.in && !hold && !document.hidden) next();
+        if (seen && !ptr.in && !hold && !document.hidden && !leave.near) next();
         else schedule();
       }, CYCLE);
     };
@@ -457,6 +532,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
     const draw = () => {
       if (!W || !H) return;
       pr.clear();
+      if (leave.gone) return;
 
       const ox = -par.x * DRIFT[0];
       const oy = -par.y * DRIFT[1];
@@ -468,9 +544,11 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       const gb = ib && rb ? measure(b, ib, rb) : null;
 
       const R = clamp(W * 0.105, 84, 180) * (1 + lens.boost);
-      const lensOn = lens.amp > 0.01 && !still;
-      const power = lensOn ? LENS * lens.amp : 0;
-      const open = fine && lens.amp > 0.01 ? smooth(clamp(lens.amp, 0, 1)) : 0;
+      // The lens shuts with the first of the page's scroll, so the dots are at rest when they leave.
+      const amp = lens.amp * (1 - smooth(leave.near));
+      const lensOn = amp > 0.01 && !still;
+      const power = lensOn ? LENS * amp : 0;
+      const open = fine && amp > 0.01 ? smooth(clamp(amp, 0, 1)) : 0;
       veilA.n = veilB.n = 0;
       // The tail eases toward its limit rather than meeting it, so a fast move has no corner.
       const lag = Math.hypot(tail.x - lens.x, tail.y - lens.y);
@@ -542,19 +620,13 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
               }
             }
 
-            let r = (1 - GROUND * (0.12 + 0.88 * tone)) * top;
-            if (r <= rGround + 0.06) continue;
-            const hushed = quiet[j * cols + i];
-            if (hushed > 0) r = rGround + (r - rGround) * (1 - KNOCK * hushed);
-            r *= smooth(clamp((r - rGround) / (EBB * top), 0, 1));
+            let r = inkAt(tone, j * cols + i, py);
+            if (!r) continue;
             if (lt > 0 && lt < 1) r *= 1 + FRONT * Math.sin(Math.PI * lt);
-            r *= vignette(py / H, EDGE);
             r *= (1 + q * 0.9) * (1 - veil * veil);
             if (r < 0.25) continue;
 
-            const size = clamp(Math.round((r / rTop) * SIZES) - 1, 0, SIZES - 1);
-            const band = Math.min(BANDS - 1, Math.round((1 - tone) * (BANDS - 1)));
-            const slot = band * SIZES + size;
+            const slot = slotOf(r, tone);
             const n = held[slot];
             if (n < cap) {
               bx[slot * cap + n] = x;
@@ -572,7 +644,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
         turn: bt,
         held,
         cap,
-        radius: (slot: number) => (rTop * ((slot % SIZES) + 1)) / SIZES,
+        radius: sizeOf,
         ink: (slot: number) => Math.floor(slot / SIZES),
       };
       pr.dots(slots, 0, SLOTS, mixes);
@@ -581,7 +653,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       if (ia && ra) pr.photo(ia, ra, veilA, seen);
       if (ib && rb) pr.photo(ib, rb, veilB, seen);
 
-      if (lensOn && ptr.in) pr.mark(ptr.x, ptr.y, 2.5, ink, lens.amp);
+      if (lensOn && ptr.in) pr.mark(ptr.x, ptr.y, 2.5, ink, amp);
 
       if (grew) {
         cap *= 2;
@@ -633,10 +705,13 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
         ptr.speed *= Math.exp(-dt * 6);
         const swell = ptr.down && ptr.in ? PRESS : clamp(ptr.speed / 2400, 0, FAST);
         lens.boost += (swell - lens.boost) * (1 - Math.exp(-dt * 5));
-        const tx = ptr.in ? (ptr.x / W) * 2 - 1 : 0;
-        const ty = ptr.in ? (ptr.y / H) * 2 - 1 : 0;
-        par.x += (tx - par.x) * (1 - Math.exp(-dt * 4));
-        par.y += (ty - par.y) * (1 - Math.exp(-dt * 4));
+        // Held while the page is scrolled: the plate must be where its dots left it when they return.
+        if (!leave.near) {
+          const tx = ptr.in ? (ptr.x / W) * 2 - 1 : 0;
+          const ty = ptr.in ? (ptr.y / H) * 2 - 1 : 0;
+          par.x += (tx - par.x) * (1 - Math.exp(-dt * 4));
+          par.y += (ty - par.y) * (1 - Math.exp(-dt * 4));
+        }
       } else {
         lens.x = tail.x = ptr.x;
         lens.y = tail.y = ptr.y;
@@ -683,7 +758,7 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       if (e.pointerType !== "mouse") out();
     };
     const click = (e: MouseEvent) => {
-      if (pressed || (e.target as HTMLElement).closest("a,button")) return;
+      if (pressed || leave.near || (e.target as HTMLElement).closest("a,button")) return;
       lens.boost = Math.min(PRESS, lens.boost + TAP);
       const r = host.getBoundingClientRect();
       press({ x: e.clientX - r.left, y: e.clientY - r.top });
@@ -757,6 +832,8 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       window.removeEventListener(PLATE_RELEASE, released);
       host.style.cursor = "";
       advance = null;
+      dotsNow = null;
+      wake = null;
       pr.dispose();
     };
   }, [builds, layout]);
