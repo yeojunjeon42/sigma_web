@@ -1,25 +1,15 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { plateDots, plateLeave, plateShown } from "@/components/ui/HeroPlate";
-import { DOT, GROUND, SCREEN, SQUARE, square, turnAt } from "@/lib/halftone";
+import { BANDS, SIZES, SWELL, plateDots, plateLeave, plateShown } from "@/components/ui/HeroPlate";
+import { DOT, GROUND, SCREEN, turnAt } from "@/lib/halftone";
 import { onPageScroll, pageY } from "@/lib/pageScroll";
+import { printer } from "@/lib/printer";
 
 type Build = { id: string; src: string };
 type Box = { x: number; y: number; w: number; h: number };
-// A print's dots in page coordinates, and the middle of its box.
 type Shape = { n: number; x: Float32Array; y: Float32Array; r: Float32Array; band: Uint8Array; cx: number; cy: number; tree?: Tree };
-// How a print is climbed. It is fed at several `seeds` (its lowest tip, its far ends and a few
-// places chosen by no rule), each from a point just outside it (`gates`). Every dot belongs to
-// the seed nearest it through the print (`seed`); `deep` is how far along the print it is from
-// that seed (0 to 1), and `route` its way there from the seed, ROUTE points (x, y) a dot.
 type Tree = { seeds: Point[]; gates: Point[]; seed: Uint8Array; deep: Float32Array; route: Float32Array };
-// One run of the thread: dot k goes from a[k] to b[k]. A negative index is a dot the smaller
-// print lends twice (-1 - index), so extras bud off or merge in by size alone. The print it
-// leaves is poured (`out` null: the hero) or climbed down; the one it reaches is climbed.
-// `lines` holds one path for every pair of a seed it leaves by and a seed it arrives at
-// (`lines[from * into.seeds.length + to]`), each LINE + 1 points (x, y) evenly spaced: they share
-// the open stretch and fray apart near the prints.
 type Leg = {
   n: number;
   a: Int32Array;
@@ -32,22 +22,9 @@ type Leg = {
 };
 type Point = [number, number];
 
-const BANDS = 10;
-// Where on the screen (as a share of its height) a print's middle is when its dots leave, and
-// when the next print's dots have all arrived.
 const LEAVE = 0.3;
 const ARRIVE = 0.62;
-// The share of a run over which the dots set off, first to last; the rest is one dot's own trip.
 const STAGGER = 0.6;
-// A dot's trip, as shares of it at most: out of the print it leaves (DOWN; nothing when the print
-// is poured), along a line, and into the print it reaches (UP). The dots never gather to a point.
-// The hero is poured: each dot keeps its place in the build and is drawn in to the line over its
-// first TAPER, a narrowing stream. A print beside a list is put together like a swarm (after the
-// nanobot bodies in VisionQuest), by no one rule: the thread frays into strands that feed it at
-// several places; most dots run in through the dots already there, the rest (FLY) leave their
-// strand early and fly to their place on arcs of their own; each keeps its own pace (PACE, the
-// slowest's share of the fastest); and the whole thread drifts (DRIFT px) like something alive.
-// It is left the same way.
 const DOWN = 0.2;
 const UP = 0.36;
 const TAPER = 0.38;
@@ -58,15 +35,13 @@ const SEEDS = 5;
 const FLY = 0.42;
 const PACE = 0.7;
 const DRIFT = 13;
-// A dot on its way in is smaller than at rest and runs hot, a little larger and a few inks
-// deeper, part of the way; it settles as it locks.
 const SMALL = 0.8;
 const HOT = 0.35;
 const DEEPER = 3;
-// The thread follows the scroll, but a run never takes less than this many seconds: a short
-// stretch of page, or a flick of the wheel, must not make the dots jump.
 const RUN = 2.4;
 const TOP = SCREEN * DOT;
+const LARGEST = TOP * SWELL;
+const SLOTS = SIZES * BANDS;
 const R_GROUND = (1 - GROUND) * TOP;
 
 const clamp = (v: number, lo = 0, hi = 1) => (v < lo ? lo : v > hi ? hi : v);
@@ -77,8 +52,6 @@ const hash = (n: number) => {
   return h - Math.floor(h);
 };
 
-// A build printed in a box beside a list: the object fitted to the box (not its transparent
-// margin), on the page's lattice, toned as the hero tones its plate.
 function printOf(img: HTMLImageElement, box: Box): Shape | null {
   const probe = document.createElement("canvas");
   probe.width = probe.height = 96;
@@ -160,7 +133,6 @@ function printOf(img: HTMLImageElement, box: Box): Shape | null {
   return out;
 }
 
-// Where a print lets go of its dots when it is poured: its lowest tip, so the thread hangs from it.
 function tipOf(s: Shape): Point {
   let low = -Infinity;
   for (let k = 0; k < s.n; k++) low = Math.max(low, s.y[k]);
@@ -174,12 +146,6 @@ function tipOf(s: Shape): Point {
   return [count ? sum / count : s.cx, low];
 }
 
-// The winding that covers a print: a spiral from its middle (t = 0) out to its farthest dot
-// (t = 1), starting at angle `from`. `at` is the point at t; `near` is the t at which the turn
-// passing closest to a place crosses that place's own direction from the middle.
-// The tree a print is climbed by, kept on the print. Neighbours are dots up to two cells away, so
-// a one-cell gap in the print doesn't cut it; a part no neighbour reaches hangs off the nearest
-// dot that was reached.
 function treeOf(s: Shape): Tree {
   if (s.tree) return s.tree;
   const tip = tipOf(s);
@@ -192,8 +158,6 @@ function treeOf(s: Shape): Tree {
     cell.set(key(col(k), row(k)), k);
     if (Math.hypot(s.x[k] - tip[0], s.y[k] - tip[1]) < Math.hypot(s.x[low] - tip[0], s.y[low] - tip[1])) low = k;
   }
-  // The seeds: the lowest tip, the two dots farthest from the seeds so far (the print's far
-  // ends), then dots picked by a hash.
   const picked = [low];
   const apart = Float32Array.from({ length: s.n }, (_, k) => Math.hypot(s.x[k] - s.x[low], s.y[k] - s.y[low]));
   while (picked.length < Math.min(SEEDS, s.n)) {
@@ -207,7 +171,6 @@ function treeOf(s: Shape): Tree {
   const far = new Float32Array(s.n).fill(Infinity);
   const parent = new Int32Array(s.n).fill(-1);
   const seed = new Uint8Array(s.n);
-  // A binary heap of [distance, dot].
   const heap: number[] = [];
   const push = (d: number, k: number) => {
     let i = heap.length;
@@ -295,7 +258,6 @@ function treeOf(s: Shape): Tree {
     }
   }
   const seeds = picked.map((k): Point => [s.x[k], s.y[k]]);
-  // A strand reaches its seed from just outside the print, off to one side by no rule.
   const gates = seeds.map(([x, y], i): Point => {
     const away = Math.hypot(x - s.cx, y - s.cy) || 1;
     const ux = (x - s.cx) / away;
@@ -308,8 +270,6 @@ function treeOf(s: Shape): Tree {
   return s.tree;
 }
 
-// A smooth curve through the points (Catmull-Rom), resampled evenly along its length so a dot's
-// speed on the line doesn't change from one stretch to the next.
 function lineThrough(points: Point[]) {
   const at = (u: number, axis: 0 | 1) => {
     const f = clamp(u) * (points.length - 1);
@@ -341,13 +301,9 @@ function legOf(A: Shape, B: Shape, H: number, via: Point[], pour: boolean): Leg 
   const out = pour ? null : treeOf(A);
   const into = treeOf(B);
   const tip = tipOf(A);
-  // One path for each way out of A and into B: by the seed's gate, across the open stretch
-  // through the waypoints, by the other seed's gate.
   const starts: Point[][] = out ? out.seeds.map((seed, i) => [seed, out.gates[i]]) : [[tip]];
   const lines = starts.flatMap((start) => into.seeds.map((seed, i) => lineThrough([...start, ...via, into.gates[i], seed])));
 
-  // The order the dots go in, loosely: A's nearest its tip first (poured) or its far ends first
-  // (climbed down); B's nearest their seeds first, so most have built dots to run in through.
   const first = Float32Array.from({ length: A.n }, (_, k) =>
     out ? -out.deep[k] + hash(k) * 0.16 : Math.hypot(A.x[k] - tip[0], A.y[k] - tip[1]) + hash(k) * 70,
   );
@@ -357,7 +313,6 @@ function legOf(A: Shape, B: Shape, H: number, via: Point[], pour: boolean): Leg 
   const n = Math.max(A.n, B.n);
   const a = new Int32Array(n);
   const b = new Int32Array(n);
-  // The smaller print's dots are spread over the run: each goes once as itself, and again as lent.
   const pick = (o: number[], m: number, k: number) => {
     const i = Math.floor((k * m) / n);
     return k > 0 && i === Math.floor(((k - 1) * m) / n) ? -1 - o[i] : o[i];
@@ -369,38 +324,31 @@ function legOf(A: Shape, B: Shape, H: number, via: Point[], pour: boolean): Leg 
   return { n, a, b, from: A.cy - LEAVE * H, to: B.cy - ARRIVE * H, lines, out, into };
 }
 
-// From the desk, Home's dots are one thread. As the page scrolls, the hero's dots leave their
-// build in single file, run down the page in one line and print another build in the empty half
-// beside Stacks, then again beside Equipments. Scrolled back, they return. The hero's own canvas
-// (HeroPlate) draws the build until its dots leave, and hands them over exactly as they stand.
 export default function DotThread({ builds }: { builds: Build[] }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = ref.current;
-    const g = canvas?.getContext("2d");
     const hero = document.querySelector<HTMLElement>("section [data-plate]")?.closest("section");
-    if (!canvas || !g || !hero) return;
+    if (!canvas || !hero) return;
     const desk = window.matchMedia("(min-width: 64rem) and (pointer: fine)");
     if (!desk.matches || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const print = printer(canvas, () => kick());
+    if (!print) return;
     canvas.hidden = false;
 
     let live = true;
     let raf = 0;
     let W = 0;
     let H = 0;
-    let dpr = 1;
-    // Where the hero's dots leave: its plate's middle, a LEAVE of the screen from the top.
     let start = Infinity;
     let middle = { x: 0, y: 0 };
-    // The gap between the Founded band's two figures, in page coordinates.
     let gap: Point | null = null;
     let prints: Shape[] = [];
     let shapes: Shape[] = [];
     let legs: Leg[] = [];
     let taken = false;
     let asked = "";
-    // Where the thread shows itself along the journey: the whole part is the run, the rest its progress.
     let at = 0;
     let last = 0;
 
@@ -427,7 +375,6 @@ export default function DotThread({ builds }: { builds: Build[] }) {
       return img.complete && img.naturalWidth ? img : null;
     };
 
-    // The empty half beside each list, in page coordinates.
     const boxes = (): Box[] => {
       const y = pageY();
       const out: Box[] = [];
@@ -460,10 +407,6 @@ export default function DotThread({ builds }: { builds: Build[] }) {
       shapes = [{ ...hand, cx: middle.x, cy: middle.y }, ...prints];
       legs = shapes.slice(1).map((B, i) => {
         const A = shapes[i];
-        // The first run pours out of the hero and threads the gap between the band's two figures.
-        // Across the open stretch every strand passes the same points, so they run as one
-        // thread there and fray only near the prints. The first run's is the gap between the
-        // band's two figures; a later run bows a little to one side on its way across.
         const dx = B.cx - A.cx;
         const dy = B.cy - A.cy;
         const on = (share: number, side: number): Point => [A.cx + dx * share - dy * side, A.cy + dy * share + dx * side];
@@ -475,10 +418,7 @@ export default function DotThread({ builds }: { builds: Build[] }) {
     const measure = () => {
       W = window.innerWidth;
       H = window.innerHeight;
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.round(W * dpr);
-      canvas.height = Math.round(H * dpr);
-      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      print.size(W, H, Math.min(window.devicePixelRatio || 1, 3));
       const plate = hero.querySelector("[data-plate]")?.getBoundingClientRect();
       if (!plate) return;
       const y = pageY();
@@ -489,7 +429,6 @@ export default function DotThread({ builds }: { builds: Build[] }) {
       const box = band?.getBoundingClientRect();
       const gutter = parseFloat(getComputedStyle(hero).getPropertyValue("--gutter")) || 24;
       gap = first && box ? [first.right + gutter / 2, box.top + y + box.height / 2] : null;
-      // The lists take the builds after the one the hero shows.
       const at = Math.max(0, builds.findIndex((b) => b.id === asked));
       prints = boxes().flatMap((box, i) => {
         const img = image(builds[(at + 1 + i) % builds.length]);
@@ -500,46 +439,34 @@ export default function DotThread({ builds }: { builds: Build[] }) {
       kick();
     };
 
-    let px = new Float32Array(0);
-    let py = new Float32Array(0);
-    let pr = new Float32Array(0);
-    let pt = new Float32Array(0);
-    let pb = new Uint8Array(0);
-    let n = 0;
-    const room = (m: number) => {
-      if (px.length >= m) return;
-      px = new Float32Array(m);
-      py = new Float32Array(m);
-      pr = new Float32Array(m);
-      pt = new Float32Array(m);
-      pb = new Uint8Array(m);
-    };
+    let cap = 1 << 9;
+    let sx = new Float32Array(SLOTS * cap);
+    let sy = new Float32Array(SLOTS * cap);
+    let st = new Float32Array(SLOTS * cap);
+    const held = new Int32Array(SLOTS);
+    let short = false;
     const put = (x: number, y: number, r: number, turn: number, band: number) => {
       if (r < 0.25 || y < -12 || y > H + 12) return;
-      // The hero's printer softens a mark's edge over one device pixel, which lays down a third of
-      // a pixel more ink than the mark's area (and far more for a mark under a pixel wide). Size
-      // the mark here to the same ink, or the build would lighten as the hero hands it over.
-      const half = r * SQUARE * dpr;
-      const same = half >= 0.5 ? Math.sqrt(half * half + 1 / 12) : Math.sqrt((half + 0.5) ** 3 / 3);
-      px[n] = x;
-      py[n] = y;
-      pr[n] = same / (SQUARE * dpr);
-      pt[n] = turn;
-      pb[n++] = band;
+      const slot = band * SIZES + clamp(Math.round((r / LARGEST) * SIZES) - 1, 0, SIZES - 1);
+      const n = held[slot];
+      if (n >= cap) {
+        short = true;
+        return;
+      }
+      sx[slot * cap + n] = x;
+      sy[slot * cap + n] = y;
+      st[slot * cap + n] = turn;
+      held[slot] = n + 1;
     };
 
     const still = (s: Shape, y: number) => {
-      room(s.n);
       for (let k = 0; k < s.n; k++) put(s.x[k], s.y[k] - y, s.r[k], turnAt(s.x[k], s.y[k]), s.band[k]);
     };
 
     const run = (L: Leg, A: Shape, B: Shape, P: number, y: number, t: number) => {
-      room(L.n);
       const down = L.out ? DOWN : 0;
       const ride = 1 - down - UP;
       const many = L.into.seeds.length;
-      // A point along a line, along a dot's route through a print (0 at its seed), or on an arc
-      // from one point to another that bows out to one side.
       let lx = 0;
       let ly = 0;
       const line = (path: Float32Array, share: number) => {
@@ -567,21 +494,17 @@ export default function DotThread({ builds }: { builds: Build[] }) {
         const ib = L.b[k];
         const ka = ia < 0 ? -1 - ia : ia;
         const kb = ib < 0 ? -1 - ib : ib;
-        // Dots set off in loose packets, not one by one.
         const order = clamp(k / L.n + 0.03 * Math.sin((k / L.n) * 57 + L.n));
         const e = clamp((P - STAGGER * order) / (1 - STAGGER));
         const jx = (hash(k * 3.1) - 0.5) * SPREAD;
         const jy = (hash(k * 5.9) - 0.5) * SPREAD;
         const pace = PACE + (1 - PACE) * hash(k * 4.7);
         const path = L.lines[(L.out ? L.out.seed[ka] : 0) * many + L.into.seed[kb]];
-        // This dot's own way: whether it flies off its print, where it joins the line, where it
-        // leaves it, whether it flies in, and how its arcs bow.
         const lifts = !!L.out && hash(k * 6.3) < FLY;
         const joins = lifts ? 0.04 + 0.15 * hash(k * 8.9) : 0;
         const flies = hash(k * 2.3) < FLY;
         const quits = flies ? 0.78 + 0.19 * hash(k * 9.7) : 1;
         const bow = (hash(k * 1.3) - 0.5) * (0.5 + 1.6 * hash(k * 7.9) ** 3);
-        // When it reaches the line, when it leaves it, and when it has landed.
         const boards = L.out ? down * pace * (lifts ? 0.7 : L.out.deep[ka]) : 0;
         const leaves = boards + ride * pace * (quits - joins);
         const lands = leaves + UP * pace * (flies ? 0.75 : L.into.deep[kb]);
@@ -606,9 +529,8 @@ export default function DotThread({ builds }: { builds: Build[] }) {
           heat = Math.sin(Math.PI * c);
           loose = 1 - c;
         } else if (e < leaves) {
-          const at = joins + ((e - boards) / (leaves - boards)) * (quits - joins);
+          const at = joins + smooth((e - boards) / (leaves - boards)) * (quits - joins);
           line(path, at);
-          // Poured: how much of its own place in the build the dot still keeps.
           const own = L.out ? 0 : 1 - smooth(clamp(at / TAPER));
           x = lx + (A.x[ka] - path[0]) * own + jx * (1 - own);
           yy = ly + (A.y[ka] - path[1]) * own + jy * (1 - own);
@@ -630,8 +552,6 @@ export default function DotThread({ builds }: { builds: Build[] }) {
           size = lerp(SMALL, 1, smooth(c)) * (1 + HOT * heat * c);
           loose = 1 - c;
         }
-        // The drift: one slow field over the page, so neighbours move together and no two
-        // moments are alike. A dot at rest is out of it.
         if (loose > 0) {
           const dx = Math.sin(x * 0.009 + t * 0.6) * Math.cos(yy * 0.011 - t * 0.45) + 0.5 * Math.sin(yy * 0.023 + t * 0.9 + k * 0.002);
           const dy = Math.sin(yy * 0.008 + t * 0.52 + 2.3) * Math.cos(x * 0.012 + t * 0.38) + 0.5 * Math.cos(x * 0.021 - t * 0.8);
@@ -640,7 +560,6 @@ export default function DotThread({ builds }: { builds: Build[] }) {
         }
         const ra = ia < 0 ? 0 : A.r[ka];
         const rb = ib < 0 ? 0 : B.r[kb];
-        // A lent dot shows only while it travels.
         const done = clamp(e / lands);
         const r = lerp(ra, rb, done) * size + (ia < 0 || ib < 0 ? 0.9 * Math.sin(Math.PI * done) : 0);
         const band = done < 0.5 ? A.band[ka] : B.band[kb];
@@ -648,7 +567,6 @@ export default function DotThread({ builds }: { builds: Build[] }) {
       }
     };
 
-    // Where the scroll puts the thread: 0 on the hero, 1 on the first print, and so on.
     const goal = (y: number) => {
       let j = 0;
       for (let i = 0; i < legs.length && y > legs[i].from; i++) j = i + clamp((y - legs[i].from) / (legs[i].to - legs[i].from));
@@ -660,8 +578,6 @@ export default function DotThread({ builds }: { builds: Build[] }) {
       const dt = clamp((now - last) / 1000, 0.001, 0.05);
       last = now;
       const y = pageY();
-      // Take the hero's dots once its lens has shut. Give them back only when the page is above
-      // that line again and every dot is home.
       const below = y > start;
       if (below && !taken) {
         taken = true;
@@ -678,27 +594,33 @@ export default function DotThread({ builds }: { builds: Build[] }) {
       const ours = taken && shapes.length > 0;
       plateLeave(clamp(y / Math.max(1, start)), ours);
 
-      g.clearRect(0, 0, W, H);
+      print.clear();
       if (!ours) return;
-      n = 0;
+      held.fill(0);
       const leg = Math.min(Math.floor(at), legs.length - 1);
       if (leg < 0 || at >= legs.length) still(shapes[shapes.length - 1], y);
       else if (at === leg) still(shapes[leg], y);
       else run(legs[leg], shapes[leg], shapes[leg + 1], at - leg, y, now / 1000);
-      for (let band = 0; band < BANDS; band++) {
-        g.beginPath();
-        for (let k = 0; k < n; k++) if (pb[k] === band) square(g, px[k], py[k], pr[k], pt[k]);
-        g.fillStyle = inks[band];
-        g.fill();
+      print.dots(
+        { x: sx, y: sy, turn: st, held, cap, radius: (slot) => (LARGEST * ((slot % SIZES) + 1)) / SIZES, ink: (slot) => Math.floor(slot / SIZES) },
+        0,
+        SLOTS,
+        inks,
+      );
+      if (short) {
+        short = false;
+        cap *= 2;
+        sx = new Float32Array(SLOTS * cap);
+        sy = new Float32Array(SLOTS * cap);
+        st = new Float32Array(SLOTS * cap);
+        kick();
       }
-      // Part way through a run the thread keeps drifting, even with the page still.
       if (at !== want || at % 1 !== 0) kick();
     };
     function kick() {
       if (!raf) raf = requestAnimationFrame(draw);
     }
 
-    // A new plate on the hero changes which builds the lists get. Not while its dots are out.
     const plate = () => {
       const id = plateShown.get()?.id ?? "";
       if (id === asked || taken) return;
@@ -715,8 +637,8 @@ export default function DotThread({ builds }: { builds: Build[] }) {
     window.addEventListener("resize", resize);
     asked = plateShown.get()?.id ?? "";
     document.fonts.ready.then(() => live && measure());
-    // Again once Home's opening has set the hero, so the boxes are measured at rest.
-    const opened = window.setTimeout(() => live && measure(), 1700);
+    const opening = hero.getAnimations({ subtree: true }).filter((a) => a instanceof CSSAnimation && a.animationName.startsWith("hero-"));
+    Promise.all(opening.map((a) => a.finished.catch(() => {}))).then(() => live && measure());
 
     return () => {
       live = false;
@@ -724,10 +646,10 @@ export default function DotThread({ builds }: { builds: Build[] }) {
       stopPlate();
       window.removeEventListener("resize", resize);
       window.clearTimeout(settle);
-      window.clearTimeout(opened);
       cancelAnimationFrame(raf);
       for (const img of imgs.values()) img.onload = null;
       plateLeave(0, false);
+      print.dispose();
     };
   }, [builds]);
 

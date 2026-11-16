@@ -13,9 +13,9 @@ export type HeroBuild = {
 };
 
 const PHONE_SCREEN = 3;
-const SIZES = 40;
-const BANDS = 10;
-const SWELL = 1.6;
+export const SIZES = 40;
+export const BANDS = 10;
+export const SWELL = 1.6;
 const LENS = 0.3;
 const FRONT = 0.3;
 const WAVE = 1300;
@@ -62,9 +62,6 @@ const show = (b: HeroBuild) => {
 export const PLATE_SHOW = "plate:show";
 export const PLATE_RELEASE = "plate:release";
 
-// DotThread carries the plate's dots down the page. As the page starts to move it shuts the lens
-// (`near`, 0 to 1); once shut it takes the dots as they stand (`plateDots`) and the plate stops
-// drawing (`gone`), so the handover shows nothing. Positions are in the hero's own box.
 export type PlateDots = { n: number; x: Float32Array; y: Float32Array; r: Float32Array; band: Uint8Array };
 let leave = { near: 0, gone: false };
 let dotsNow: (() => PlateDots | null) | null = null;
@@ -378,7 +375,6 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       const g = c.getContext("2d", { willReadFrequently: true });
       if (!g) return;
       const range = document.createRange();
-      // The opening is still moving the words: seek it to its end, measure them at rest, seek back.
       const opening = host
         .getAnimations({ subtree: true })
         .filter((a) => a instanceof CSSAnimation && a.animationName.startsWith("hero-") && a.currentTime !== null);
@@ -427,7 +423,6 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       }
     };
 
-    // A cell's ink at rest, before the wave and the lens: 0 where nothing prints.
     const inkAt = (tone: number, k: number, py: number) => {
       let r = (1 - GROUND * (0.12 + 0.88 * tone)) * top;
       if (r <= rGround + 0.06) return 0;
@@ -440,7 +435,6 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       Math.min(BANDS - 1, Math.round((1 - tone) * (BANDS - 1))) * SIZES + clamp(Math.round((r / rTop) * SIZES) - 1, 0, SIZES - 1);
     const sizeOf = (slot: number) => (rTop * ((slot % SIZES) + 1)) / SIZES;
 
-    // The plate's dots as it prints them with the lens shut and no wave: what DotThread takes.
     const standing = (): PlateDots | null => {
       const img = b >= 0 ? load(b) : null;
       if (!img || !W) return null;
@@ -544,7 +538,6 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
       const gb = ib && rb ? measure(b, ib, rb) : null;
 
       const R = clamp(W * 0.105, 84, 180) * (1 + lens.boost);
-      // The lens shuts with the first of the page's scroll, so the dots are at rest when they leave.
       const amp = lens.amp * (1 - smooth(leave.near));
       const lensOn = amp > 0.01 && !still;
       const power = lensOn ? LENS * amp : 0;
@@ -705,7 +698,6 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
         ptr.speed *= Math.exp(-dt * 6);
         const swell = ptr.down && ptr.in ? PRESS : clamp(ptr.speed / 2400, 0, FAST);
         lens.boost += (swell - lens.boost) * (1 - Math.exp(-dt * 5));
-        // Held while the page is scrolled: the plate must be where its dots left it when they return.
         if (!leave.near) {
           const tx = ptr.in ? (ptr.x / W) * 2 - 1 : 0;
           const ty = ptr.in ? (ptr.y / H) * 2 - 1 : 0;

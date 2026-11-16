@@ -28,7 +28,6 @@ function Stmt({ className, delay, children }: { className: string; delay: number
   );
 }
 
-// One span a letter, so each can rise on its own (`hero-letters` in globals.css).
 function Letters({ children }: { children: string }) {
   return [...children].map((c, i) => (
     <span key={i} style={{ "--i": i } as React.CSSProperties}>
@@ -40,7 +39,6 @@ function Letters({ children }: { children: string }) {
 // Half the track must outrun the widest column it rolls in, and the row translates by half.
 const ROLL_COPIES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-// The logos roll in one muted line, with no labels. Copies are hidden from readers and keyboards.
 function LogoRoll({ items }: { items: Sponsor[] }) {
   const set = (copy: boolean) =>
     items.map((s) => (
