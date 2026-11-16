@@ -755,6 +755,57 @@
     transition: opacity 160ms ease-out;
   }
 }
+/* A post's cards (an Instagram carousel) as a strip: every card is --card high and as wide as
+   its own shape makes it (--own, width over height), never wider than --max, so portrait and
+   landscape cards sit side by side with even gaps. The track is full bleed; --lead is the article
+   column's left line, and the last card's margin lets it rest on that line too. */
+.card-reel {
+  container-type: inline-size;
+}
+.card-reel > ul {
+  --c: calc((100cqw - 7 * var(--gutter)) / 6);
+  --card: calc(100cqw - 2 * var(--gutter) - 2.5rem);
+  --max: var(--card);
+  --lead: var(--gutter);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gutter);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: var(--lead);
+  padding-left: var(--lead);
+}
+.card-reel > ul > li {
+  --w: min(var(--max), calc(var(--card) * var(--own, 1)));
+  flex: none;
+  width: var(--w);
+  aspect-ratio: var(--own, 1);
+  scroll-snap-align: start;
+}
+.card-reel > ul > li:last-child {
+  margin-right: calc(100cqw - var(--lead) - var(--w));
+}
+@media (width >= 48rem) {
+  .card-reel > ul {
+    --c: calc((100cqw - 13 * var(--gutter)) / 12);
+    --card: calc(6 * var(--c) + 5 * var(--gutter));
+    --lead: calc(var(--c) + 2 * var(--gutter));
+    --max: calc(100cqw - var(--lead) - var(--gutter));
+  }
+}
+@media (width >= 64rem) {
+  .card-reel > ul {
+    --card: calc(5 * var(--c) + 4 * var(--gutter));
+    --lead: calc(2 * var(--c) + 3 * var(--gutter));
+  }
+}
+@media (width >= 80rem) {
+  .card-reel > ul {
+    --card: calc(4 * var(--c) + 3 * var(--gutter));
+    --lead: calc(3 * var(--c) + 4 * var(--gutter));
+  }
+}
 .u-arrive > *,
 .member-profile [data-profile-part] {
   animation: arrive var(--duration-arrive) cubic-bezier(0.22, 1, 0.36, 1) both;

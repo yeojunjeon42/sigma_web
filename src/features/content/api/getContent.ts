@@ -47,6 +47,7 @@ function toMeta(collection: Collection, slug: string, data: Record<string, strin
     tags,
     team: list(data.team),
     authors: list(data.author),
+    cards: list(data.cards),
     sample: data.sample === "true" || undefined,
   };
 }

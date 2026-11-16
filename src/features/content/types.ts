@@ -12,6 +12,9 @@ export interface DocMeta {
   tags: string[];
   team: string[];
   authors: string[];
+  // Cards shown as a reel in place of the cover: one alt text a card, files
+  // `blog-photos/<slug>-card-<n>.jpg` counted from 1.
+  cards: string[];
   sample?: boolean;
 }
 

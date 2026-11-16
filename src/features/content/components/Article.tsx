@@ -1,36 +1,38 @@
+import path from "node:path";
 import Image from "next/image";
 import Link from "next/link";
 import { Arrow } from "@/components/ui";
 import { displayTags } from "../data/tags";
 import { formatDate } from "@/lib/date";
+import { imageSize } from "@/features/archive/api/imageSize";
 import type { Photo } from "@/features/archive/types";
-import type { Doc, DocMeta } from "../types";
+import type { Doc } from "../types";
 import { coverFor } from "../data/covers";
+import CardReel from "./CardReel";
 import CodeCopy from "./CodeCopy";
 import PostImage from "./PostImage";
-
-const LABEL = "text-caption tracking-normal leading-none text-ink-muted";
 
 export default function Article({
   doc,
   photos = [],
   videos = [],
   back,
-  newer,
-  older,
 }: {
   doc: Doc;
   photos?: Photo[];
   videos?: string[];
   back: { href: string; label: string };
-  newer?: DocMeta;
-  older?: DocMeta;
 }) {
   const stamp = doc.date ?? (doc.year ? String(doc.year) : undefined);
   const dateLabel = formatDate(stamp);
   const tags = displayTags(doc.tags, Infinity);
   const [leadPhoto, ...inline] = photos;
-  const cover = leadPhoto ? undefined : coverFor(doc.slug);
+  const cards = doc.cards.map((alt, i) => {
+    const src = `/blog-photos/${doc.slug}-card-${i + 1}.jpg`;
+    const size = imageSize(path.join(process.cwd(), "public", src)) ?? { width: 1080, height: 1080 };
+    return { src, alt, ...size };
+  });
+  const cover = leadPhoto || cards.length ? undefined : coverFor(doc.slug);
 
   const COL = "col-span-full md:col-span-10 md:col-start-2 lg:col-span-8 lg:col-start-3 xl:col-span-6 xl:col-start-4";
   const imageSizes = "(min-width: 708px) 50vw, calc(100vw - 2rem)";
@@ -74,6 +76,8 @@ export default function Article({
             )}
           </p>
         </header>
+
+        {cards.length > 0 && <CardReel cards={cards} column={COL} />}
 
         {(leadPhoto || cover) && (
           <div className={`mt-xxl md:mt-16 ${COL}`}>
@@ -122,30 +126,6 @@ export default function Article({
                 </li>
               ))}
             </ul>
-          )}
-
-          {(newer || older) && (
-            <nav aria-label="Next and previous posts" className={`mt-section grid border-t border-rule md:grid-cols-2 md:gap-x-gutter ${COL}`}>
-              {[
-                older && { post: older, label: "Older", align: "" },
-                newer && { post: newer, label: "Newer", align: "md:col-start-2 md:text-right" },
-              ]
-                .filter((x): x is { post: DocMeta; label: string; align: string } => Boolean(x))
-                .map(({ post, label, align }) => (
-                  <Link
-                    key={post.slug}
-                    href={`/blog/${post.slug}`}
-                    className={`group/next flex flex-col gap-xs border-b border-rule py-lg md:border-b-0 ${align}`}
-                  >
-                    <span className={LABEL}>
-                      {label}
-                    </span>
-                    <span className="text-title text-balance text-ink transition-colors group-hover/next:text-ink-muted">
-                      {post.title}
-                    </span>
-                  </Link>
-                ))}
-            </nav>
           )}
         </div>
       </div>

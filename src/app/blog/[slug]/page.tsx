@@ -6,7 +6,7 @@ import "katex/dist/katex.min.css";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { getDoc, getIndex, getSlugs } from "@/features/content/api/getContent";
+import { getDoc, getSlugs } from "@/features/content/api/getContent";
 import Article from "@/features/content/components/Article";
 import { GridField } from "@/components/ui";
 
@@ -38,8 +38,6 @@ export default async function PostPage({
   const { slug } = await params;
   const doc = await getDoc("posts", slug);
   if (!doc) notFound();
-  const all = await getIndex("posts");
-  const at = all.findIndex((p) => p.slug === slug);
   const cover = coverFor(slug);
   const ld = {
     "@context": "https://schema.org",
@@ -66,12 +64,7 @@ export default async function PostPage({
       <Navbar />
       <main id="main" className="bg-canvas pb-section">
         <GridField>
-          <Article
-            doc={doc}
-            back={{ href: "/blog", label: "Blog" }}
-            newer={at > 0 ? all[at - 1] : undefined}
-            older={at >= 0 && at < all.length - 1 ? all[at + 1] : undefined}
-          />
+          <Article doc={doc} back={{ href: "/blog", label: "Blog" }} />
         </GridField>
       </main>
       <Footer />
