@@ -19,9 +19,8 @@ const ALL: Sponsor[] = [
   {
     id: "amd",
     name: "AMD",
-    logo: { src: "/sponsors/amd.svg", width: 1397, height: 334, cap: 0.865, foot: 0.068 },
+    logo: { src: "/sponsors/amd-logo.svg", width: 1964, height: 468, cap: 0.867, foot: 0.066 },
     website: "https://www.amd.com/",
-    pending: true,
   },
 ];
 
