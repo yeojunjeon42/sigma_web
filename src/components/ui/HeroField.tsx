@@ -42,7 +42,7 @@ const ROLL_COPIES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 function LogoRoll({ items }: { items: Sponsor[] }) {
   const set = (copy: boolean) =>
     items.map((s) => (
-      <li key={s.id} className="shrink-0 pr-xxl desk:pr-xxxl">
+      <li key={s.id} className="shrink-0 pr-xxl">
         <a
           href={s.website}
           target="_blank"
@@ -64,8 +64,7 @@ function LogoRoll({ items }: { items: Sponsor[] }) {
     ));
 
   return (
-    // From the desk, the bottom margin sets the logos on the baseline of INTELLIGENCE beside them.
-    <div data-offgrid className="-mx-[var(--gutter)] overflow-hidden py-2 [--logo-cap:1rem] motion-reduce:overflow-x-auto desk:mx-0 desk:-mb-[9.73px] desk:[--logo-cap:clamp(1rem,1.2vw,1.5rem)] desk:[mask-image:linear-gradient(90deg,transparent,#000_7%,#000_93%,transparent)]">
+    <div data-offgrid className="-mx-[var(--gutter)] overflow-hidden py-2 [--logo-cap:1rem] motion-reduce:overflow-x-auto">
       <div className="logo-roll flex w-max">
         {ROLL_COPIES.map((n) => (
           <ul key={n} aria-hidden={n > 0 || undefined} className={`flex shrink-0 items-baseline ${n > 0 ? "motion-reduce:hidden" : ""}`}>
@@ -161,7 +160,8 @@ export default function HeroField({
           </Stmt>
         </div>
 
-        <div data-sponsors style={at(820)} className="hero-set order-last flex h-[var(--below)] flex-col justify-center desk:order-none desk:col-span-5 desk:col-start-1 desk:row-start-6 desk:mt-0 desk:block desk:h-auto desk:min-w-0 desk:self-end">
+        {/* Below the desk the supporters roll here, under the first screen. From the desk they are a row of their own (SupportRow). */}
+        <div data-sponsors style={at(820)} className="hero-set order-last flex h-[var(--below)] flex-col justify-center desk:hidden">
           <LogoRoll items={[...sponsors, ...cofounded]} />
         </div>
 

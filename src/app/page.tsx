@@ -11,6 +11,7 @@ import { HERO_BUILDS } from "@/features/archive/data/hero";
 import { splitTitle } from "@/features/archive/components/splitTitle";
 import { objectSrc } from "@/features/archive/data/field";
 import RecordLines from "@/features/site/components/RecordLines";
+import SupportBand from "@/features/sponsors/components/SupportBand";
 import { CountUp } from "@/components/ui/CountUp";
 import { getAwards } from "@/features/awards/api/getAwards";
 import { ALUMNI_TOTAL, COHORT_COUNT } from "@/features/alumni/data/cohorts";
@@ -61,6 +62,8 @@ export default async function Home() {
         <DotThread builds={plates} />
 
       <main id="main">
+        <SupportBand sponsors={sponsors} cofounded={cofounded} />
+
         <section
           aria-label="Founded 1984"
           className="bg-band text-ink"

@@ -2,7 +2,8 @@ export interface Sponsor {
   id: string;
   name: string;
   // cap: the letters' height as a share of the image's. foot: what hangs under their baseline, same
-  // unit. The page sets every logo's letters to one height on one baseline.
+  // unit. The page sets every logo's letters to one height on one baseline. Each file keeps a
+  // little room around the artwork: drawn to the very edge, a curve loses its soft outline there.
   logo: { src: string; width: number; height: number; cap: number; foot: number };
   website: string;
   // Awaiting the sponsor's go-ahead: shown in development only.
@@ -13,13 +14,13 @@ const ALL: Sponsor[] = [
   {
     id: "hyundai-mobis",
     name: "Hyundai Mobis",
-    logo: { src: "/sponsors/hyundai-mobis.svg", width: 720, height: 248, cap: 0.581, foot: 0.036 },
+    logo: { src: "/sponsors/hyundai-mobis-v2.svg", width: 728, height: 256, cap: 0.563, foot: 0.05 },
     website: "https://www.mobis.com/",
   },
   {
     id: "amd",
     name: "AMD",
-    logo: { src: "/sponsors/amd-logo.svg", width: 1964, height: 468, cap: 0.867, foot: 0.066 },
+    logo: { src: "/sponsors/amd-logo-v2.svg", width: 1980, height: 484, cap: 0.838, foot: 0.08 },
     website: "https://www.amd.com/",
   },
 ];
@@ -31,7 +32,7 @@ export const COFOUNDED: Sponsor[] = [
   {
     id: "roboticus",
     name: "Roboticus",
-    logo: { src: "/sponsors/roboticus-wordmark.svg", width: 1932, height: 382, cap: 0.762, foot: 0.039 },
+    logo: { src: "/sponsors/roboticus-wordmark-v2.svg", width: 1946, height: 396, cap: 0.735, foot: 0.055 },
     website: "https://robotic-us.com/",
   },
 ];

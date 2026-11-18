@@ -344,6 +344,7 @@ export default function DotThread({ builds }: { builds: Build[] }) {
     let start = Infinity;
     let middle = { x: 0, y: 0 };
     let gap: Point | null = null;
+    let rule: Point | null = null;
     let prints: Shape[] = [];
     let shapes: Shape[] = [];
     let legs: Leg[] = [];
@@ -382,18 +383,31 @@ export default function DotThread({ builds }: { builds: Build[] }) {
       const col = (W - gutter * 13) / 12;
       const line = (n: number) => gutter + (n - 1) * (col + gutter);
       const heads = [...document.querySelectorAll("main h2")];
-      const beside = (name: string, from: number, to: number) => {
-        const h2 = heads.find((h) => h.textContent?.trim() === name);
+      const span = (name?: string) => {
+        const h2 = name ? heads.find((h) => h.textContent?.trim() === name) : undefined;
         const list = h2?.nextElementSibling;
-        if (!h2 || !list) return;
+        if (!h2 || !list) return null;
         const a = h2.getBoundingClientRect();
         const b = list.getBoundingClientRect();
-        const mid = (a.top + Math.max(a.bottom, b.bottom)) / 2 + y;
-        const h = Math.min(520, H * 0.6);
-        out.push({ x: line(from), y: mid - h / 2, w: line(to + 1) - gutter - line(from), h });
+        return { top: a.top + y, bottom: Math.max(a.bottom, b.bottom) + y };
       };
-      beside("Stacks", 8, 12);
-      beside("Equipments", 1, 5);
+      // The rows above and below a print run through its columns, so it keeps a gutter clear of both.
+      const beside = (name: string, from: number, to: number, above?: string, below?: string) => {
+        const own = span(name);
+        if (!own) return;
+        const mid = (own.top + own.bottom) / 2;
+        const up = span(above);
+        const down = span(below);
+        const half = Math.min(
+          Math.min(520, H * 0.6) / 2,
+          up ? mid - up.bottom - gutter : Infinity,
+          down ? down.top - gutter - mid : Infinity,
+        );
+        if (half <= 0) return;
+        out.push({ x: line(from), y: mid - half, w: line(to + 1) - gutter - line(from), h: half * 2 });
+      };
+      beside("Stacks", 8, 12, undefined, "Equipments");
+      beside("Equipments", 1, 5, "Stacks", "Intake");
       return out;
     };
 
@@ -410,7 +424,7 @@ export default function DotThread({ builds }: { builds: Build[] }) {
         const dx = B.cx - A.cx;
         const dy = B.cy - A.cy;
         const on = (share: number, side: number): Point => [A.cx + dx * share - dy * side, A.cy + dy * share + dx * side];
-        const via: Point[] = i === 0 ? [...(gap ? [gap] : []), on(0.72, 0.03)] : [on(0.24, 0.07), on(0.5, 0.14), on(0.76, 0.06)];
+        const via: Point[] = i === 0 ? [...(rule ? [rule] : []), ...(gap ? [gap] : []), on(0.72, 0.03)] : [on(0.24, 0.07), on(0.5, 0.14), on(0.76, 0.06)];
         return legOf(A, B, H, via, i === 0);
       });
     };
@@ -429,6 +443,16 @@ export default function DotThread({ builds }: { builds: Build[] }) {
       const box = band?.getBoundingClientRect();
       const gutter = parseFloat(getComputedStyle(hero).getPropertyValue("--gutter")) || 24;
       gap = first && box ? [first.right + gutter / 2, box.top + y + box.height / 2] : null;
+      // The supporters' row lies on the way to the gap. The thread passes it at the clear spot
+      // nearest the gap, between two logos or past the row's end, so no dot crosses a logo.
+      const logos = [...document.querySelectorAll("main section[aria-label='Supported by'] li")].map((li) => li.getBoundingClientRect());
+      const g = gap;
+      rule = null;
+      if (g && logos.length) {
+        const clear = [logos[0].left - gutter * 3, ...logos.slice(1).map((r, i) => (logos[i].right + r.left) / 2), logos[logos.length - 1].right + gutter * 3];
+        const x = clear.reduce((a, c) => (Math.abs(c - g[0]) < Math.abs(a - g[0]) ? c : a));
+        rule = [x, logos[0].top + y + logos[0].height / 2];
+      }
       const at = Math.max(0, builds.findIndex((b) => b.id === asked));
       prints = boxes().flatMap((box, i) => {
         const img = image(builds[(at + 1 + i) % builds.length]);
