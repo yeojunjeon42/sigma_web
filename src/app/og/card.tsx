@@ -104,7 +104,9 @@ const TITLE = [
 
 export async function postCard({ slug, title, section }: { slug: string; title: string; section?: string }) {
   const file = coverFile(slug);
-  const cover = file ? await readFile(path.join(process.cwd(), "public", file)) : null;
+  // The folder is named in full: a path that could be anywhere under public/ makes the build pack all
+  // of public/ into this function, and that is past the platform's size limit.
+  const cover = file ? await readFile(path.join(process.cwd(), "public/blog-covers", path.basename(file))) : null;
   const size = TITLE.find(([most]) => [...title].length <= most)![1];
   const [latin, hangul] = await Promise.all([font("authentic-sans-100.otf"), font("pretendard-445-hangul.woff")]);
 
