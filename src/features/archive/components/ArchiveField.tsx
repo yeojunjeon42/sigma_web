@@ -6,14 +6,11 @@ import { eraLabel, type ArchiveProject } from "../types";
 import type { Look } from "../data/covers";
 import { tileFor, type Tile } from "../data/field";
 import { splitTitle } from "./splitTitle";
-import FieldPrint from "./FieldPrint";
 import PlateArt from "./PlateArt";
 import PlateHandoff from "./PlateHandoff";
 
 const MARGIN: CSSProperties = { scrollMarginTop: "calc(var(--masthead) + var(--spacing-lg))" };
 const SQUARE: CSSProperties = { aspectRatio: "1 / 1" };
-const FADE =
-  "transition-opacity duration-[420ms] ease-in-out group-hover/plate:duration-[620ms] group-focus-visible/plate:duration-[620ms] motion-reduce:transition-none";
 // Centres a cut-out with room for the name at the plate's foot. No tile is drawn, so it can run larger than the phone's.
 const OBJECT: Tile["box"] = [0.05, 0.05, 0.9, 0.9];
 const BIG =
@@ -88,12 +85,10 @@ export default function ArchiveField({
     ...b,
     projects: b.projects.toSorted((x, y) => weight(y) - weight(x)),
   }));
-  const printKey = `${look}|${bands.flatMap((b) => b.projects.map((p) => p.id)).join()}`;
 
   return (
     <Container>
       <div data-field className="relative pt-xxl">
-        <FieldPrint key={printKey} />
         <PlateHandoff />
         {bands.map((band, n) => (
           <section
@@ -122,7 +117,7 @@ export default function ArchiveField({
                       href={reelHref(p.id)}
                       data-plate-link
                       data-vt-id={p.id}
-                      className="group/plate relative block"
+                      className="relative block"
                     >
                       <PlateArt
                         tile={tile.kind === "lift" && look === "object" ? { ...tile, box: OBJECT } : tile}
@@ -130,13 +125,9 @@ export default function ArchiveField({
                         eager={eager && n === 0 && i < 3}
                         plain
                         style={SQUARE}
-                        className={`w-full opacity-0 group-hover/plate:opacity-100 group-focus-visible/plate:opacity-100 ${FADE}`}
+                        className="w-full"
                       />
-                      <canvas
-                        aria-hidden="true"
-                        className={`pointer-events-none absolute inset-0 size-full opacity-100 group-hover/plate:opacity-0 group-focus-visible/plate:opacity-0 ${FADE}`}
-                      />
-                      <h3 className="u-trim absolute inset-x-0 bottom-0 z-10 font-[family-name:var(--f-display)] font-semibold [font-stretch:125%] text-body-sm text-ink transition-colors group-hover/plate:text-ink-muted">
+                      <h3 className="u-trim absolute inset-x-0 bottom-0 z-10 font-[family-name:var(--f-display)] font-semibold [font-stretch:125%] text-body-sm text-ink">
                         {splitTitle(p.title).en}
                       </h3>
                       <span className="sr-only">

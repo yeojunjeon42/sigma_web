@@ -1,10 +1,6 @@
 import type { ArchiveProject } from "../types";
 import { LIFTED, type Look } from "./covers";
 import objects from "./objects.json";
-import { SCREEN } from "@/lib/halftone";
-
-// The field prints at half the site's screen, so that small cut-outs stay readable.
-export const FIELD_CELL = SCREEN / 2;
 
 export type Shape = "port" | "sq" | "land";
 
