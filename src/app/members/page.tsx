@@ -1,21 +1,15 @@
 import type { Metadata } from "next";
 import { share } from "@/app/share";
-import ContactPill from "@/components/ContactPill";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Container, GridField } from "@/components/ui";
 import { ALUMNI } from "@/features/alumni/data/people";
 import { getTeam } from "@/features/members/api/getMembers";
 import MemberCrew, { type CrewMember } from "@/features/members/components/MemberCrew";
-import { INCOMING } from "@/features/members/data/roster";
-import { CREW_SAMPLES } from "@/features/members/data/samples";
-import { SHOW_SAMPLES } from "@/features/content/data/samples";
-
-const PLACEHOLDER_BIO = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+import { INCOMING, MEMBER_COUNT } from "@/features/members/data/roster";
 
 const DESCRIPTION = "The members and alumni of SIGMA INTELLIGENCE.";
 const MEMBER_FORM = "https://forms.gle/o3uj9VwncYV3in9r6";
-const PILL = "Update your member profile";
 
 export const metadata: Metadata = {
   title: "Members",
@@ -24,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 export default async function MembersPage() {
-  const team = [...(await getTeam()), ...CREW_SAMPLES.map((m) => ({ ...m, portrait: null }))];
+  const team = await getTeam();
 
   const ranked = team.filter((m) => m.role || m.incoming);
   const rest = team
@@ -37,7 +31,7 @@ export default async function MembersPage() {
     post: m.role ?? (m.incoming && !m.duty ? INCOMING : undefined),
     duty: m.duty,
     department: m.department,
-    bio: m.bio ?? (SHOW_SAMPLES ? PLACEHOLDER_BIO : undefined),
+    bio: m.bio,
     portrait: m.portrait,
     links: m.links,
   }));
@@ -70,13 +64,12 @@ export default async function MembersPage() {
                     Members
                     <span className="tabular-nums text-ink-muted">{new Date().getFullYear()}</span>
                   </h2>
-                  <span className="ml-auto tabular-nums text-ink-muted">{crew.length}</span>
+                  <span className="ml-auto tabular-nums text-ink-muted">{alumni.length + MEMBER_COUNT}</span>
                 </div>
-                {crew.length > 0 && <MemberCrew members={crew} />}
+                <MemberCrew members={crew} total={alumni.length + MEMBER_COUNT} form={MEMBER_FORM} />
               </section>
             </Container>
           </GridField>
-          <ContactPill href={MEMBER_FORM} pill={PILL} showOnMobile />
         </main>
 
         <Footer />

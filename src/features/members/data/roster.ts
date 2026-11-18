@@ -22,6 +22,9 @@ export interface RosterMember {
 
 export const INCOMING: Bilingual = { en: "Executive", ko: "임원" };
 
+// Everyone in the club this year, listed below or not.
+export const MEMBER_COUNT = 105;
+
 const ECE: Bilingual = {
   en: "Electrical and Computer Engineering",
   ko: "전기정보공학부",

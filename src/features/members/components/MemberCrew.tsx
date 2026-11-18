@@ -14,10 +14,11 @@ import { DOT, SCREEN, relief, square, turnAt } from "@/lib/halftone";
 
 type CrewGroup = "alumni" | "executives" | "members";
 
-const GROUPS: { key: CrewGroup; label: string }[] = [
-  { key: "alumni", label: "Alumni" },
+// A group with nobody in it keeps its heading and one row: the link to the profile form.
+const GROUPS: { key: CrewGroup; label: string; invite?: string }[] = [
+  { key: "alumni", label: "Alumni", invite: "Add your alumni profile" },
   { key: "executives", label: "Executives" },
-  { key: "members", label: "Members" },
+  { key: "members", label: "Members", invite: "Add your member profile" },
 ];
 
 export interface CrewMember {
@@ -37,8 +38,9 @@ export interface CrewMember {
 const HEAD = 0.52;
 const HEADROOM = 0.09;
 
-const IN = 700;
-const OUT = 400;
+// The archive field's plate fade: 620ms to the photograph, 420ms back.
+const IN = 620;
+const OUT = 420;
 const FACE_RELIEF = 0.3;
 
 type Sheet = {
@@ -256,7 +258,7 @@ export function Print({
         </>
       ) : (
         <div className="absolute inset-0 grid place-items-center bg-surface-sunken max-lg:bg-canvas">
-          <Image src="/logo-mark.svg" alt="" width={253} height={274} className="h-auto w-[28%] max-w-9 opacity-35" />
+          <Image src="/logo-mark.svg" alt="" width={253} height={274} className="h-auto w-[28%] max-w-9 opacity-35 grayscale" />
         </div>
       )}
     </div>
@@ -265,9 +267,9 @@ export function Print({
 
 function press(g: CanvasRenderingContext2D, { tone, spin, cols, rows, cell, w, h }: Sheet) {
   const css = getComputedStyle(document.documentElement);
-  g.fillStyle = css.getPropertyValue("--color-canvas").trim() || "#e9eae5";
+  g.fillStyle = css.getPropertyValue("--color-canvas").trim() || "#e4e4e4";
   g.fillRect(0, 0, w, h);
-  g.fillStyle = css.getPropertyValue("--color-ink").trim() || "#0f110d";
+  g.fillStyle = css.getPropertyValue("--color-ink").trim() || "#000000";
   g.beginPath();
   for (let y = 0; y < rows; y++)
     for (let x = 0; x < cols; x++) {
@@ -318,8 +320,28 @@ function GroupHead({ id, label, count, className = "" }: { id?: string; label: s
   return (
     <h3 id={id} className={`flex items-baseline justify-between pb-xs text-body-sm text-ink-muted ${className}`}>
       {label}
-      <span className="tabular-nums">{count}</span>
+      {count > 0 && <span className="tabular-nums">{count}</span>}
     </h3>
+  );
+}
+
+// The whole row is the link: its label where a name sits, its arrow where a row's links sit.
+function Invite({ href, label, className = "" }: { href: string; label: string; className?: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`u-swipe-host group/invite flex items-center justify-between text-body-sm text-ink ${className}`}
+    >
+      <span className="u-swipe">{label}</span>
+      <span
+        aria-hidden="true"
+        className="text-ink-muted transition-colors duration-200 group-hover/invite:text-ink motion-reduce:transition-none"
+      >
+        ↗
+      </span>
+    </a>
   );
 }
 
@@ -525,12 +547,14 @@ function BioLine({ text, on }: { text: string; on: boolean }) {
   );
 }
 
-export default function MemberCrew({ members }: { members: CrewMember[] }) {
+export default function MemberCrew({ members, total, form }: { members: CrewMember[]; total: number; form: string }) {
   const [hot, setHot] = useState<string | null>(null);
   const [selected, setSelected] = useState<CrewMember | null>(null);
-  const groups = GROUPS.map((g) => ({ ...g, members: members.filter((m) => m.group === g.key) })).filter(
-    (g) => g.members.length > 0,
-  );
+  // Members counts everyone in the club who has no row here.
+  const groups = GROUPS.map((g) => {
+    const listed = members.filter((m) => m.group === g.key);
+    return { ...g, members: listed, count: listed.length + (g.key === "members" ? total - members.length : 0) };
+  }).filter((g) => g.members.length > 0 || g.invite);
   const order = groups.flatMap((g) => g.members);
 
   return (
@@ -538,14 +562,20 @@ export default function MemberCrew({ members }: { members: CrewMember[] }) {
       <div className="lg:hidden">
         {groups.map((g, i) => (
           <section key={g.key} aria-labelledby={`crew-m-${g.key}`} className={`pb-xl ${i === 0 ? "pt-sm" : ""}`}>
-            <GroupHead id={`crew-m-${g.key}`} label={g.label} count={g.members.length} />
-            <ul data-offgrid className="grid grid-cols-4 gap-xs md:grid-cols-6">
-              {g.members.map((m) => (
-                <Card key={m.id} m={m} onSelect={setSelected} />
-              ))}
-              <Spare members={g.members.length} cols={4} className="md:hidden" />
-              <Spare members={g.members.length} cols={6} className="hidden md:block" />
-            </ul>
+            <GroupHead id={`crew-m-${g.key}`} label={g.label} count={g.count} />
+            {g.members.length === 0 && g.invite ? (
+              <p className="border-t border-rule-strong border-b border-b-rule">
+                <Invite href={form} label={g.invite} className="min-h-11" />
+              </p>
+            ) : (
+              <ul data-offgrid className="grid grid-cols-4 gap-xs md:grid-cols-6">
+                {g.members.map((m) => (
+                  <Card key={m.id} m={m} onSelect={setSelected} />
+                ))}
+                <Spare members={g.members.length} cols={4} className="md:hidden" />
+                <Spare members={g.members.length} cols={6} className="hidden md:block" />
+              </ul>
+            )}
           </section>
         ))}
       </div>
@@ -569,8 +599,13 @@ export default function MemberCrew({ members }: { members: CrewMember[] }) {
               aria-labelledby={`crew-d-${g.key}`}
               className={`col-span-full grid grid-cols-subgrid ${i ? "pt-xxl" : ""}`}
             >
-              <GroupHead id={`crew-d-${g.key}`} label={g.label} count={g.members.length} className="col-span-full" />
+              <GroupHead id={`crew-d-${g.key}`} label={g.label} count={g.count} className="col-span-full" />
               <ul className="col-span-full grid grid-cols-subgrid border-t border-rule-strong">
+                {g.members.length === 0 && g.invite && (
+                  <li className="col-span-full border-b border-rule">
+                    <Invite href={form} label={g.invite} className="py-1.5" />
+                  </li>
+                )}
                 {g.members.map((m) => {
                   const read = hot === m.id && !!m.bio;
                   const away = `transition-[opacity,visibility] duration-200 motion-reduce:transition-none ${read ? "invisible opacity-0" : ""}`;
