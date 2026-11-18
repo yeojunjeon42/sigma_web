@@ -18,13 +18,13 @@
   --default-font-family: var(--font-sans);
   --radius-photo: clamp(10px, 0.6rem + 0.5vw, 16px);
 
-  --color-canvas: #e9eae5;
-  --color-surface: #e1e3dd;
-  --color-surface-sunken: #d9dbd4;
-  --color-ink: #0f110d;
-  --color-ink-muted: #4b4f47;
-  --color-rule: #c3c6be;
-  --color-rule-strong: #a3a79d;
+  --color-canvas: #e4e4e4;
+  --color-surface: #dbdbdb;
+  --color-surface-sunken: #d2d2d2;
+  --color-ink: #000000;
+  --color-ink-muted: #4a4a4a;
+  --color-rule: #bebebe;
+  --color-rule-strong: #9e9e9e;
   --color-rule-field: #76767a;
 
   --color-band: #f0d8d1;
@@ -1121,10 +1121,12 @@ html:has([data-terminal]) {
 .prose.flow li {
   font-size: var(--flow);
   line-height: 1.65;
-  letter-spacing: 0;
+  letter-spacing: -0.01em;
 }
 .prose.flow p {
   margin: 0 0 var(--flow);
+  /* Fewer stranded words at line ends; Korean lines break on whole words, so they rag more. */
+  text-wrap: pretty;
 }
 .prose.flow h1,
 .prose.flow h2,
@@ -1185,7 +1187,7 @@ html:has([data-terminal]) {
   margin-bottom: 0;
 }
 .prose.flow.flow-panel {
-  --flow: 0.9375rem;
+  --flow: 1rem;
 }
 
 .prose strong,
@@ -1581,30 +1583,52 @@ html[data-fast] [data-flow] {
   }
 }
 
+/* The panel reads at body size, a clear step above its 14px facts table; headings step up from it. */
 .prose.flow.flow-panel {
-  --flow: 0.9375rem;
+  --flow: 1rem;
   --prose-gap: 1.25rem;
 }
 .prose.flow.flow-panel p,
 .prose.flow.flow-panel li {
-  font-size: 0.9375rem;
-  line-height: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.625rem;
 }
 .prose.flow.flow-panel p {
   margin: 0 0 1.25rem;
 }
 .prose.flow.flow-panel h1,
 .prose.flow.flow-panel h2 {
-  margin: 1.75rem 0 0.75rem;
-  font-size: 1.25rem;
+  margin: 2.25rem 0 0.75rem;
+  font-size: 1.375rem;
 }
 .prose.flow.flow-panel h3,
 .prose.flow.flow-panel h4 {
   margin: 1.5rem 0 0.5rem;
-  font-size: 1.0625rem;
+  font-size: 1.125rem;
 }
 .prose.flow.flow-panel blockquote {
   font-size: 1rem;
+}
+
+/* An entry of a sentence or two is set as a statement. */
+.prose.flow.flow-lead p {
+  font-size: var(--text-title);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+/* Archive field: pointing at a plate quiets the others, 620ms down and 420ms back. */
+[data-field] [data-plate-link] {
+  transition: opacity 420ms ease-in-out;
+}
+[data-field]:has([data-plate-link]:is(:hover, :focus-visible)) [data-plate-link]:not(:hover, :focus-visible) {
+  opacity: 0.35;
+  transition-duration: 620ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-field] [data-plate-link] {
+    transition: none;
+  }
 }
 
 .u-swipe,
@@ -1621,7 +1645,9 @@ html[data-fast] [data-flow] {
   background-size: 0% 1px;
 }
 .u-swipe:hover,
-.u-swipe:focus-visible {
+.u-swipe:focus-visible,
+.u-swipe-host:hover .u-swipe,
+.u-swipe-host:focus-visible .u-swipe {
   background-position: 0% 100%;
   background-size: 100% 1px;
 }

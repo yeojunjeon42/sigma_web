@@ -2,7 +2,7 @@ import Image from "next/image";
 
 const STRONG = ["#ed2024", "#ee7f6a", "#8e1316"];
 const SOFT = ["#f3c1b5", "#f0d8d1"];
-const COOL = ["#b9c0b3", "#dfe1dc"];
+const COOL = ["#bcbcbc", "#dedede"];
 const BASE = ["#f3c1b5", "#ee7f6a", "#f0d8d1"];
 
 function hash(s: string) {

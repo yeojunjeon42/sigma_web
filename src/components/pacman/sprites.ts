@@ -24,8 +24,8 @@ export function readInk(): Ink {
   const css = (n: string, f: string) =>
     getComputedStyle(document.documentElement).getPropertyValue(n).trim() || f;
   return {
-    paper: css("--color-canvas", "#e9eae5"),
-    ink: css("--color-ink", "#0f110d"),
+    paper: css("--color-canvas", "#e4e4e4"),
+    ink: css("--color-ink", "#000000"),
     muted: css("--color-ink-muted", "#4d514a"),
     accent: css("--color-accent", "#ed2024"),
   };

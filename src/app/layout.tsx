@@ -15,7 +15,7 @@ import { browserTheme, MOBILE } from "@/lib/browserTheme";
 
 const sans = localFont({
   src: [
-    { path: "../fonts/authentic-sans-90.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/authentic-sans-100.woff2", weight: "400", style: "normal" },
     { path: "../fonts/authentic-sans-130.woff2", weight: "700", style: "normal" },
   ],
   variable: "--f-sans",
@@ -47,7 +47,7 @@ const marks = localFont({
 
 const kr = localFont({
   src: [
-    { path: "../fonts/pretendard-regular.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/pretendard-445.woff2", weight: "400", style: "normal" },
     { path: "../fonts/pretendard-medium.woff2", weight: "700", style: "normal" },
   ],
   variable: "--f-kr",
@@ -120,7 +120,7 @@ const SCREEN = `(()=>{const s=document.createElement("style"),r=()=>{s.textConte
 export const viewport: Viewport = {
   // Let Safari fit the page inside the safe area, as on non-linear.studio.
   viewportFit: "auto",
-  themeColor: browserTheme("#e9eae5"),
+  themeColor: browserTheme("#e4e4e4"),
 };
 
 export const metadata: Metadata = {
