@@ -20,14 +20,13 @@ const LEGAL = [
   { label: "Electrical and Computer Engineering", href: "https://ece.snu.ac.kr" },
 ];
 
-const LABEL = "mb-sm text-caption text-ink-muted";
 const HIT = "relative before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] lg:before:hidden";
 const ITEM = `${HIT} u-swipe`;
 const LINK = "u-swipe-rest whitespace-nowrap";
 
 function Wordmark() {
   return (
-    <div aria-hidden="true" className="u-gutter @container pointer-events-none mx-auto mt-lg w-full max-w-wide">
+    <div aria-hidden="true" className="u-gutter @container pointer-events-none mx-auto mt-lg w-full max-w-wide select-none">
       <p className="u-trim -ml-[0.0555em] whitespace-nowrap font-[family-name:var(--f-display)] text-[length:calc(100cqw/4.115)] font-bold leading-none tracking-[-0.02em] text-ink [font-stretch:125%]">
         SIGMA
       </p>
@@ -43,11 +42,9 @@ export default function Footer() {
       <footer data-band className="u-card-rise overflow-hidden rounded-t-[2.5rem] bg-band text-ink [corner-shape:squircle]">
         <div className="u-gutter mx-auto w-full max-w-wide pt-xxl lg:pt-section">
           <div className="grid grid-cols-2 gap-x-gutter gap-y-xxxl text-body lg:grid-cols-12 lg:gap-y-xl">
-            {/* Match the tagline/email line boxes to the adjacent labels/links. */}
-            <div className="hidden lg:col-span-4 lg:block">
-              <p className="mb-sm text-caption">
-                <span className="text-body leading-[0]">Where Imagination Meets Reality</span>
-              </p>
+            {/* The tagline and the email sit on the lists' first two lines. */}
+            <div className="hidden lg:col-span-4 lg:flex lg:flex-col lg:gap-y-xxs">
+              <p>Where Imagination Meets Reality</p>
               <p>
                 <a href={`mailto:${EMAIL}`} className={LINK}>
                   {EMAIL}&nbsp;↗
@@ -56,9 +53,6 @@ export default function Footer() {
             </div>
 
             <nav aria-label="Footer" className="lg:col-span-2 lg:col-start-6">
-              <p className={`${LABEL} max-lg:hidden`}>
-                Pages
-              </p>
               <ul className="flex flex-col gap-y-xxs">
                 {PAGES.map((page) => (
                   <li key={page.href}>
@@ -72,9 +66,6 @@ export default function Footer() {
 
             {/* Below lg, align the list with the last page link. */}
             <div className="max-lg:mt-[calc(5*(1lh+var(--spacing-xxs)))] max-lg:text-right lg:col-span-2">
-              <p className={`${LABEL} max-lg:hidden`}>
-                Follow
-              </p>
               <ul className="flex flex-col gap-y-xxs max-lg:items-end">
                 {SOCIAL.map((s) => (
                   <li key={s.name}>
@@ -87,15 +78,11 @@ export default function Footer() {
             </div>
 
             <div className="col-span-2 lg:col-span-3">
-              <p className={`${LABEL} max-lg:hidden`}>
-                Visit
-              </p>
-              <p>
-                Building 302, Room 215‑2
-                <br />
-                Seoul National University
-                <br />
-                1 Gwanak-ro, Gwanak-gu, Seoul
+              {/* One line to a row, on the lists' rows. */}
+              <p className="flex flex-col gap-y-xxs">
+                <span>Building 302, Room 215‑2</span>
+                <span>Seoul National University</span>
+                <span>1 Gwanak-ro, Gwanak-gu, Seoul</span>
               </p>
             </div>
 
