@@ -64,6 +64,9 @@ const nextConfig: NextConfig = {
       { source: "/ai/people", destination: "/ai/members", permanent: true },
     ];
   },
+  experimental: {
+    agentUpgrade: "security",
+  },
 };
 
 export default nextConfig;
