@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
-import PostImage from "./PostImage";
+import PostCover from "./PostCover";
 
 export type BlogItem = {
   slug: string;
@@ -11,7 +11,6 @@ export type BlogItem = {
   year: number;
   section?: string;
   keys: string[];
-  cover?: string;
   sample?: boolean;
 };
 
@@ -42,31 +41,23 @@ function Section({ post, className = "" }: { post: BlogItem; className?: string 
   return post.section ? <span className={className}>{post.section}</span> : null;
 }
 
+// The cover carries the section and the title, so only the date sits under it.
 function Grid({ posts }: { posts: BlogItem[] }) {
   return (
     <ul className="grid gap-x-gutter gap-y-xxl sm:grid-cols-2 lg:grid-cols-3 lg:gap-y-section">
       {posts.map((post, i) => (
         <li key={post.slug}>
-          <Link href={`/blog/${post.slug}`} className="group/post flex flex-col">
-            <PostImage
-              src={post.cover}
-              seed={post.slug}
-              ratio="1 / 1"
+          <Link href={`/blog/${post.slug}`} className="flex flex-col">
+            <PostCover
+              slug={post.slug}
+              title={post.title}
+              section={post.section}
               sizes="(min-width: 1024px) 30vw, (min-width: 768px) 45vw, 100vw"
               eager={i < 3}
-              className="u-develop u-corner w-full"
+              heading
+              className="u-corner w-full"
             />
-            <h2 className="mt-md max-w-[34ch] text-lead text-ink transition-colors group-hover/post:text-ink-muted">
-              {post.title}
-            </h2>
-            <p className={`mt-sm ${META} text-ink-muted`}>
-              <Section post={post} className="mr-md text-ink" />
-              {post.date && (
-                <span className="tabular-nums">
-                  {post.date}
-                </span>
-              )}
-            </p>
+            {post.date && <p className={`mt-md ${META} tabular-nums text-ink-muted`}>{post.date}</p>}
           </Link>
         </li>
       ))}
@@ -107,14 +98,14 @@ function List({ posts }: { posts: BlogItem[] }) {
                     className="pointer-events-none absolute inset-y-0 hidden md:left-[calc((100%-11*var(--gutter))/12+var(--gutter))] md:right-[calc(4*(100%-11*var(--gutter))/12+4*var(--gutter))] lg:block"
                   >
                     <span className="u-corner absolute top-1/2 right-0 z-30 hidden w-[12rem] -translate-y-1/2 overflow-hidden lg:group-hover/row:block lg:group-focus-visible/row:block">
-                      <PostImage src={post.cover} seed={post.slug} ratio="3 / 2" sizes="192px" className="w-full" />
+                      <PostCover slug={post.slug} title={post.title} section={post.section} ratio="3 / 2" sizes="192px" className="w-full" />
                     </span>
                   </div>
-                  <h2 className="u-trim text-title text-ink transition-[translate,color] duration-200 ease-out motion-reduce:transition-none md:col-span-7 lg:col-span-6 lg:text-ink-muted lg:group-hover/row:translate-x-sm lg:group-hover/row:text-ink lg:group-focus-visible/row:translate-x-sm lg:group-focus-visible/row:text-ink">
+                  <h2 className="u-trim text-title text-ink transition-[translate] duration-200 ease-out motion-reduce:transition-none md:col-span-7 lg:col-span-6 lg:group-hover/row:translate-x-sm lg:group-focus-visible/row:translate-x-sm">
                     {post.title}
                     <span className="text-ink-muted">{" ↗"}</span>
                   </h2>
-                  <p className={`u-trim hidden whitespace-nowrap text-ink-muted md:col-span-2 md:block lg:col-span-1 ${META}`}>
+                  <p className="u-trim hidden whitespace-nowrap text-body-sm text-ink-muted md:col-span-2 md:block lg:col-span-1">
                     <Section post={post} />
                   </p>
                   <p className="u-trim col-start-2 row-start-1 justify-self-end text-body-sm tabular-nums text-ink-muted md:col-span-2 md:col-start-auto md:row-start-auto md:text-right">

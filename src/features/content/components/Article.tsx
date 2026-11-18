@@ -57,7 +57,7 @@ export default function Article({
               </span>
             ))}
           </p>
-          <h1 className="mt-lg text-center text-[clamp(2rem,1.3rem+3vw,4rem)] leading-[1.13] tracking-[-0.03em] md:leading-[1.06] lg:leading-none text-balance text-ink">
+          <h1 className="mt-lg text-center text-[clamp(2rem,1.3rem+3vw,4rem)] leading-[1.13] tracking-[-0.03em] md:leading-[1.06] text-balance text-ink">
             {doc.title}
           </h1>
           {(doc.summary || doc.summaryKo) && (

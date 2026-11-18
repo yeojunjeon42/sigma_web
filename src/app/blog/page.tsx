@@ -8,7 +8,6 @@ import { getIndex } from "@/features/content/api/getContent";
 import { displayTags, isDateTag, tagLabel } from "@/features/content/data/tags";
 import { formatDate } from "@/lib/date";
 import BlogIndex, { type BlogItem, type Topic } from "@/features/content/components/BlogIndex";
-import { coverFor } from "@/features/content/data/covers";
 
 const PILL = "Write for the blog";
 
@@ -31,7 +30,6 @@ export default async function PostsPage() {
     year: post.year ?? Number((post.date ?? "").slice(0, 4)),
     section: displayTags(post.tags, 1)[0]?.en,
     keys: post.tags.filter((t) => !isDateTag(t)),
-    cover: coverFor(post.slug),
     sample: post.sample,
   }));
 
