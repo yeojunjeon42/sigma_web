@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useMedia } from "@/lib/media";
-import { useLocale } from "@/i18n/LocaleProvider";
-import { SHELL } from "@/i18n/dict/shell";
 import { createFace, createPrinter, readInk } from "./sprites";
 
 const BEST = "sigma_404";
@@ -34,7 +32,6 @@ export default function Arcade({ word, label, extra }: { word: string; label: st
   const scoreRef = useRef<HTMLSpanElement>(null);
   const bestRef = useRef<HTMLSpanElement>(null);
   const livesRef = useRef<HTMLSpanElement>(null);
-  const say = SHELL[useLocale()].lost;
   const [state, setState] = useState<State>("idle");
   const still = useMedia("(prefers-reduced-motion: reduce)", false);
   // Skip the game loop, canvas and listeners on phones.
@@ -621,7 +618,8 @@ export default function Arcade({ word, label, extra }: { word: string; label: st
     };
   }, [word, wide]);
 
-  const prompt = state === "over" ? say.over : state === "idle" ? say.idle : null;
+  const prompt =
+    state === "over" ? "Game over. Press an arrow or click to play again" : state === "idle" ? "Press an arrow or click to play" : null;
 
   return (
     <>
@@ -639,13 +637,13 @@ export default function Arcade({ word, label, extra }: { word: string; label: st
           <button
             ref={padRef}
             type="button"
-            aria-label={say.play}
+            aria-label="Play Pac-Man: arrow keys, W A S D or the pointer steer"
             className="flex h-11 items-center gap-x-sm rounded-pill bg-canvas/85 px-md text-caption backdrop-blur-sm focus:outline-none focus-visible:bg-ink focus-visible:text-canvas"
           >
             {prompt ? (
               <span className="whitespace-nowrap">
                 <span className="max-md:hidden">{prompt}</span>
-                <span className="md:hidden">{state === "over" ? say.tapOver : say.tap}</span>
+                <span className="md:hidden">{state === "over" ? "Tap to replay" : "Tap to play"}</span>
               </span>
             ) : null}
             <span className={`flex items-center gap-x-sm font-mono text-[12px] leading-none tabular-nums ${prompt ? "opacity-60" : ""}`}>

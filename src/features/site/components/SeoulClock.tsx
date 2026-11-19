@@ -1,9 +1,6 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import type { Locale } from "@/i18n/config";
-import { CONTACT } from "@/i18n/dict/contact";
-import { useLocale } from "@/i18n/LocaleProvider";
 
 const TIME = new Intl.DateTimeFormat("en-GB", {
   timeZone: "Asia/Seoul",
@@ -23,16 +20,17 @@ function subscribe(tick: () => void) {
   return () => window.clearTimeout(id);
 }
 
-// "Thursday 19 November", or "11월 19일 목요일".
-const day = (tag: string) => new Intl.DateTimeFormat(tag, { timeZone: "Asia/Seoul", weekday: "long", day: "numeric", month: "long" });
-const DAY: Record<Locale, Intl.DateTimeFormat> = { en: day("en-GB"), ko: day("ko-KR") };
+const DAY = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Seoul", weekday: "long", day: "numeric", month: "long" });
 
 const KST = 9 * 60;
 
-function gap(locale: Locale) {
+function gap() {
   const d = KST + new Date().getTimezoneOffset();
   if (d === 0) return null;
-  return CONTACT[locale].zone.gap(Math.floor(Math.abs(d) / 60), Math.abs(d) % 60, d > 0);
+  const h = Math.floor(Math.abs(d) / 60);
+  const m = Math.abs(d) % 60;
+  const span = [h ? `${h} hour${h === 1 ? "" : "s"}` : "", m ? `${m} minutes` : ""].filter(Boolean).join(" ");
+  return `${span} ${d > 0 ? "ahead of" : "behind"} you`;
 }
 
 const now = () => Math.floor(Date.now() / 1000);
@@ -48,10 +46,8 @@ export default function SeoulClock({ className = "" }: { className?: string }) {
 }
 
 export function SeoulZone({ className = "" }: { className?: string }) {
-  const locale = useLocale();
-  const { city, zone } = CONTACT[locale].zone;
   const s = useSyncExternalStore(subscribe, now, never);
-  const parts = [city, zone, ...(s ? [DAY[locale].format(s * 1000), gap(locale)] : [])].filter(Boolean);
+  const parts = ["Seoul", "KST, UTC+9", ...(s ? [DAY.format(s * 1000), gap()] : [])].filter(Boolean);
   return (
     <span className={className}>
       {parts.map((p, i) => (

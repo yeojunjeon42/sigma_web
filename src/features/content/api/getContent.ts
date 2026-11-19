@@ -2,8 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { Marked, marked } from "marked";
 import markedKatex from "marked-katex-extension";
-import type { BodyPhoto, Collection, Doc, DocMeta } from "../types";
-import { DEFAULT, other, type Locale } from "@/i18n/config";
+import type { BodyPhoto, Collection, Doc, DocMeta, Lang } from "../types";
+
 import { SAMPLES_DIR, SHOW_SAMPLES } from "../data/samples";
 
 const ROOT = path.join(process.cwd(), "content");
@@ -29,7 +29,7 @@ function parseFrontmatter(raw: string): { data: Record<string, string>; body: st
   return { data, body: raw.slice(match[0].length) };
 }
 
-function toMeta(collection: Collection, slug: string, data: Record<string, string>, locale: Locale = DEFAULT): DocMeta {
+function toMeta(collection: Collection, slug: string, data: Record<string, string>): DocMeta {
   const tags = (data.tags ?? "")
     .replace(/^\[|\]$/g, "")
     .split(",")
@@ -39,11 +39,11 @@ function toMeta(collection: Collection, slug: string, data: Record<string, strin
   return {
     slug,
     collection,
-    title: (locale === "ko" && data.titleKo) || data.title || slug,
+    title: data.title || slug,
     titleKo: data.titleKo || undefined,
     date: data.date || undefined,
     year: data.year ? Number(data.year) : undefined,
-    summary: (locale === "ko" && data.summaryKo) || data.summary || undefined,
+    summary: data.summary || undefined,
     summaryKo: data.summaryKo || undefined,
     tags,
     team: list(data.team),
@@ -54,15 +54,13 @@ function toMeta(collection: Collection, slug: string, data: Record<string, strin
   };
 }
 
-// content/<locale>/<collection>/<slug>.md: the same file names in both languages.
-function dir(collection: Collection, locale: Locale): string {
-  return path.join(ROOT, locale, collection);
-}
+// content/<language>/<collection>/<slug>.md: the same file names in both languages. Only an
+// entry's text differs between them; the site reads everything else from the English file.
+const LANGS: Lang[] = ["en", "ko"];
 
-function dirs(collection: Collection, locale: Locale): string[] {
-  return collection === "posts" && SHOW_SAMPLES
-    ? [dir(collection, locale), path.join(ROOT, SAMPLES_DIR)]
-    : [dir(collection, locale)];
+function dirs(collection: Collection, lang: Lang): string[] {
+  const own = path.join(ROOT, lang, collection);
+  return collection === "posts" && SHOW_SAMPLES ? [own, path.join(ROOT, SAMPLES_DIR)] : [own];
 }
 
 function mdIn(d: string): string[] {
@@ -75,30 +73,26 @@ function mdIn(d: string): string[] {
 
 // An entry exists if either language has it.
 function slugs(collection: Collection): string[] {
-  return [...new Set([DEFAULT, other(DEFAULT)].flatMap((locale) => dirs(collection, locale).flatMap(mdIn)))];
+  return [...new Set(LANGS.flatMap((lang) => dirs(collection, lang).flatMap(mdIn)))];
 }
 
-function fileFor(collection: Collection, slug: string, locale: Locale): string | null {
-  for (const d of dirs(collection, locale)) {
+function parse(collection: Collection, slug: string, lang: Lang) {
+  for (const d of dirs(collection, lang)) {
     const file = path.join(d, `${slug}.md`);
-    if (fs.existsSync(file)) return file;
+    if (fs.existsSync(file)) return parseFrontmatter(fs.readFileSync(file, "utf8"));
   }
   return null;
 }
 
-// An entry in a language. Where that language has no text for it, the other language's text is
-// shown instead and `lang` says which it is, so the page can say so.
-function read(collection: Collection, slug: string, locale: Locale) {
-  const parse = (l: Locale) => {
-    const file = fileFor(collection, slug, l);
-    return file ? parseFrontmatter(fs.readFileSync(file, "utf8")) : null;
-  };
-  const own = parse(locale);
-  if (own?.body.trim()) return { ...own, lang: locale };
-  const lent = parse(other(locale));
-  if (lent?.body.trim()) return { data: own?.data ?? lent.data, body: lent.body, lang: other(locale) };
-  const empty = own ?? lent;
-  return empty ? { ...empty, lang: locale } : null;
+// An entry with its text in a language. Where that language has no text, the other's is lent and
+// `lang` says which it is. The frontmatter is the English file's wherever there is one.
+function read(collection: Collection, slug: string, lang: Lang) {
+  const files = { en: parse(collection, slug, "en"), ko: parse(collection, slug, "ko") };
+  const data = (files.en ?? files.ko)?.data;
+  if (!data) return null;
+  const langs = LANGS.filter((l) => files[l]?.body.trim());
+  const shown = langs.includes(lang) ? lang : (langs[0] ?? lang);
+  return { data, body: files[shown]?.body ?? "", lang: shown, langs };
 }
 
 export async function getSlugs(collection: Collection): Promise<Set<string>> {
@@ -110,18 +104,18 @@ const withMath = new Marked(markedKatex({ throwOnError: false, nonStandard: fals
 export async function getDoc(
   collection: Collection,
   slug: string,
-  locale: Locale = DEFAULT,
+  lang: Lang = "en",
 ): Promise<Doc | null> {
   if (!/^[a-z0-9-]+$/i.test(slug)) return null;
 
-  const found = read(collection, slug, locale);
+  const found = read(collection, slug, lang);
   if (!found) return null;
 
-  const { data, body, lang } = found;
+  const { data, body } = found;
   const md = collection === "posts" ? withMath : marked;
   const html = (await md.parse(body, { async: true }))
     .replaceAll('class="katex-display"', 'class="katex-display u-scroll-x"');
-  return { ...toMeta(collection, slug, data, locale), html: collection === "posts" ? glue(html) : html, lang };
+  return { ...toMeta(collection, slug, data), html: collection === "posts" ? glue(html) : html, lang: found.lang, langs: found.langs };
 }
 
 function glue(html: string): string {
@@ -155,11 +149,16 @@ function when(doc: DocMeta): string {
   return doc.date ?? (doc.year !== undefined ? String(doc.year) : "");
 }
 
-export async function getIndex(collection: Collection, locale: Locale = DEFAULT): Promise<DocMeta[]> {
+// Which entries can be read in Korean as well as English, for the sitemap.
+export function inKorean(collection: Collection): Set<string> {
+  return new Set(slugs(collection).filter((slug) => (read(collection, slug, "en")?.langs.length ?? 0) > 1));
+}
+
+export async function getIndex(collection: Collection): Promise<DocMeta[]> {
   const out: DocMeta[] = [];
   for (const slug of slugs(collection)) {
-    const found = read(collection, slug, locale);
-    if (found) out.push(toMeta(collection, slug, found.data, locale));
+    const found = read(collection, slug, "en");
+    if (found) out.push(toMeta(collection, slug, found.data));
   }
   return out.sort(
     (a, b) => when(b).localeCompare(when(a)) || a.slug.localeCompare(b.slug),

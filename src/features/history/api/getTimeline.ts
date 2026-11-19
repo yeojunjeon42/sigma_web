@@ -2,9 +2,6 @@ import { AWARDS } from "@/features/awards/data/awards";
 import { TIMELINE } from "../data/timeline";
 import type { HistoryEvent, YearNode } from "../types";
 
-// The fair has one name in Korean, whichever way a year's record wrote it.
-const fair = (contest: string) => contest.replace(/^(?:서울대 )?(제\d+회) (?:서울대 )?창의설계축전$/, "$1 서울대학교 창의설계축전");
-
 export async function getTimeline(): Promise<YearNode[]> {
   const byYear = new Map<number, HistoryEvent[]>();
 
@@ -16,7 +13,7 @@ export async function getTimeline(): Promise<YearNode[]> {
     const events = byYear.get(award.year) ?? [];
     const title = {
       en: `${award.contest.en} — ${award.result.en}`,
-      ko: `${fair(award.contest.ko)} — ${award.result.ko}`,
+      ko: `${award.contest.ko} — ${award.result.ko}`,
     };
 
     const twin = award.work

@@ -2,10 +2,8 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { ImageResponse } from "next/og";
-import { coverOf, drawingFile, type Cover } from "@/features/content/api/cover";
-import { getDoc } from "@/features/content/api/getContent";
-import { displayTags } from "@/features/content/data/tags";
-import { pick, type Locale } from "@/i18n/config";
+import { drawingFile, type Cover } from "@/features/content/api/cover";
+import { HANG, leans } from "@/features/content/components/coverType";
 import { INK_FILTER, inkFilter } from "@/features/hand/filter";
 
 // A post's share image is its index cover at this size: the page's paper inside a hairline, the
@@ -18,13 +16,19 @@ const INK = "#000000";
 const EDGE = W * 0.06;
 const LABEL = W * 0.034;
 const DRAWING = 500;
-// A word space, as a share of the type size.
-const SPACE = 0.24;
 const TITLE = [
   [24, W * 0.075],
   [40, W * 0.065],
   [Infinity, W * 0.055],
 ] as const;
+
+// The card trims the title's box to its baseline; this renderer cannot, so the title is let down
+// by what lies under the baseline in its line: the face's descent (0.224em) and half of the
+// leading over one em. The baseline then stands as far from the foot as the words do from the side.
+const LEAD = 1.06;
+const UNDER = 0.224 + (LEAD - 1) / 2;
+// The card's first-line indent for a line that starts with a diagonal capital.
+const indent = (text: string | undefined, size: number) => (leans(text) ? size * HANG : 0);
 
 const font = (name: string) => readFile(path.join(process.cwd(), "src/app/og", name));
 
@@ -39,17 +43,7 @@ async function drawing(cover: Cover) {
   return `data:image/svg+xml;base64,${Buffer.from(inked).toString("base64")}`;
 }
 
-// A post's card in a language: /og/blog/<slug> and /og/ko/blog/<slug> are the same drawing with
-// the title and the section in that language.
-export async function postImage(slug: string, locale: Locale) {
-  const doc = await getDoc("posts", slug, locale);
-  if (!doc) return new Response("Not found", { status: 404 });
-  return postCard({ title: doc.title, section: displayTags(doc.tags, 1).map((tag) => pick(locale, tag))[0], cover: coverOf(doc, locale), whole: locale === "ko" });
-}
-
-// `whole` keeps each word in one piece: Korean breaks between words, as the page's cover does, where
-// the renderer would break it between any two syllables.
-export async function postCard({ title, section, cover, whole = false }: { title: string; section?: string; cover?: Cover; whole?: boolean }) {
+export async function postCard({ title, section, cover }: { title: string; section?: string; cover?: Cover }) {
   const size = TITLE.find(([most]) => [...title].length <= most)![1];
   const [latin, hangul, drawn] = await Promise.all([font("authentic-sans-100.otf"), font("pretendard-445-hangul.woff"), cover ? drawing(cover) : null]);
 
@@ -75,16 +69,8 @@ export async function postCard({ title, section, cover, whole = false }: { title
             color: INK,
           }}
         >
-          <div style={{ display: "flex", fontSize: LABEL, lineHeight: 1 }}>{section ?? ""}</div>
-          {whole ? (
-            <div style={{ display: "flex", flexWrap: "wrap", columnGap: size * SPACE, maxWidth: W * 0.5, fontSize: size, lineHeight: 1.06, letterSpacing: "-0.02em" }}>
-              {title.split(/\s+/).map((word, i) => (
-                <span key={i}>{word}</span>
-              ))}
-            </div>
-          ) : (
-            <div style={{ display: "flex", maxWidth: W * 0.5, fontSize: size, lineHeight: 1.06, letterSpacing: "-0.02em" }}>{title}</div>
-          )}
+          <div style={{ display: "flex", fontSize: LABEL, lineHeight: 1, textIndent: indent(section, LABEL) }}>{section ?? ""}</div>
+          <div style={{ display: "flex", maxWidth: W * 0.5, fontSize: size, lineHeight: LEAD, letterSpacing: "-0.02em", textIndent: indent(title, size), marginBottom: -size * UNDER }}>{title}</div>
         </div>
       </div>
     ),

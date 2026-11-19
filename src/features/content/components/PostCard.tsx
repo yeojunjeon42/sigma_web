@@ -1,4 +1,4 @@
-import Link from "@/i18n/Link";
+import Link from "next/link";
 import type { BlogItem } from "./BlogIndex";
 import PostCover from "./PostCover";
 

@@ -1,6 +1,4 @@
-import Link from "@/i18n/Link";
-import type { Locale } from "@/i18n/config";
-import { ARCHIVE_TEXT } from "@/i18n/dict/archive";
+import Link from "next/link";
 import { Arrow } from "@/components/ui";
 import EntryBody from "./EntryBody";
 import EntryTop from "./EntryTop";
@@ -17,19 +15,16 @@ interface EntryStep {
 }
 
 export default function ArchiveEntry({
-  locale,
   build,
   close,
   prev,
   next,
 }: {
-  locale: Locale;
   build: ReelBuild;
   close: string;
   prev: EntryStep | null;
   next: EntryStep | null;
 }) {
-  const t = ARCHIVE_TEXT[locale];
   const step = (s: EntryStep | null, label: string) =>
     s ? (
       <Link href={s.href} replace className={TAP}>
@@ -45,28 +40,28 @@ export default function ArchiveEntry({
   return (
     <article className="u-gutter pt-sm">
       <EntryTop key={build.id} />
-      <nav aria-label={t.entryNav} className={`flex items-center justify-between gap-x-lg text-ink-muted ${META}`}>
+      <nav aria-label="Entry" className={`flex items-center justify-between gap-x-lg text-ink-muted ${META}`}>
         <Link href={close} replace className={`${TAP} gap-x-xs`}>
           <Pending />
           <Arrow />
-          <span className="u-trim">{t.title}</span>
+          <span className="u-trim">Archive</span>
         </Link>
         <span className="flex items-center gap-x-lg">
-          {step(prev, t.previous)}
-          {step(next, t.next)}
+          {step(prev, "Previous")}
+          {step(next, "Next")}
         </span>
       </nav>
 
       <div className="mt-lg">
-        <EntryBody locale={locale} build={build} variant="page" />
+        <EntryBody build={build} variant="page" />
       </div>
 
       {prev || next ? (
-        <nav aria-label={t.moreBuilds} className="mt-section border-t border-rule-strong">
+        <nav aria-label="More builds" className="mt-section border-t border-rule-strong">
           {(
             [
-              [prev, t.previous],
-              [next, t.next],
+              [prev, "Previous"],
+              [next, "Next"],
             ] as const
           ).map(([s, label]) =>
             s ? (

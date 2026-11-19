@@ -1,4 +1,4 @@
-import Link from "@/i18n/Link";
+import Link from "next/link";
 
 type ContactLinkProps = { pill: string } & (
   | { about: string; href?: never }

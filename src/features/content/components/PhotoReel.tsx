@@ -3,15 +3,12 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { PhotoFrame } from "@/components/ui";
-import { BLOG } from "@/i18n/dict/blog";
-import { useLocale } from "@/i18n/LocaleProvider";
 import { focusOf, type BodyPhoto } from "../types";
 
 const STEP =
   "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-end text-body leading-none text-ink transition-opacity hover:opacity-60 aria-disabled:cursor-default aria-disabled:opacity-30 lg:min-h-0 lg:min-w-0";
 
 export default function PhotoReel({ photos, title, column }: { photos: BodyPhoto[]; title: string; column: string }) {
-  const t = BLOG[useLocale()].reel;
   const track = useRef<HTMLUListElement>(null);
   const [at, setAt] = useState(0);
   const aim = useRef<number | null>(null);
@@ -63,7 +60,7 @@ export default function PhotoReel({ photos, title, column }: { photos: BodyPhoto
   return (
     <>
       <div data-reel className="photo-reel col-span-full -mx-[var(--gutter)] mt-xxl md:mt-16">
-        <ul ref={track} tabIndex={0} aria-label={t.label} onPointerDown={taken} onWheel={taken} className="u-scroll-x outline-none">
+        <ul ref={track} tabIndex={0} aria-label="Photographs" onPointerDown={taken} onWheel={taken} className="u-scroll-x outline-none">
           {photos.map((photo, i) => (
             <PhotoFrame as="li" key={photo.src} data-i={i} className="relative">
               <Image
@@ -84,17 +81,17 @@ export default function PhotoReel({ photos, title, column }: { photos: BodyPhoto
       </div>
       <div className={`mt-md flex items-center justify-between ${column}`}>
         <p aria-live="polite" aria-atomic="true" className="text-caption leading-none tracking-normal text-ink-muted tabular-nums">
-          <span className="sr-only">{t.photograph}</span>
+          <span className="sr-only">Photograph </span>
           <span className="text-ink">{at + 1}</span> / {photos.length}
         </p>
         <p className="hidden lg:gap-x-lg [@media(pointer:fine)]:flex">
           {/* Not `disabled`: at either end that would drop the keyboard's focus. */}
-          <button type="button" aria-label={t.previous} aria-disabled={at === 0} onClick={() => go(-1)} className={STEP}>
+          <button type="button" aria-label="Previous photograph" aria-disabled={at === 0} onClick={() => go(-1)} className={STEP}>
             ←
           </button>
           <button
             type="button"
-            aria-label={t.next}
+            aria-label="Next photograph"
             aria-disabled={at === photos.length - 1}
             onClick={() => go(1)}
             className={STEP}

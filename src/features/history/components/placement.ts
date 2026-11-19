@@ -47,10 +47,12 @@ const WIDTHS = { wide: [0.36, 0.43, 0.5], narrow: [0.5, 0.6, 0.7] } as const;
 const STRIP = { wide: 0.34, narrow: 0.42 } as const;
 // To end beside the list, the column may shrink its photographs to this share of their size, and
 // then draw its gaps in towards the small end of their range. Past that it runs on below the list.
-const LEAST = 0.85;
+const LEAST = 0.92;
 const TIGHT = 0.25;
 // Tape reaches a little past the photograph it holds.
 const TAPE = 8;
+// A year's photographs are taken up once the run is this close above where the year starts.
+const AHEAD = 140;
 
 export function seedOf(key: string) {
   let h = 2166136261;
@@ -75,14 +77,14 @@ function cover(left: number, top: number, w: number, h: number, tilt: number): B
 
 type Choice = { share: number; anchor: number; jitter: number; tilt: number; open: -1 | 1; tape: Spot["tape"]; gap: number };
 
-// What the seeds decide, before any measuring: no two neighbours share a width or an anchor, and
-// no more than two in a row lean the same way.
-function choose(items: Item[], narrow: boolean): Choice[] {
+// What a photograph's seed decides, given the one set down just before it: no two neighbours
+// share a width or an anchor, and no more than two in a row lean the same way.
+function chooser(narrow: boolean) {
   const shares = narrow ? WIDTHS.narrow : WIDTHS.wide;
   const anchors: readonly number[] = narrow ? ANCHORS.narrow : ANCHORS.wide;
   let [lastSize, lastAnchor] = [-1, -1];
   const leans: number[] = [];
-  return items.map((item) => {
+  return (item: Item): Choice => {
     const seed = seedOf(item.key);
     // A tall photograph takes one of the two smaller widths, so it never fills the column.
     const sizes = [0, 1, 2].filter((s) => s !== lastSize && !(item.ratio > 1.1 && s === 2));
@@ -106,55 +108,61 @@ function choose(items: Item[], narrow: boolean): Choice[] {
       tape: !item.strip && roll(seed, 7) < 0.5 ? "corners" : "top",
       gap: roll(seed, 8),
     };
-  });
+  };
 }
 
-// Sets the photographs down the column at one scale. A year with few photographs is set first,
-// starting beside its own year in the list; a year with more than its section can hold starts
-// there too and runs on, around whatever is already down. Each photograph comes to rest its own gap
-// below whatever is under it, and below the start of the one before it in its year.
-function drop(items: Item[], choices: Choice[], cw: number, scale: number, spread: number, yearTop: (year: number) => number | undefined) {
+// Sets the photographs down the column at one scale, as one run from the top. Each comes to rest
+// its own gap below whatever is under it and below the start of the one before it. The run follows
+// the list beside it: when it reaches the place where a later year starts, that year's photographs
+// go down next, and the fuller year above carries on after them.
+function drop(items: Item[], cw: number, scale: number, spread: number, yearTop: (year: number) => number | undefined) {
+  const choice = chooser(cw < NARROW);
   const taken: Box[] = [];
   const spots: Spot[] = new Array(items.length);
-  const years = [...new Set(items.map((i) => i.year))];
-  const count = (year: number) => items.filter((i) => i.year === year).length;
-  for (const year of years.toSorted((a, b) => count(a) - count(b))) {
-    let before = (yearTop(year) ?? 0) + PAD;
-    items.forEach((item, i) => {
-      if (item.year !== year) return;
-      const c = choices[i];
-      const gap = GAP[0] + c.gap * spread * (GAP[1] - GAP[0]) - 2 * TAPE;
-      const width = Math.min(cw * c.share * scale, cw - 2 * TAPE);
-      const height = width * item.ratio;
-      // Keep the whole tilted photograph, and its note, inside the column.
-      const lean = Math.abs(Math.sin((c.tilt * Math.PI) / 180)) * height + TAPE;
-      const text = item.noted ? Math.max(NOTE.least, Math.min(NOTE.width, cw - width - REACH - 2 * lean)) : 0;
-      const beside = text ? text + REACH : 0;
-      const free = Math.min(Math.max(lean, c.anchor * (cw - width) + c.jitter), cw - width - lean);
-      const left = !text ? free : c.open > 0 ? Math.min(free, Math.max(lean, cw - width - beside - lean)) : Math.max(free, beside + lean);
-      const boxes = (top: number): Box[] => {
-        const own = cover(left, top, width, height, c.tilt);
-        if (!text) return [own];
-        const side = c.open > 0 ? { l: own.r - TAPE, r: own.r - TAPE + beside } : { l: own.l + TAPE - beside, r: own.l + TAPE };
-        return [own, { ...side, t: top, b: top + Math.max(28, height * 0.12) + NOTE.height }];
-      };
-      let top = before;
-      // Slide down until neither the photograph nor its note is closer than its gap to anything.
-      for (let moved = true; moved; ) {
-        moved = false;
-        for (const mine of boxes(top)) {
-          const hit = taken.find((theirs) => mine.r + ASIDE > theirs.l && mine.l - ASIDE < theirs.r && mine.t < theirs.b + gap - 0.01 && mine.b + gap > theirs.t + 0.01);
-          if (!hit) continue;
-          top += hit.b + gap - mine.t + 0.02;
-          moved = true;
-          break;
-        }
+  const waiting = items.map((_, i) => i);
+  const starts = new Map([...new Set(items.map((i) => i.year))].map((year, n) => [year, n === 0 ? 0 : (yearTop(year) ?? 0)]));
+  let before = PAD;
+  while (waiting.length) {
+    // Of the years the run has reached, the one furthest down the list goes first.
+    const reached = waiting.filter((i) => starts.get(items[i].year)! <= before + AHEAD);
+    const year = reached.length ? Math.max(...reached.map((i) => starts.get(items[i].year)!)) : Math.min(...waiting.map((i) => starts.get(items[i].year)!));
+    const i = waiting.find((k) => starts.get(items[k].year) === year)!;
+    waiting.splice(waiting.indexOf(i), 1);
+    const item = items[i];
+    const c = choice(item);
+    const gap = GAP[0] + c.gap * spread * (GAP[1] - GAP[0]) - 2 * TAPE;
+    // A note needs open page beside its photograph, so in a narrow column that photograph is smaller.
+    const most = item.noted ? cw - NOTE.least - REACH - 4 * TAPE : cw - 2 * TAPE;
+    const width = Math.min(cw * c.share * scale, most);
+    const height = width * item.ratio;
+    // Keep the whole tilted photograph, and its note, inside the column.
+    const lean = Math.abs(Math.sin((c.tilt * Math.PI) / 180)) * height + TAPE;
+    const text = item.noted ? Math.max(NOTE.least, Math.min(NOTE.width, cw - width - REACH - 2 * lean)) : 0;
+    const beside = text ? text + REACH : 0;
+    const free = Math.min(Math.max(lean, c.anchor * (cw - width) + c.jitter), cw - width - lean);
+    const left = !text ? free : c.open > 0 ? Math.min(free, Math.max(lean, cw - width - beside - lean)) : Math.max(free, beside + lean);
+    const boxes = (top: number): Box[] => {
+      const own = cover(left, top, width, height, c.tilt);
+      if (!text) return [own];
+      const side = c.open > 0 ? { l: own.r - TAPE, r: own.r - TAPE + beside } : { l: own.l + TAPE - beside, r: own.l + TAPE };
+      return [own, { ...side, t: top, b: top + Math.max(28, height * 0.12) + NOTE.height }];
+    };
+    let top = Math.max(before, year + (year ? PAD : 0));
+    // Slide down until neither the photograph nor its note is closer than its gap to anything.
+    for (let moved = true; moved; ) {
+      moved = false;
+      for (const mine of boxes(top)) {
+        const hit = taken.find((theirs) => mine.r + ASIDE > theirs.l && mine.l - ASIDE < theirs.r && mine.t < theirs.b + gap - 0.01 && mine.b + gap > theirs.t + 0.01);
+        if (!hit) continue;
+        top += hit.b + gap - mine.t + 0.02;
+        moved = true;
+        break;
       }
-      taken.push(...boxes(top));
-      spots[i] = { key: item.key, top, left, width, height, tilt: c.tilt, open: c.open, note: text, tape: c.tape };
-      // The next one starts lower than this one, so the column reads in order.
-      before = top + Math.min(height * 0.3, 60);
-    });
+    }
+    taken.push(...boxes(top));
+    spots[i] = { key: item.key, top, left, width, height, tilt: c.tilt, open: c.open, note: text, tape: c.tape };
+    // The next one starts lower than this one, so the column reads in order.
+    before = top + Math.min(height * 0.3, 60);
   }
   return { spots, height: Math.max(...taken.map((b) => b.b)) + PAD / 2 };
 }
@@ -162,8 +170,8 @@ function drop(items: Item[], choices: Choice[], cw: number, scale: number, sprea
 // The column for a width, ending beside the list (`limit`) where its rules allow: full size first,
 // then smaller photographs, then tighter gaps. `height` is what it takes in the end.
 export function place(items: Item[], cw: number, limit: number, yearTop: (year: number) => number | undefined) {
-  const choices = choose(items, cw < NARROW);
-  const at = (scale: number, spread: number) => drop(items, choices, cw, scale, spread, yearTop);
+  const at = (scale: number, spread: number) => drop(items, cw, scale, spread, yearTop);
+  // The largest value between two ends at which the column still ends beside the list.
   const fit = (lo: number, hi: number, run: (v: number) => ReturnType<typeof drop>) => {
     let best = run(lo);
     if (best.height > limit) return best;
@@ -179,5 +187,5 @@ export function place(items: Item[], cw: number, limit: number, yearTop: (year: 
   if (full.height <= limit) return full;
   const smaller = fit(LEAST, 1, (scale) => at(scale, 1));
   if (smaller.height <= limit) return smaller;
-  return fit(TIGHT, 1, (spread) => at(LEAST, spread)).height <= limit ? fit(TIGHT, 1, (spread) => at(LEAST, spread)) : at(LEAST, TIGHT);
+  return fit(TIGHT, 1, (spread) => at(LEAST, spread));
 }

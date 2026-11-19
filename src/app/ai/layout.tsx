@@ -4,12 +4,10 @@ import { Ld } from "@/app/ai/terminal";
 import { organization } from "@/app/ai/ld";
 import { TerminalNav, Prompt } from "./TerminalNav";
 import { browserTheme } from "@/lib/browserTheme";
-import { base, Shell } from "../shell";
 
 const mono = Geist_Mono({ weight: ["400", "500"], subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
-  ...base,
   title: { default: "Terminal", template: "%s \\ Terminal" },
 };
 
@@ -24,41 +22,39 @@ export default function TerminalLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Shell lang="en" skip="Skip to content">
-      <main
-        id="main"
-        data-terminal=""
-        style={{ fontFamily: `${mono.style.fontFamily}, var(--f-kr), ui-monospace, monospace` }}
-        className="min-h-screen bg-canvas-inverse px-4 pt-10 pb-32 text-[13px] leading-5 text-ink-inverse [overflow-wrap:anywhere] selection:bg-ink-inverse selection:text-canvas-inverse"
-      >
-        <link rel="describedby" type="text/markdown" href="/llms.txt" />
-        <Ld data={organization} />
+    <main
+      id="main"
+      data-terminal=""
+      style={{ fontFamily: `${mono.style.fontFamily}, var(--f-kr), ui-monospace, monospace` }}
+      className="min-h-screen bg-canvas-inverse px-4 pt-10 pb-32 text-[13px] leading-5 text-ink-inverse [overflow-wrap:anywhere] selection:bg-ink-inverse selection:text-canvas-inverse"
+    >
+      <link rel="describedby" type="text/markdown" href="/llms.txt" />
+      <Ld data={organization} />
 
-        <div className="mx-auto flex max-w-4xl flex-col gap-10">
-          <TerminalNav />
+      <div className="mx-auto flex max-w-4xl flex-col gap-10">
+        <TerminalNav />
 
-          <article className="flex flex-col gap-10">{children}</article>
+        <article className="flex flex-col gap-10">{children}</article>
 
-          <footer className="flex flex-col text-ink-inverse-muted">
-            <p>
-              # plain-text index:{" "}
-              <a href="/llms.txt" className="relative underline underline-offset-4 before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] lg:before:hidden">
-                /llms.txt
-              </a>
-            </p>
-            <p>
-              # full text:{" "}
-              <a href="/llms-full.txt" className="relative underline underline-offset-4 before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] lg:before:hidden">
-                /llms-full.txt
-              </a>
-            </p>
-            <p aria-hidden="true" className="mt-6">
-              <Prompt />
-              <span className="term-cursor ml-[1ch] inline-block h-[1.15em] w-[1ch] translate-y-[0.2em] bg-ink-inverse" />
-            </p>
-          </footer>
-        </div>
-      </main>
-    </Shell>
+        <footer className="flex flex-col text-ink-inverse-muted">
+          <p>
+            # plain-text index:{" "}
+            <a href="/llms.txt" className="relative underline underline-offset-4 before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] lg:before:hidden">
+              /llms.txt
+            </a>
+          </p>
+          <p>
+            # full text:{" "}
+            <a href="/llms-full.txt" className="relative underline underline-offset-4 before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] lg:before:hidden">
+              /llms-full.txt
+            </a>
+          </p>
+          <p aria-hidden="true" className="mt-6">
+            <Prompt />
+            <span className="term-cursor ml-[1ch] inline-block h-[1.15em] w-[1ch] translate-y-[0.2em] bg-ink-inverse" />
+          </p>
+        </footer>
+      </div>
+    </main>
   );
 }

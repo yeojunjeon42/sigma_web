@@ -1,21 +1,16 @@
 import Image from "next/image";
-import { pick, type Locale } from "@/i18n/config";
-import { BLOG } from "@/i18n/dict/blog";
-import { COMMON } from "@/i18n/dict/common";
-import Link from "@/i18n/Link";
+import Link from "next/link";
 import { Arrow, PhotoFrame } from "@/components/ui";
 import { displayTags } from "../data/tags";
 import { formatDate } from "@/lib/date";
+import { READING_LINK, type Reading } from "../reading";
 import { focusOf, type Doc } from "../types";
 import CodeCopy from "./CodeCopy";
 import PhotoReel from "./PhotoReel";
 
-export default function Article({ doc, locale, back }: { doc: Doc; locale: Locale; back: { href: string; label: string } }) {
-  const t = BLOG[locale];
-  // The text is in the other language where the reader's has none.
-  const lent = doc.lang !== locale;
+export default function Article({ doc, back, reading }: { doc: Doc; back: { href: string; label: string }; reading?: Reading }) {
   const stamp = doc.date ?? (doc.year ? String(doc.year) : undefined);
-  const dateLabel = formatDate(stamp, locale);
+  const dateLabel = formatDate(stamp);
   const tags = displayTags(doc.tags, Infinity);
   // Body photographs are unedited photographs at one shape, 3:2: several run as a reel, one sits in
   // the column, and a post with none shows no picture.
@@ -38,11 +33,15 @@ export default function Article({ doc, locale, back }: { doc: Doc; locale: Local
               </span>
             )}
             {tags.map((tag) => (
-              <span key={tag.en}>
-                {pick(locale, tag)}
+              <span key={tag.ko}>
+                {tag.en}
               </span>
             ))}
-            {lent && <span>{COMMON[locale].onlyIn[doc.lang]}</span>}
+            {reading ? (
+              <Link href={reading.href} className={READING_LINK}>
+                {reading.label}
+              </Link>
+            ) : null}
           </p>
           <h1 className="mt-lg text-center text-[clamp(2rem,1.3rem+3vw,4rem)] leading-[1.13] tracking-[-0.03em] md:leading-[1.06] text-balance text-ink">
             {doc.title}
@@ -53,12 +52,12 @@ export default function Article({ doc, locale, back }: { doc: Doc; locale: Local
             </p>
           )}
           <p className="mt-md text-center text-[0.875rem] text-ink-muted">
-            {t.by}{" "}
+            By{" "}
             <span className="text-ink">{doc.authors.length ? doc.authors.join(", ") : "SIGMA INTELLIGENCE"}</span>
             {doc.team.length > 0 && (
               <>
                 <span aria-hidden="true" className="mx-xs">·</span>
-                {t.team} {doc.team.join(", ")}
+                Team {doc.team.join(", ")}
               </>
             )}
           </p>
@@ -84,8 +83,8 @@ export default function Article({ doc, locale, back }: { doc: Doc; locale: Local
         <div className="col-span-full mt-xxl grid grid-cols-subgrid md:mt-16">
           {doc.html ? (
             <div
-              lang={lent ? doc.lang : undefined}
               className={`${COL} prose flow article-prose u-trim [&_figure[data-placeholder]]:my-xl [&_figure[data-placeholder]]:aspect-[16/9] [&_figure[data-placeholder]]:u-corner [&_figure[data-placeholder]]:bg-ink/5`}
+              lang={doc.lang === "ko" ? "ko" : undefined}
               dangerouslySetInnerHTML={{ __html: doc.html }}
             />
           ) : null}

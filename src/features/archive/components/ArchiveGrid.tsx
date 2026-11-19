@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import Link from "@/i18n/Link";
+import Link from "next/link";
 import { MachineFrame } from "@/components/ui";
 import Pending from "./Pending";
 import PlateArt from "./PlateArt";

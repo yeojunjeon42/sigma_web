@@ -1,7 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import { DEFAULT, type Locale } from "@/i18n/config";
-import { BLOG } from "@/i18n/dict/blog";
 import { displayTags } from "../data/tags";
 import type { DocMeta } from "../types";
 
@@ -27,11 +25,10 @@ function shows(src: string) {
   return fs.existsSync(file) ? (/<title>([^<]+)<\/title>/.exec(fs.readFileSync(file, "utf8"))?.[1].trim() ?? "") : null;
 }
 
-// `post` is read in `locale`, so its title is already in that language.
-export function coverOf(post: DocMeta, locale: Locale = DEFAULT): Cover | undefined {
+export function coverOf(post: DocMeta): Cover | undefined {
   const section = displayTags(post.tags, 1)[0]?.en ?? "";
   const src = post.coverIllustration ?? `${FOLDER}/${SHARED[section] ?? NOTEBOOK}.svg`;
   const drawn = shows(src);
   if (drawn === null) return undefined;
-  return { src, alt: drawn ? BLOG[locale].coverAlt(post.title, drawn) : post.title };
+  return { src, alt: drawn ? `${post.title}, ${drawn}` : post.title };
 }

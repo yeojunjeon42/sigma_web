@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 import { EMAIL } from "@/features/site/data/contact";
-import { useLocale } from "@/i18n/LocaleProvider";
-import { SHELL } from "@/i18n/dict/shell";
 
 export default function CopyEmail() {
-  const say = SHELL[useLocale()];
   const [copied, setCopied] = useState(false);
 
   function copy() {
@@ -29,7 +26,7 @@ export default function CopyEmail() {
         {EMAIL}
       </a>
       <span aria-live="polite" className="absolute inset-x-0 top-full mt-xxs text-caption text-accent">
-        {copied ? say.copied : null}
+        {copied ? "Copied" : null}
       </span>
     </span>
   );

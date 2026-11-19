@@ -1,26 +1,27 @@
 import { getDoc, getSlugs } from "@/features/content/api/getContent";
-import { DEFAULT, type Locale } from "@/i18n/config";
+import type { Lang } from "@/features/content/types";
 import { getLocalPhotos, getLocalVideos } from "./getArchive";
 import type { Photo } from "../types";
 
 interface Entry {
   html: string;
-  // The language the text is in: the reader's, or the other one where theirs has none.
-  lang: Locale;
+  // The language the text is in, and every language the entry has text in.
+  lang: Lang;
+  langs: Lang[];
   team: string[];
   photos: Photo[];
   videos: string[];
 }
 
-// One set of entries to a language: content/<locale>/archive.
-const filled = new Map<Locale, Map<string, Entry>>();
+const caches: Record<Lang, Map<string, Entry> | undefined> = { en: undefined, ko: undefined };
 
-export async function getEntries(locale: Locale = DEFAULT): Promise<Map<string, Entry>> {
-  const hit = filled.get(locale);
-  if (hit && process.env.NODE_ENV === "production") return hit;
+// Every entry with its text in a language (English, or Korean where the reader asked for it).
+export async function getEntries(lang: Lang = "en"): Promise<Map<string, Entry>> {
+  const kept = caches[lang];
+  if (kept && process.env.NODE_ENV === "production") return kept;
 
   const slugs = [...(await getSlugs("archive"))];
-  const docs = await Promise.all(slugs.map((slug) => getDoc("archive", slug, locale)));
+  const docs = await Promise.all(slugs.map((slug) => getDoc("archive", slug, lang)));
 
   const cache = new Map<string, Entry>();
   for (const doc of docs) {
@@ -28,12 +29,13 @@ export async function getEntries(locale: Locale = DEFAULT): Promise<Map<string, 
     cache.set(doc.slug, {
       html: doc.html,
       lang: doc.lang,
+      langs: doc.langs,
       team: doc.team.map(name),
       photos: getLocalPhotos(doc.slug),
       videos: getLocalVideos(doc.slug),
     });
   }
-  filled.set(locale, cache);
+  caches[lang] = cache;
   return cache;
 }
 

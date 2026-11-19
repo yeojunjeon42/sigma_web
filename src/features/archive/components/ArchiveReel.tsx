@@ -6,12 +6,10 @@ import { glide, type Glide } from "@/lib/glide";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useWide } from "@/lib/media";
-import { localePath, splitPath, type Locale } from "@/i18n/config";
-import { ARCHIVE_TEXT } from "@/i18n/dict/archive";
-import { useLocale } from "@/i18n/LocaleProvider";
 import type { Photo } from "../types";
 import { PLATE, type Tile } from "../data/field";
 import EntryBody from "./EntryBody";
+import type { Reading } from "@/features/content/reading";
 import PlateArt from "./PlateArt";
 import { archiveGo } from "./ArchiveTransitions";
 
@@ -23,8 +21,9 @@ export interface ReelBuild {
   award?: string;
   tags: string[];
   body?: string;
-  // Set only where the body is in the other language, because the reader's has none.
-  lang?: Locale;
+  // Set where the text is Korean, and the link to the entry's other reading where it has one.
+  lang?: "ko";
+  reading?: Reading;
   team?: string[];
   photos?: Photo[];
   videos?: string[];
@@ -81,9 +80,6 @@ export default function ArchiveReel({
   back: string;
 }) {
   const router = useRouter();
-  const locale = useLocale();
-  // The reel moves between addresses itself, so it puts the reader's language on them.
-  const home = localePath(locale, back);
   const [active, setActive] = useState(start);
   const sectionRef = useRef<HTMLElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
@@ -95,9 +91,9 @@ export default function ArchiveReel({
 
   useEffect(() => {
     if (!wide) return;
-    const id = window.setTimeout(() => router.prefetch(home), 600);
+    const id = window.setTimeout(() => router.prefetch(back), 600);
     return () => window.clearTimeout(id);
-  }, [wide, home, router]);
+  }, [wide, back, router]);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -112,7 +108,7 @@ export default function ArchiveReel({
     let raf = 0;
     let leaving = false;
     const here = () => {
-      if (leaving || splitPath(window.location.pathname).path !== "/archive") return false;
+      if (leaving || window.location.pathname !== "/archive") return false;
       const view = new URLSearchParams(window.location.search).get("view");
       return view === null || view === "reel";
     };
@@ -158,7 +154,7 @@ export default function ArchiveReel({
 
     const syncAddress = (i: number) => {
       if (!here()) return;
-      const url = localePath(locale, reelHref(query, builds[i].id));
+      const url = reelHref(query, builds[i].id);
       window.history.replaceState(window.history.state, "", url);
     };
 
@@ -256,7 +252,7 @@ export default function ArchiveReel({
       } else if (e.key === "Escape") {
         e.preventDefault();
         leaving = true;
-        if (!archiveGo(home)) router.push(home);
+        if (!archiveGo(back)) router.push(back);
       }
     };
 
@@ -316,7 +312,7 @@ export default function ArchiveReel({
       section.removeEventListener("click", onPick);
       window.removeEventListener("popstate", onLeave);
     };
-  }, [builds, count, start, jump, query, home, locale, router, wide]);
+  }, [builds, count, start, jump, query, back, router, wide]);
 
   useEffect(() => {
     const rail = railRef.current;
@@ -347,7 +343,7 @@ export default function ArchiveReel({
       <div className="sticky top-0 h-[var(--screen)] overflow-hidden pt-[max(1.5rem,calc(var(--masthead)+1.5rem-var(--lift,0px)))] pb-lg">
         <div className="u-sheet mx-auto h-[calc(100%-var(--lift,0px))] grid-rows-[minmax(0,1fr)_auto] md:grid-rows-1">
           <nav
-            aria-label={ARCHIVE_TEXT[locale].builds}
+            aria-label="Builds"
             className="relative hidden overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_1.5rem,black_calc(100%-4rem),transparent)] md:col-span-3 md:block"
           >
             <ol
@@ -366,7 +362,7 @@ export default function ArchiveReel({
                       return (
                         <li key={x.id} data-row={i}>
                           <a
-                            href={localePath(locale, reelHref(query, x.id))}
+                            href={reelHref(query, x.id)}
                             data-at={i}
                             aria-current={on ? "true" : undefined}
                             className={`u-line-cap group/row flex items-baseline justify-between gap-x-sm py-[4px] text-body-sm transition-colors duration-300 ${
@@ -438,7 +434,7 @@ export default function ArchiveReel({
               aria-live="polite"
               className="min-h-0 max-h-[calc(var(--screen)*0.38)] flex-1 overflow-y-auto pt-lg pb-section transition-opacity duration-300 [mask-image:linear-gradient(to_bottom,transparent,#000_var(--spacing-lg),#000_calc(100%-4rem),transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden starting:opacity-0 md:max-h-none"
             >
-              <EntryBody locale={locale} build={b} variant="panel" />
+              <EntryBody build={b} variant="panel" />
             </div>
           </div>
         </div>

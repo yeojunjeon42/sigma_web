@@ -10,14 +10,15 @@ import { INKED, InkDefs } from "@/features/hand/HandLayer";
 import { Fact } from "@/features/archive/components/EntryBody";
 import type { MemberLinks as Links } from "../data/roster";
 import MemberLinks from "./MemberLinks";
-import { pick, type Locale } from "@/i18n/config";
-import { useLocale } from "@/i18n/LocaleProvider";
-import { MEMBERS } from "@/i18n/dict/members";
 
 type CrewGroup = "alumni" | "executives" | "members";
 
 // A group with nobody in it keeps its heading and one row: the link to the profile form.
-const GROUPS: CrewGroup[] = ["alumni", "executives", "members"];
+const GROUPS: { key: CrewGroup; label: string; invite?: string }[] = [
+  { key: "alumni", label: "Alumni", invite: "Add your alumni profile" },
+  { key: "executives", label: "Executives" },
+  { key: "members", label: "Members", invite: "Add your member profile" },
+];
 
 export interface CrewMember {
   id: string;
@@ -54,20 +55,20 @@ function whole(text: string) {
   return text.split(/(\S*-\S*)/).map((part, i) => (i % 2 ? <span key={i} className="whitespace-nowrap">{part}</span> : part));
 }
 
-function Meta({ m, locale, className = "" }: { m: CrewMember; locale: Locale; className?: string }) {
+function Meta({ m, className = "" }: { m: CrewMember; className?: string }) {
   if (m.group === "alumni") {
     return (
       <span className={className}>
         <span className="tabular-nums">{m.year}</span>
-        <span className="xl:hidden"> · {pick(locale, m.department)}</span>
+        <span className="xl:hidden"> · {m.department.en}</span>
       </span>
     );
   }
   return (
     <span className={className}>
-      {m.post && whole(pick(locale, m.post))}
+      {m.post && whole(m.post.en)}
       {m.post && m.duty && <span className="text-ink-muted"> · </span>}
-      {m.duty && <span>{whole(pick(locale, m.duty))}</span>}
+      {m.duty && <span>{whole(m.duty.en)}</span>}
     </span>
   );
 }
@@ -102,13 +103,12 @@ function Invite({ href, label, className = "" }: { href: string; label: string; 
 }
 
 function Card({ m, onSelect }: { m: CrewMember; onSelect: (member: CrewMember) => void }) {
-  const t = MEMBERS[useLocale()];
   return (
     <li className="min-w-0">
       <button
         type="button"
         aria-haspopup="dialog"
-        aria-label={t.viewProfile(m.name)}
+        aria-label={`${m.name}, view profile`}
         onClick={(e) => {
           // Safari doesn't focus a tapped button, and the dialog hands focus back to whatever had it.
           e.currentTarget.focus({ preventScroll: true });
@@ -130,8 +130,6 @@ function Spare({ members, cols, className }: { members: number; cols: number; cl
 }
 
 function MemberProfile({ member: m, onClose }: { member: CrewMember; onClose: () => void }) {
-  const locale = useLocale();
-  const t = MEMBERS[locale];
   const ref = useRef<HTMLDialogElement>(null);
   const motion = useRef<{ animation: Animation; path: Sprung | null } | null>(null);
 
@@ -227,11 +225,11 @@ function MemberProfile({ member: m, onClose }: { member: CrewMember; onClose: ()
               <h2 data-profile-part id={`profile-${m.id}`} className="text-body">{m.name}</h2>
               <dl data-profile-part="details" className="flex min-w-0 flex-wrap gap-x-gutter gap-y-sm [&_dd]:text-body [&_dt]:sr-only">
                 {m.group === "alumni" ? (
-                  <Fact label={t.year}><span className="tabular-nums">{m.year}</span></Fact>
+                  <Fact label="Year"><span className="tabular-nums">{m.year}</span></Fact>
                 ) : m.post || m.duty ? (
-                  <Fact label={t.role}><Meta m={m} locale={locale} /></Fact>
+                  <Fact label="Role"><Meta m={m} /></Fact>
                 ) : null}
-                <Fact label={m.group === "alumni" ? t.field : t.department} className="[&_dd]:text-ink-muted">{pick(locale, m.department)}</Fact>
+                <Fact label={m.group === "alumni" ? "Field" : "Department"} className="[&_dd]:text-ink-muted">{m.department.en}</Fact>
               </dl>
             </header>
             {m.bio && <p data-profile-part="bio" lang={korean ? "ko" : "en"} className="max-w-[60ch] text-body [overflow-wrap:anywhere]">{m.bio}</p>}
@@ -244,7 +242,7 @@ function MemberProfile({ member: m, onClose }: { member: CrewMember; onClose: ()
             onClick={leave}
             className="-mr-xs min-h-11 min-w-11 shrink-0 px-xs text-body text-ink transition-opacity duration-200 hover:opacity-70 active:opacity-70 active:duration-0 focus-visible:underline focus-visible:underline-offset-4 motion-reduce:transition-none"
           >
-            {t.close}
+            Close
           </button>
         </div>
       </div>
@@ -303,12 +301,10 @@ function BioLine({ text, on }: { text: string; on: boolean }) {
 export default function MemberCrew({ members, total, form }: { members: CrewMember[]; total: number; form: string }) {
   const [hot, setHot] = useState<string | null>(null);
   const [selected, setSelected] = useState<CrewMember | null>(null);
-  const locale = useLocale();
-  const t = MEMBERS[locale];
   // Members counts everyone in the club who has no row here.
-  const groups = GROUPS.map((key) => {
-    const listed = members.filter((m) => m.group === key);
-    return { key, label: t.groups[key], invite: t.invite[key], members: listed, count: listed.length + (key === "members" ? total - members.length : 0) };
+  const groups = GROUPS.map((g) => {
+    const listed = members.filter((m) => m.group === g.key);
+    return { ...g, members: listed, count: listed.length + (g.key === "members" ? total - members.length : 0) };
   }).filter((g) => g.members.length > 0 || g.invite);
   const order = groups.flatMap((g) => g.members);
 
@@ -375,8 +371,8 @@ export default function MemberCrew({ members, total, form }: { members: CrewMemb
                     }`}
                   >
                     <span className="col-span-2 col-start-1 whitespace-nowrap xl:col-span-1">{m.name}</span>
-                    <Meta m={m} locale={locale} className={`col-span-3 col-start-3 xl:col-span-2 xl:col-start-2 ${away}`} />
-                    <span className={`col-span-4 col-start-4 hidden text-ink-muted xl:block ${away}`}>{pick(locale, m.department)}</span>
+                    <Meta m={m} className={`col-span-3 col-start-3 xl:col-span-2 xl:col-start-2 ${away}`} />
+                    <span className={`col-span-4 col-start-4 hidden text-ink-muted xl:block ${away}`}>{m.department.en}</span>
                     {/* Centre 32px hit areas on the 21px text line. */}
                     <MemberLinks name={m.name} links={m.links} dense className="col-start-6 -my-[5.5px] -mr-xxs justify-self-end xl:col-start-7" />
                     {m.bio && (

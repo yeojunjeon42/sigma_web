@@ -24,8 +24,13 @@ export interface DocMeta {
   sample?: boolean;
 }
 
+// The languages an entry's text can be read in. English is the site's; Korean is offered beside it.
+export type Lang = "en" | "ko";
+
 export interface Doc extends DocMeta {
   html: string;
-  // The language the text is in: the reader's, or the other one where theirs has none.
-  lang: "en" | "ko";
+  // The language the text is in: the one asked for, or the other where that one has none.
+  lang: Lang;
+  // Every language the entry has text in.
+  langs: Lang[];
 }

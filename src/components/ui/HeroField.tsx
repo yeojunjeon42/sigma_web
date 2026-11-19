@@ -1,8 +1,6 @@
 import Image from "next/image";
 import HeroPlate, { HeroCaption, type HeroBuild } from "./HeroPlate";
 import type { Sponsor } from "@/features/sponsors/api/getSponsors";
-import type { Locale } from "@/i18n/config";
-import { HOME } from "@/i18n/dict/home";
 import { PLATE_KEY } from "@/lib/halftone";
 
 const FRAME = {
@@ -79,22 +77,19 @@ function LogoRoll({ items }: { items: Sponsor[] }) {
 }
 
 export default function HeroField({
-  locale,
   sponsors,
   cofounded,
   builds,
 }: {
-  locale: Locale;
   sponsors: Sponsor[];
   cofounded: Sponsor[];
   builds: HeroBuild[];
 }) {
-  const t = HOME[locale];
 
   return (
     <section style={FRAME} className="relative isolate touch-pan-y touch-pinch-zoom overflow-hidden bg-canvas">
       <h1 className="sr-only">
-        {t.heading}
+        Sigma Intelligence — the robotics club of Seoul National University
       </h1>
 
       {builds.length > 0 && (
@@ -117,7 +112,7 @@ export default function HeroField({
             <Letters>Sigma</Letters>
           </span>
           <Stmt delay={380} className="u-trim desk:col-span-3 desk:col-start-10 desk:row-start-1 desk:self-start">
-            {t.est}
+            Est. 1984
           </Stmt>
         </div>
 
@@ -137,31 +132,31 @@ export default function HeroField({
             delay={320}
             className="col-span-3 col-start-4 row-start-1 self-start desk:col-span-4 desk:col-start-6 desk:row-start-1 desk:[text-box:trim-both_cap_alphabetic]"
           >
-            {t.university}
+            Seoul National University
           </Stmt>
           <Stmt
             delay={440}
             className="hidden desk:col-span-3 desk:col-start-10 desk:row-start-2 desk:block desk:self-end"
           >
-            {t.room}
+            Room 215‑2, Mabang
           </Stmt>
           <Stmt
             delay={500}
             className="col-span-4 col-start-2 row-start-2 mt-lg self-start desk:col-span-3 desk:col-start-1 desk:row-start-3 desk:mt-0 desk:self-end"
           >
-            {t.community}
+            Undergraduate research community
           </Stmt>
           <Stmt
             delay={560}
             className="col-span-3 col-start-1 row-start-4 self-start desk:col-span-3 desk:col-start-4 desk:row-start-4 desk:self-end"
           >
-            {t.art}
+            Media and kinetic art
           </Stmt>
           <Stmt
             delay={620}
             className="col-span-3 col-start-4 row-start-5 mt-lg self-start desk:col-span-3 desk:col-start-10 desk:row-start-4 desk:mt-0 desk:self-end"
           >
-            {t.first}
+            Korea’s first university robotics club
           </Stmt>
         </div>
 

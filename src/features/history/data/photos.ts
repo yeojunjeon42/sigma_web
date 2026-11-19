@@ -1,11 +1,6 @@
-import type { Both } from "@/i18n/config";
-
-// `name` is what the collage writes by hand, in English in both languages: the handwriting face
-// has no Hangul. `ko` is the name set in type.
 export interface ClubEvent {
   id: string;
   name: string;
-  ko?: string;
   when: string;
   photos: { src: string; w: number; h: number }[];
   strip?: boolean;
@@ -18,20 +13,19 @@ export const HERO_PHOTO = {
   src: "/history-photos/creative-design-fair/01.jpg",
   w: 1600,
   h: 1200,
-  alt: { en: "Members on a lawn holding two award boards", ko: "잔디밭에서 상장 보드 두 개를 든 부원들" },
+  alt: "Members on a lawn holding two award boards",
 };
 
 // One photograph leads a year on phones, where the collage is hidden.
-export const YEAR_PHOTOS: Record<number, { src: string; w: number; h: number; alt: Both }> = {
-  2026: { src: "/history-photos/homecoming/01.jpg", w: 1600, h: 1200, alt: { en: "Members and alumni posing in a lecture room at the summer homecoming", ko: "여름 홈커밍데이에 강의실에 모인 부원과 졸업생" } },
-  2025: { src: "/history-photos/creative-design-fair-2025/01.jpg", w: 1600, h: 900, alt: { en: "Members holding four award boards at the SNU Creative Design Fair", ko: "서울대학교 창의설계축전에서 상장 보드 네 개를 든 부원들" } },
+export const YEAR_PHOTOS: Record<number, { src: string; w: number; h: number; alt: string }> = {
+  2026: { src: "/history-photos/homecoming/01.jpg", w: 1600, h: 1200, alt: "Members and alumni posing in a lecture room at the summer homecoming" },
+  2025: { src: "/history-photos/creative-design-fair-2025/01.jpg", w: 1600, h: 900, alt: "Members holding four award boards at the SNU Creative Design Fair" },
 };
 
 export const CLUB_EVENTS: ClubEvent[] = [
   {
     id: "cdf",
     name: "15th SNU Creative Design Fair, 2026",
-    ko: "제15회 서울대학교 창의설계축전, 2026",
     when: "Fall 2026",
     photos: set("creative-design-fair", [[1600, 1200]]),
   },

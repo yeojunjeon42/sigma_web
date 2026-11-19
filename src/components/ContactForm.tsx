@@ -3,8 +3,6 @@
 import { square, turnAt } from "@/lib/halftone";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { EMAIL } from "@/features/site/data/contact";
-import { CONTACT } from "@/i18n/dict/contact";
-import { useLocale } from "@/i18n/LocaleProvider";
 
 const ENDPOINT = "https://api.web3forms.com/submit";
 const KEY = "88d928f1-f41f-4ec4-b59b-e3c66d04209c";
@@ -12,7 +10,24 @@ const KEY = "88d928f1-f41f-4ec4-b59b-e3c66d04209c";
 type Status = "idle" | "sending" | "sent" | "error";
 type RequiredField = "name" | "email" | "message";
 type Errors = Partial<Record<RequiredField, string>>;
-type Words = (typeof CONTACT)["en"]["form"]["errors"];
+
+const ARCHIVE_DRAFT = `I'd like to add a build to the archive.
+
+Name:
+Year:
+Team:
+Link (Google Drive or other):`;
+
+const BLOG_DRAFT = `I'd like to write a post for the blog.
+
+Title:
+Author:
+Article link (Google Drive or other):
+
+Cover: the section's drawing is used unless the post needs its own. A drawing of your own is black ink on plain paper with one red mark, like a quick sketch in a notebook.
+Photos: unedited photographs only. No card news, text overlays, stickers or templates.`;
+
+const DRAFTS: Record<string, string> = { archive: ARCHIVE_DRAFT, blog: BLOG_DRAFT };
 
 const FIELD = "group flex flex-col gap-y-xs";
 const HEAD = "flex items-baseline justify-between text-caption text-ink-muted transition-colors group-focus-within:text-ink";
@@ -54,11 +69,11 @@ function SendButton({ children, type = "button", disabled = false, onClick }: { 
   );
 }
 
-function fieldError(field: HTMLInputElement | HTMLTextAreaElement, words: Words) {
+function fieldError(field: HTMLInputElement | HTMLTextAreaElement) {
   if (!field.value.trim()) {
-    return field.name === "name" ? words.name : field.name === "email" ? words.email : words.message;
+    return field.name === "name" ? "Enter your name." : field.name === "email" ? "Enter your email address." : "Enter a message.";
   }
-  if (field.validity.typeMismatch) return words.invalid;
+  if (field.validity.typeMismatch) return "Enter a valid email address.";
 }
 
 function fit(el: HTMLTextAreaElement | null) {
@@ -69,17 +84,16 @@ function fit(el: HTMLTextAreaElement | null) {
 }
 
 export function ContactForm() {
-  const { form: t, drafts } = CONTACT[useLocale()];
   const [status, setStatus] = useState<Status>("idle");
   const [draft, setDraft] = useState("");
   const [stamp, setStamp] = useState("");
   const [errors, setErrors] = useState<Errors>({});
   const messageRef = useCallback((el: HTMLTextAreaElement | null) => {
     if (!el) return;
-    const draft = drafts[new URLSearchParams(window.location.search).get("about") ?? ""];
+    const draft = DRAFTS[new URLSearchParams(window.location.search).get("about") ?? ""];
     if (!el.value && draft) el.value = draft;
     fit(el);
-  }, [drafts]);
+  }, []);
 
   async function send(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -87,7 +101,7 @@ export function ContactForm() {
     const fields = [...e.currentTarget.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("[required]")];
     const nextErrors: Errors = {};
     for (const field of fields) {
-      const error = fieldError(field, t.errors);
+      const error = fieldError(field);
       if (error) nextErrors[field.name as RequiredField] = error;
     }
     setErrors(nextErrors);
@@ -124,13 +138,13 @@ export function ContactForm() {
         <Receipt stamp={stamp} />
         <div>
           <p ref={(el) => el?.focus({ preventScroll: true })} tabIndex={-1} className="text-display-md text-ink outline-none">
-            {t.sent}
+            Message sent
           </p>
           <p className="mt-md text-body text-ink">
-            {t.reply}
+            We’ll come back to you shortly.
           </p>
           <div className="mt-lg">
-            <SendButton onClick={() => setStatus("idle")}>{t.again}</SendButton>
+            <SendButton onClick={() => setStatus("idle")}>Send another</SendButton>
           </div>
         </div>
       </div>
@@ -145,11 +159,11 @@ export function ContactForm() {
         const field = e.target;
         if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) || !field.required) return;
         const name = field.name as RequiredField;
-        if (errors[name]) setErrors((previous) => ({ ...previous, [name]: fieldError(field, t.errors) }));
+        if (errors[name]) setErrors((previous) => ({ ...previous, [name]: fieldError(field) }));
       }}
       className="grid gap-y-lg md:grid-cols-2 md:gap-x-gutter lg:grid-cols-7"
     >
-      <Field id="contact-name" label={t.name} error={errors.name} className="lg:col-span-4">
+      <Field id="contact-name" label="Name" error={errors.name} className="lg:col-span-4">
         <input
           id="contact-name"
           name="name"
@@ -162,7 +176,7 @@ export function ContactForm() {
         />
       </Field>
 
-      <Field id="contact-email" label={t.email} error={errors.email} className="lg:col-span-3">
+      <Field id="contact-email" label="Email" error={errors.email} className="lg:col-span-3">
         <input
           id="contact-email"
           name="email"
@@ -177,11 +191,11 @@ export function ContactForm() {
         />
       </Field>
 
-      <Field id="contact-organisation" label={t.from} note={t.optional} className="md:col-span-2 lg:col-span-7">
+      <Field id="contact-organisation" label="From" note="Optional" className="md:col-span-2 lg:col-span-7">
         <input id="contact-organisation" name="organisation" type="text" autoComplete="organization" className={ENTRY} />
       </Field>
 
-      <Field id="contact-message" label={t.message} error={errors.message} className="md:col-span-2 lg:col-span-7">
+      <Field id="contact-message" label="Message" error={errors.message} className="md:col-span-2 lg:col-span-7">
         <textarea
           id="contact-message"
           name="message"
@@ -199,17 +213,17 @@ export function ContactForm() {
 
       <div className="mt-sm flex flex-wrap items-center gap-x-xl gap-y-sm md:col-span-2 lg:col-span-7">
         <SendButton type="submit" disabled={status === "sending"}>
-          {status === "sending" ? t.sending : t.send}
+          {status === "sending" ? "Sending" : "Send message"}
         </SendButton>
         <p aria-live="polite" className="text-body-sm text-ink">
           {status === "error" ? (
             <>
-              {t.failed}
+              {"It could not be sent. "}
               <a
                 href={draft}
                 className="u-swipe-rest text-ink"
               >
-                {t.asEmail}
+                Open it as an email instead
               </a>
             </>
           ) : null}

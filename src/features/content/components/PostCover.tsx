@@ -2,6 +2,7 @@ import Image from "next/image";
 import { MachineFrame } from "@/components/ui";
 import { INKED, InkDefs } from "@/features/hand/HandLayer";
 import type { Cover } from "../api/cover";
+import { hang } from "./coverType";
 
 // A post's cover: an ink drawing in the upper part of a square cell of the page's own paper, with
 // the section top left and the title bottom left. Type and padding scale with the cover's width,
@@ -47,8 +48,19 @@ export default function PostCover({
         />
       ) : null}
       <div data-offgrid className="absolute inset-0 flex flex-col justify-between p-[6cqw]">
-        <p className="text-[max(3.4cqw,0.75rem)] leading-none">{section}</p>
-        <Title className="max-w-[18ch] text-[8cqw] leading-[1.06] tracking-[-0.02em] text-balance">{title}</Title>
+        <p style={{ textIndent: hang(section) }} className="text-[max(3.4cqw,0.75rem)] leading-none">
+          {section}
+        </p>
+        {/* The title's box ends on its baseline, so the baseline stands as far from the foot of the
+            card as the text does from its side; descenders hang into the padding. Where the box
+            cannot be trimmed, the same distance is taken off below: the sans's descent (0.224em)
+            less half of what this leading takes off the line (0.07em). */}
+        <Title
+          style={{ textIndent: hang(title) }}
+          className="max-w-[18ch] text-[8cqw] leading-[1.06] tracking-[-0.02em] text-balance [text-box:trim-end_text_alphabetic] not-supports-[text-box:trim-end_text_alphabetic]:-mb-[0.154em]"
+        >
+          {title}
+        </Title>
       </div>
     </MachineFrame>
   );

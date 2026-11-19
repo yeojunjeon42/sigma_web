@@ -1,8 +1,6 @@
 "use client";
 
-import { BLOG } from "@/i18n/dict/blog";
-import Link from "@/i18n/Link";
-import { useLocale } from "@/i18n/LocaleProvider";
+import Link from "next/link";
 import { useSyncExternalStore } from "react";
 import type { Cover } from "../api/cover";
 import PostCard from "./PostCard";
@@ -60,21 +58,20 @@ function Grid({ posts }: { posts: BlogItem[] }) {
 }
 
 function List({ posts }: { posts: BlogItem[] }) {
-  const t = BLOG[useLocale()].heads;
   return (
     <>
       <div className={`hidden border-b border-rule-strong pb-sm text-ink-muted ${COLS} ${META}`}>
         <span className="md:col-span-1 lg:col-span-3">
-          {t.year}
+          Year
         </span>
         <span className="md:col-span-7 lg:col-span-6">
-          {t.title}
+          Title
         </span>
         <span className="md:col-span-2 lg:col-span-1">
-          {t.section}
+          Section
         </span>
         <span className="md:col-span-2 md:text-right">
-          {t.date}
+          Date
         </span>
       </div>
       <ul>
@@ -117,7 +114,6 @@ function List({ posts }: { posts: BlogItem[] }) {
 }
 
 export default function BlogIndex({ posts, topics, span }: { posts: BlogItem[]; topics: Topic[]; span: string }) {
-  const words = BLOG[useLocale()];
   const query = new URLSearchParams(useSyncExternalStore(subscribe, readQuery, () => ""));
   const asked = query.get("topic");
   const topic = asked && topics.some((t) => t.key === asked) ? asked : null;
@@ -142,7 +138,7 @@ export default function BlogIndex({ posts, topics, span }: { posts: BlogItem[]; 
       className={`${HIT} flex cursor-pointer items-baseline ${topic === key ? ON : OFF}`}
     >
       {key === null ? (
-        words.all
+        "All"
       ) : (
         topics.find((t) => t.key === key)?.label ?? key
       )}
@@ -150,18 +146,18 @@ export default function BlogIndex({ posts, topics, span }: { posts: BlogItem[]; 
   );
 
   const views: { key: View; label: string }[] = [
-    { key: "grid", label: words.grid },
-    { key: "list", label: words.list },
+    { key: "grid", label: "Grid" },
+    { key: "list", label: "List" },
   ];
 
   return (
     <>
       <div className="u-scroll-in flex flex-nowrap items-baseline justify-between gap-x-md whitespace-nowrap border-b border-rule pt-xl pb-sm text-body md:pt-xxl md:grid md:grid-cols-12 md:gap-x-gutter min-[90rem]:text-title">
         <h1 className="flex shrink-0 items-baseline gap-x-sm text-ink md:col-span-3 md:row-start-1">
-          {words.title}
+          Blog
           <span className="tabular-nums text-ink-muted">{span}</span>
         </h1>
-        <nav aria-label={words.sections} className="u-scroll-x -my-3 min-w-0 overflow-x-auto py-3 max-md:hidden md:col-start-4 md:col-end-11 md:row-start-1">
+        <nav aria-label="Sections" className="u-scroll-x -my-3 min-w-0 overflow-x-auto py-3 max-md:hidden md:col-start-4 md:col-end-11 md:row-start-1">
           <ul className="flex items-baseline gap-x-md lg:gap-x-sm xl:gap-x-md">
             <li className="shrink-0">{pick(null)}</li>
             {topics.map((t) => (
@@ -171,7 +167,7 @@ export default function BlogIndex({ posts, topics, span }: { posts: BlogItem[]; 
             ))}
           </ul>
         </nav>
-        <nav aria-label={words.view} className="flex shrink-0 items-baseline gap-x-md md:col-start-11 md:col-end-13 md:row-start-1 md:justify-self-end lg:gap-x-sm xl:gap-x-md">
+        <nav aria-label="View" className="flex shrink-0 items-baseline gap-x-md md:col-start-11 md:col-end-13 md:row-start-1 md:justify-self-end lg:gap-x-sm xl:gap-x-md">
           {views.map((v) => (
             <button
               key={v.key}

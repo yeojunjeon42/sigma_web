@@ -1,8 +1,6 @@
 "use client";
 
-import Link from "@/i18n/Link";
-import { useLocale } from "@/i18n/LocaleProvider";
-import { HOME } from "@/i18n/dict/home";
+import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { DOT, GROUND, GROUND_INK, PLATE_KEY, SCREEN, relief, turnAt } from "@/lib/halftone";
 import { printer, scaled, STRIDE, vignette } from "@/lib/printer";
@@ -88,7 +86,6 @@ export function HeroCaption({
   className?: string;
   style?: React.CSSProperties;
 }) {
-  const locale = useLocale();
   const b =
     useSyncExternalStore(
       subscribe,
@@ -111,7 +108,7 @@ export function HeroCaption({
         onClick={() => advance?.()}
         className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-end leading-none text-ink transition-opacity hover:opacity-60 lg:min-h-0 lg:min-w-0"
       >
-        {HOME[locale].next}
+        Next
       </button>
     </p>
   );

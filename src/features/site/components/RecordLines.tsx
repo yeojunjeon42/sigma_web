@@ -3,9 +3,7 @@
 import { pageY, onPageScroll } from "@/lib/pageScroll";
 
 import { square, turnAt } from "@/lib/halftone";
-import Link from "@/i18n/Link";
-import { useLocale } from "@/i18n/LocaleProvider";
-import { HOME } from "@/i18n/dict/home";
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { MachineFrame } from "@/components/ui/frame";
 import { PLATE_RELEASE, PLATE_SHOW } from "@/components/ui/HeroPlate";
@@ -55,7 +53,6 @@ export default function RecordLines({
   cohorts: number;
   people: number;
 }) {
-  const t = HOME[useLocale()];
   const root = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -436,10 +433,10 @@ export default function RecordLines({
     >
       <div className="flex items-baseline justify-between gap-x-lg">
         <h2 className={`${META} text-ink`}>
-          {t.builds}
+          Builds
         </h2>
         <Link href="/archive" className={`${META} ${ALL}`}>
-          {t.all(builds.length)}
+          {`All ${builds.length} ↗`}
         </Link>
       </div>
       <div data-offgrid className={`${fade} mt-sm`}>
@@ -454,19 +451,19 @@ export default function RecordLines({
 
       <div className="mt-lg flex items-baseline justify-between gap-x-lg">
         <h2 className={`${META} text-ink`}>
-          {t.results}
+          Competition results
         </h2>
         <Link href="/history" className={`${META} ${ALL}`}>
-          {t.all(total)}
+          {`All ${total} ↗`}
         </Link>
       </div>
 
       <div className="mt-lg flex items-baseline justify-between gap-x-lg">
         <h2 className={`${META} text-ink`}>
-          {t.members}
+          Members
         </h2>
         <Link href="/members" className={`${META} ${ALL}`}>
-          {t.roster(cohorts, people)}
+          {`${cohorts} cohorts · ${people} members and alumni ↗`}
         </Link>
       </div>
 

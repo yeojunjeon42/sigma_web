@@ -1,8 +1,6 @@
 import Image from "next/image";
-import Link from "@/i18n/Link";
+import Link from "next/link";
 import { Fragment } from "react";
-import { pick, type Locale } from "@/i18n/config";
-import { HISTORY, seasonName } from "@/i18n/dict/history";
 import { YEAR_PHOTOS } from "../data/photos";
 import { soleWork } from "../data/works";
 import { splitResult } from "../splitResult";
@@ -35,17 +33,15 @@ export function season(label: string) {
 }
 
 type Result = { label: string; count: number; work?: string };
-// `event` is the contest in English, which is what rows are gathered by; `name` is what is shown.
-type Row = { id: string; date: string; award: boolean; event: string; name: string; results: Result[] };
+type Row = { id: string; date: string; award: boolean; event: string; results: Result[] };
 
 // A contest takes one row in a year, with all its results on the same line.
-export function rowsOf(events: YearNode["events"], locale: Locale) {
+export function rowsOf(events: YearNode["events"]) {
   const rows: Row[] = [];
   for (const e of events) {
-    const [event] = splitResult(e.title.en);
-    const [name, result] = splitResult(pick(locale, e.title));
+    const [event, result] = splitResult(e.title.en);
     const twin = e.award ? rows.find((r) => r.award && r.event === event) : undefined;
-    const row = twin ?? { id: e.id, date: e.date, award: !!e.award, event, name, results: [] };
+    const row = twin ?? { id: e.id, date: e.date, award: !!e.award, event, results: [] };
     if (!twin) rows.push(row);
     if (result) row.results.push({ label: result, count: e.count ?? 1, work: soleWork(e.work) });
   }
@@ -67,17 +63,14 @@ function seasonLabels(rows: Row[]) {
 
 export default function Chronology({
   nodes,
-  locale,
 }: {
   nodes: YearNode[];
-  locale: Locale;
 }) {
-  const t = HISTORY[locale];
   return (
     <div className="border-b border-rule max-md:-mx-[var(--gutter)] max-md:px-[var(--gutter)] md:col-span-full md:grid md:grid-cols-subgrid">
       <RuleIn />
       {nodes.map((node) => {
-        const rows = rowsOf(node.events, locale);
+        const rows = rowsOf(node.events);
         const seasons = seasonLabels(rows);
         return (
         <section
@@ -92,7 +85,7 @@ export default function Chronology({
           {YEAR_PHOTOS[node.year] ? (
             <Image
               src={YEAR_PHOTOS[node.year].src}
-              alt={pick(locale, YEAR_PHOTOS[node.year].alt)}
+              alt={YEAR_PHOTOS[node.year].alt}
               width={YEAR_PHOTOS[node.year].w}
               height={YEAR_PHOTOS[node.year].h}
               sizes="100vw"
@@ -109,11 +102,11 @@ export default function Chronology({
                 className="u-line-cap grid grid-cols-[3.5rem_minmax(0,1fr)] items-baseline gap-x-gutter py-xxs text-body text-ink md:col-span-full md:grid-cols-subgrid"
               >
                 <span className={`${DATE} text-ink-muted whitespace-nowrap md:col-span-2 lg:col-span-1`}>
-                  {r.award ? t.award : seasons[i] ? seasonName(locale, seasons[i]) : null}
+                  {r.award ? "Award" : seasons[i]}
                 </span>
                 {/* When the results don't fit beside the event they drop to its left edge, whole. */}
                 <span className="flex flex-wrap gap-x-sm md:col-start-3 md:col-end-[-1] lg:col-start-2">
-                  <span className="min-w-0">{r.name}</span>
+                  <span className="min-w-0">{r.event}</span>
                   {r.results.length ? (
                     <span className="min-w-0 text-ink-muted">
                       {r.results.map((x, k) => (
