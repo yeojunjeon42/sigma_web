@@ -1134,6 +1134,12 @@ html:has([data-terminal]) {
   color: var(--color-ink);
   text-wrap: balance;
 }
+/* Korean headings: Hangul in Medium at the Korean face's own size, the weight nearest the sans
+   heading's stroke and colour. Latin and figures stay in the sans, as in the English reading.
+   The marks face stays first: the first family sets the line's metrics. */
+.prose.flow :is(h1, h2, h3, h4):lang(ko) {
+  font-family: var(--f-marks), var(--f-kr-head), var(--f-sans), var(--f-kr), ui-sans-serif, system-ui, sans-serif;
+}
 .prose.flow h1,
 .prose.flow h2 {
   margin: calc(var(--flow) * 2.2) 0 calc(var(--flow) * 0.75);

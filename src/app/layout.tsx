@@ -61,6 +61,23 @@ const kr = localFont({
   ],
 });
 
+// Headings in a Korean reading: Medium at 400, Hangul only, so the face can stand ahead of the
+// sans and its generic fallbacks, which would otherwise hand Hangul to the system's Korean font.
+const krHead = localFont({
+  src: [{ path: "../fonts/pretendard-medium.woff2", weight: "400", style: "normal" }],
+  variable: "--f-kr-head",
+  display: "swap",
+  preload: false,
+  adjustFontFallback: false,
+  declarations: [
+    { prop: "unicode-range", value: "U+3131-318E, U+AC00-D7A3" },
+    { prop: "size-adjust", value: "104.6%" },
+    { prop: "ascent-override", value: "93.3%" },
+    { prop: "descent-override", value: "21.4%" },
+    { prop: "line-gap-override", value: "0%" },
+  ],
+});
+
 const display = Archivo({
   subsets: ["latin"],
   axes: ["wdth"],
@@ -139,7 +156,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${marks.variable} ${sans.variable} ${kr.variable} ${mono.variable} ${display.variable}`}
+      className={`${marks.variable} ${sans.variable} ${kr.variable} ${krHead.variable} ${mono.variable} ${display.variable}`}
     >
       <head>
         <meta name="theme-color" media={MOBILE} content="#000000" />
