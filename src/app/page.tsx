@@ -69,17 +69,21 @@ export default async function Home() {
           className="bg-band text-ink"
         >
           <Container className="grid gap-y-xl py-xxl md:grid-cols-12 md:items-end md:gap-x-gutter md:py-section">
-            <p className="u-drift [--drift-from:32px] [--drift-to:-32px] md:col-span-8">
+            {/* Both figures hang a little into the margin so their ink, not their box, sits on the
+                line. They count up for the eye; a screen reader is given the number itself. */}
+            <p data-offgrid className="u-drift [--drift-from:32px] [--drift-to:-32px] md:col-span-8">
               <span className="text-body text-ink">
                 Founded
               </span>
-              <span className={`${FIGURE} mt-sm -ml-[0.108em]`}><CountUp from={new Date().getFullYear()} to={FOUNDED} /></span>
+              <span aria-hidden="true" className={`${FIGURE} mt-sm -ml-[0.108em]`}><CountUp from={new Date().getFullYear()} to={FOUNDED} /></span>
+              <span className="sr-only">{FOUNDED}</span>
             </p>
             <p data-offgrid className="u-drift [--drift-from:32px] [--drift-to:-32px] text-right md:col-span-4">
               <span className="text-body text-ink">
                 Years
               </span>
-              <span className={`${FIGURE} mt-sm -mr-[0.029em]`}><CountUp to={years} /></span>
+              <span aria-hidden="true" className={`${FIGURE} mt-sm -mr-[0.029em]`}><CountUp to={years} /></span>
+              <span className="sr-only">{years}</span>
             </p>
           </Container>
         </section>
