@@ -44,7 +44,7 @@ function Portrait({ m, sizes, className = "" }: { m: CrewMember; sizes: string; 
       {m.portrait ? (
         // Loaded with the page, not lazily: in Safari a lazily loaded portrait could vanish after a
         // reload, while the page's arrival fade was running on an ancestor.
-        <Image src={m.portrait} alt={m.name} fill sizes={sizes} loading="eager" className="rounded-none object-cover" />
+        <Image src={m.portrait} alt={m.name} fill sizes={sizes} loading="eager" style={INKED} className="rounded-none object-cover" />
       ) : (
         <Image src={PLACEHOLDER} alt="" fill unoptimized loading="lazy" style={INKED} className="rounded-none object-contain" />
       )}
