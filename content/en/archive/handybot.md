@@ -8,17 +8,9 @@ team: Jihwan Gong, Juhyeong Kim, Huigyeong Song, Seohyeon Lee, Donggwang Kim, Je
 
 ## Overview
 
-Remote operation
-
-Signal transmission and reception using hand tilt
-
-Omnidirectional movement
-
-Forward/backward/left/right movement, left/right rotation, and diagonal movement
-
-Stability and expandability
-
-Stable communication and power supply, with potential for additional input/output device applications
+- **Remote operation**: Signal transmission and reception using hand tilt
+- **Omnidirectional movement**: Forward/backward/left/right movement, left/right rotation, and diagonal movement
+- **Stability and expandability**: Stable communication and power supply, with potential for additional input/output device applications
 
 ## Process
 
