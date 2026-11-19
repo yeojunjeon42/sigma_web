@@ -47,8 +47,14 @@ export default function PostCover({
           className={`absolute right-[5cqw] aspect-square ${room}`}
         />
       ) : null}
-      <div data-offgrid className="absolute inset-0 flex flex-col justify-between p-[6cqw]">
-        <p style={{ textIndent: hang(section) }} className="text-[max(3.4cqw,0.75rem)] leading-none">
+      {/* The inset is `INSET` in coverType.ts: 4% of the cover's width on every side. */}
+      <div data-offgrid className="absolute inset-0 flex flex-col justify-between p-[4cqw]">
+        {/* The label's box starts on its capitals' tops, so they stand the inset from the top. Where
+            the box cannot be trimmed, the same distance is taken off above. */}
+        <p
+          style={{ textIndent: hang(section) }}
+          className="text-[max(3.4cqw,0.75rem)] leading-none [text-box:trim-start_cap_alphabetic] not-supports-[text-box:trim-start_cap_alphabetic]:-mt-[0.072em]"
+        >
           {section}
         </p>
         {/* The title's box ends on its baseline, so the baseline stands as far from the foot of the

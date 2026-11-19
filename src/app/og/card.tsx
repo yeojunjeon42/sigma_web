@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { ImageResponse } from "next/og";
 import { drawingFile, type Cover } from "@/features/content/api/cover";
-import { HANG, leans } from "@/features/content/components/coverType";
+import { INSET, hangEm } from "@/features/content/components/coverType";
 import { INK_FILTER, inkFilter } from "@/features/hand/filter";
 
 // A post's share image is its index cover at this size: the page's paper inside a hairline, the
@@ -13,7 +13,7 @@ const H = 630;
 const PAPER = "#e4e4e4";
 const RULE = "#bebebe";
 const INK = "#000000";
-const EDGE = W * 0.06;
+const EDGE = W * INSET;
 const LABEL = W * 0.034;
 const DRAWING = 500;
 const TITLE = [
@@ -27,8 +27,8 @@ const TITLE = [
 // leading over one em. The baseline then stands as far from the foot as the words do from the side.
 const LEAD = 1.06;
 const UNDER = 0.224 + (LEAD - 1) / 2;
-// The card's first-line indent for a line that starts with a diagonal capital.
-const indent = (text: string | undefined, size: number) => (leans(text) ? size * HANG : 0);
+// The card's first-line indent, which puts a line's ink and not its box on the inset.
+const indent = (text: string | undefined, size: number) => size * hangEm(text);
 
 const font = (name: string) => readFile(path.join(process.cwd(), "src/app/og", name));
 
