@@ -1134,9 +1134,13 @@ html:has([data-terminal]) {
   color: var(--color-ink);
   text-wrap: balance;
 }
-/* Korean headings: Hangul in Medium at the Korean face's own size, the weight nearest the sans
-   heading's stroke and colour. Latin and figures stay in the sans, as in the English reading.
-   The marks face stays first: the first family sets the line's metrics. */
+/* A Korean reading: Hangul in Pretendard 445 (Medium where the text is bold), at the Korean face's
+   own size. Latin and figures stay in the sans, as in the English reading. The marks face stays
+   first: the first family sets the line's metrics. */
+.prose.flow:lang(ko) {
+  font-family: var(--f-marks), var(--f-kr-body), var(--f-sans), var(--f-kr), ui-sans-serif, system-ui, sans-serif;
+}
+/* Its headings: Hangul in Medium, the weight nearest the sans heading's stroke and colour. */
 .prose.flow :is(h1, h2, h3, h4):lang(ko) {
   font-family: var(--f-marks), var(--f-kr-head), var(--f-sans), var(--f-kr), ui-sans-serif, system-ui, sans-serif;
 }
