@@ -1,20 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
-import { displayTags } from "../data/tags";
 import type { DocMeta } from "../types";
 
 export type Cover = { src: string; alt: string };
 
-// A post's cover is an ink drawing: its own (`coverIllustration` in the frontmatter), or the one
-// its section shares. A section with no drawing of its own takes the notebook.
-const FOLDER = "/blog-illustrations";
-const SHARED: Record<string, string> = {
-  "Activity report": "activity-report",
-  Trip: "trip",
-  Collaboration: "collaboration",
-  Education: "education",
-};
-const NOTEBOOK = "activity-report";
+// A post's cover is a pen-and-ink drawing of its own: `coverIllustration` in the frontmatter, a
+// file under public/blog-illustrations/. No two posts share one, and a post without one has a
+// plain cover.
 
 // The folder is named in full, so a build packs nothing else from public/.
 export const drawingFile = (src: string) => path.join(process.cwd(), "public/blog-illustrations", path.basename(src));
@@ -26,9 +18,8 @@ function shows(src: string) {
 }
 
 export function coverOf(post: DocMeta): Cover | undefined {
-  const section = displayTags(post.tags, 1)[0]?.en ?? "";
-  const src = post.coverIllustration ?? `${FOLDER}/${SHARED[section] ?? NOTEBOOK}.svg`;
-  const drawn = shows(src);
-  if (drawn === null) return undefined;
+  const src = post.coverIllustration;
+  const drawn = src ? shows(src) : null;
+  if (!src || drawn === null) return undefined;
   return { src, alt: drawn ? `${post.title}, ${drawn}` : post.title };
 }

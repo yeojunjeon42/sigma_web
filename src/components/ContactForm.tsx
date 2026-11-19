@@ -24,7 +24,7 @@ Title:
 Author:
 Article link (Google Drive or other):
 
-Cover: the section's drawing is used unless the post needs its own. A drawing of your own is black ink on plain paper with one red mark, like a quick sketch in a notebook.
+Cover: every post has its own pen-and-ink drawing: black ink on plain paper with one red mark, like a quick sketch in a notebook.
 Photos: unedited photographs only. No card news, text overlays, stickers or templates.`;
 
 const DRAFTS: Record<string, string> = { archive: ARCHIVE_DRAFT, blog: BLOG_DRAFT };

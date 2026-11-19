@@ -5,7 +5,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { sheet } from "./ink/pen.mjs";
 
-const DRAWINGS = ["activity-report", "trip", "collaboration", "education", "maple-leaf", "placeholder"];
+const DRAWINGS = ["trip", "collaboration", "maple-leaf", "medal", "arduino", "caliper", "showcase", "placeholder"];
 const INK = "#0a0907";
 const ACCENT = "#ed2024";
 

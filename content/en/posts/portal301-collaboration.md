@@ -3,6 +3,7 @@ title: SIGMA × PORTAL301 Collaboration
 titleKo: PORTAL301 기술 협업
 year: 2025
 tags: [2025, Collaboration, Autonomous driving, Industrial robot]
+coverIllustration: /blog-illustrations/collaboration.svg
 photos: portal301-collaboration-2x.jpg | Lit PORTAL301 sign on an office wall
 ---
 

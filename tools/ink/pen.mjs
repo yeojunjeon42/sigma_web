@@ -38,3 +38,18 @@ export const arc = (cx, cy, rx, ry, from, to, steps = 10) =>
     const a = ((from + ((to - from) * i) / steps) * Math.PI) / 180;
     return [cx + Math.cos(a) * rx, cy + Math.sin(a) * ry];
   });
+
+// A straight edge as a stroke: run past its ends by `before` and `after` (or stopped short of
+// them, when negative) and bowed by `bow`, as a line ruled freehand is.
+export const edge = (a, b, before = 2, after = 2, bow = 0) => {
+  const len = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+  const [dx, dy] = [(b[0] - a[0]) / len, (b[1] - a[1]) / len];
+  return [
+    [a[0] - dx * before, a[1] - dy * before],
+    [(a[0] + b[0]) / 2 - dy * bow, (a[1] + b[1]) / 2 + dx * bow],
+    [b[0] + dx * after, b[1] + dy * after],
+  ];
+};
+
+// The points of one stroke that turns sharply at each of them instead of rounding through.
+export const bent = (points) => points.flatMap((p, i) => (i && i < points.length - 1 ? [p, p] : [p]));
