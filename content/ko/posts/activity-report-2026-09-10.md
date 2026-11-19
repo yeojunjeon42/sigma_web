@@ -5,6 +5,7 @@ year: 2026
 date: 2026-11-04
 tags: [2026, Activity report]
 coverIllustration: /blog-illustrations/maple-leaf.svg
+photos: activity-report-2026-09-10-photo-1.jpg | Members at a long restaurant table posing with a hand sign; activity-report-2026-09-10-photo-2.jpg | Members on a lawn holding two bronze award boards; activity-report-2026-09-10-photo-3.jpg | Group posing in front of a welcome screen on a green wall; activity-report-2026-09-10-photo-4.jpg | Three members at a lab workbench with a multimeter and sample dishes; activity-report-2026-09-10-photo-5.jpg | Club room after cleaning, with a long table, shelves and bookcases; activity-report-2026-09-10-photo-6.jpg | Members at laptops in a lecture room during ROS2 training
 ---
 
 SIGMA는 2026년 9월과 10월에 신입 부원 대상 ROS2 교육과 진로 세션, 연구실 투어를 열고 창의설계축전에 참가했습니다.

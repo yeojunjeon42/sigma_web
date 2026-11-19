@@ -5,7 +5,7 @@ year: 2026
 date: 2026-02-20
 tags: [2026, Activity report]
 coverIllustration: /blog-illustrations/showcase.svg
-photos: year-end-showcase-2025-card-2.jpg | Robots on the club room table; year-end-showcase-2025-card-3.jpg | Members around the table at the showcase | 0.4 0.5; year-end-showcase-2025-card-4.jpg | Members around the table with their robots | 0.4 0.5; ai-fusion-education-2025-card-10.jpg | AI education: slides on the screen | 0.5 0.75; ai-fusion-education-2025-card-1.jpg | Fusion education: the instructor at the projector screen | 0.5 0.45; creative-design-fair-2025-card-1.jpg | Stage screen at the fair | 0.5 0.75; creative-design-fair-2025-card-3.jpg | Members in a lecture room | 0.5 0.6; creative-design-fair-2025-card-2.jpg | Members holding their award boards; portal301-collaboration-2x.jpg | Lit PORTAL301 sign on an office wall
+photos: year-end-showcase-2025-photo-1.jpg | Robots and other builds laid out on the club room table; year-end-showcase-2025-photo-2.jpg | Members around a table of pizza and drinks in the club room; year-end-showcase-2025-photo-3.jpg | Members posing around the table of robots in the club room
 ---
 
 On January 24, 2026, SIGMA held its 2025 Year-End Showcase to review the projects and activities completed over the past year.
