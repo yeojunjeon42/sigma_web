@@ -6,7 +6,7 @@ export function generateStaticParams() {
   return [...inKorean("posts")].map((slug) => ({ slug }));
 }
 
-export const generateMetadata = async ({ params }: { params: Promise<{ slug: string }> }) => postMetadata((await params).slug);
+export const generateMetadata = async ({ params }: { params: Promise<{ slug: string }> }) => postMetadata((await params).slug, "ko");
 
 export default async function PostInKorean({ params }: { params: Promise<{ slug: string }> }) {
   return <Post slug={(await params).slug} lang="ko" />;

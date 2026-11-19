@@ -16,7 +16,7 @@ export function share(
 ): Metadata {
   const heading = title ? `${title} — ${NAME}` : `${NAME} — SNU Robotics Club`;
   return {
-    // The canonical address is the English one; `languages` names an entry's other reading.
+    // `path` is the page's own address and its canonical; `languages` names an entry's two readings.
     alternates: { canonical: path, languages },
     openGraph: {
       ...(published ? { type: "article" as const, publishedTime: published } : { type: "website" as const }),

@@ -58,6 +58,9 @@ const nextConfig: NextConfig = {
       { source: "/people", destination: "/members", permanent: true },
       { source: "/posts", destination: "/blog", permanent: true },
       { source: "/posts/:slug", destination: "/blog/:slug", permanent: true },
+      // A post's Korean reading has one address, ?lang=ko. The page that answers it behind the
+      // rewrite above is not an address of its own.
+      { source: "/blog/:slug/ko", destination: "/blog/:slug?lang=ko", permanent: true },
 
       { source: "/ai/mabang", destination: "/ai/archive", permanent: true },
       { source: "/ai/club-life", destination: "/ai/history", permanent: true },

@@ -3,16 +3,16 @@ import { headers } from "next/headers";
 import { share } from "@/app/share";
 import { getArchiveWithMedia } from "@/features/archive/api/getArchive";
 import { getDoc } from "@/features/content/api/getContent";
-import { readings } from "@/features/content/reading";
+import { koOf, readings } from "@/features/content/reading";
 import { splitTitle } from "@/features/archive/components/splitTitle";
 import ArchiveView, { ARCHIVE_META, type ArchiveQuery } from "./view";
 
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ at?: string }>;
+  searchParams: Promise<{ at?: string; lang?: string }>;
 }): Promise<Metadata> {
-  const { at } = await searchParams;
+  const { at, lang } = await searchParams;
   const build = at ? (await getArchiveWithMedia()).find((p) => p.id === at) : undefined;
   if (!build) return ARCHIVE_META;
   const name = splitTitle(build.title).en;
@@ -25,7 +25,9 @@ export async function generateMetadata({
     .join(" ");
   const href = `/archive?view=reel&at=${build.id}`;
   const langs = (await getDoc("archive", build.id))?.langs ?? [];
-  return { title: name, description, ...share(href, { title: name, description, languages: readings(href, langs) }) };
+  // Each reading is its own canonical address; both name the pair.
+  const own = lang === "ko" && langs.includes("ko") ? koOf(href) : href;
+  return { title: name, description, ...share(own, { title: name, description, languages: readings(href, langs) }) };
 }
 
 export default async function ArchivePage({ searchParams }: { searchParams: Promise<ArchiveQuery> }) {

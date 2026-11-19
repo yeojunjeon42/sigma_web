@@ -13,17 +13,19 @@ import type { Lang } from "@/features/content/types";
 import { SITE_URL } from "@/features/site/data/site";
 
 // A post at /blog/<slug>, and its Korean reading at /blog/<slug>?lang=ko (next.config.ts serves
-// that from /blog/<slug>/ko, so both stay prerendered). Only the text is Korean there: the title,
-// the metadata and everything around it are the English page's.
-export async function postMetadata(slug: string): Promise<Metadata> {
+// that from /blog/<slug>/ko, so both stay prerendered, and sends anyone who opens that address
+// itself back to ?lang=ko). Only the text is Korean there: the title and everything around it are
+// the English page's.
+export async function postMetadata(slug: string, lang: Lang): Promise<Metadata> {
   const doc = await getDoc("posts", slug);
   if (!doc) return { title: "Not found" };
   const description = doc.summary ?? "Writing from SIGMA INTELLIGENCE at Seoul National University.";
   const href = `/blog/${slug}`;
+  // Each reading is its own canonical address; both name the pair.
   return {
     title: doc.title,
     description,
-    ...share(href, {
+    ...share(lang === "ko" && doc.langs.includes("ko") ? koOf(href) : href, {
       title: doc.title,
       description,
       image: { url: `/og/blog/${slug}`, alt: coverOf(doc)?.alt ?? doc.title },
