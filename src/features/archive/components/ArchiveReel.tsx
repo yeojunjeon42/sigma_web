@@ -156,6 +156,8 @@ export default function ArchiveReel({
       if (!here()) return;
       const url = reelHref(query, builds[i].id);
       window.history.replaceState(window.history.state, "", url);
+      // The address now names another build, so the tab does too, as its own page's title would.
+      document.title = `${builds[i].name} \\ SIGMA INTELLIGENCE`;
     };
 
     const frame = () => {
