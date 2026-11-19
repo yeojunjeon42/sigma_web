@@ -143,7 +143,6 @@ export default async function ArchiveView({
         reading: entry && entry.lang === lang ? otherReading(href(era, "reel", sort, look, p.id), lang, entry.langs) : undefined,
         team: entry?.team,
         photos: entry?.photos,
-        videos: entry?.videos,
         tile: tileFor(p, look),
       });
     }

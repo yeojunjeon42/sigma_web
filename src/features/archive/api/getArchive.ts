@@ -7,7 +7,6 @@ import { ERAS, type ArchiveProject, type Era, type Photo } from "../types";
 import { imageSize } from "./imageSize";
 
 const PHOTO_ROOT = path.join(process.cwd(), "public", "archive-photos");
-const VIDEO_ROOT = path.join(process.cwd(), "public", "archive-video");
 
 function listMedia(root: string, urlBase: string, id: string, ext: RegExp): string[] {
   const dir = path.join(root, id);
@@ -42,10 +41,6 @@ function getFirstLocalPhoto(id: string): Photo | null {
   const photo = src ? { ...sized(src), focus: cover?.focus } : null;
   firstPhoto.set(id, photo);
   return photo;
-}
-
-export function getLocalVideos(id: string): string[] {
-  return listMedia(VIDEO_ROOT, "/archive-video", id, /\.(mp4|webm)$/i);
 }
 
 async function getArchive(): Promise<ArchiveProject[]> {

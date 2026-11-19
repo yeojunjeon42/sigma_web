@@ -67,8 +67,6 @@ export default function EntryBody({
   // A phone opens on a picture: the first photograph leads, the rest follow the text.
   const lead = page ? b.photos?.[0] : undefined;
   const photos = lead ? b.photos?.slice(1) : b.photos;
-  const looseVideos = page ? b.videos : undefined;
-  const columnVideos = page ? undefined : b.videos;
   const words = b.body?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() ?? "";
   const brief = words.length < BRIEF;
   // A sentence or two with no structure is set large, as a statement.
@@ -126,7 +124,7 @@ export default function EntryBody({
         <div lang={b.lang} className={`${s.body} ${statement ? "flow-lead" : ""}`} dangerouslySetInnerHTML={{ __html: b.body }} />
       ) : null}
 
-      {photos?.length || columnVideos?.length ? (
+      {photos?.length ? (
         <ul className={brief ? BRIEF_MEDIA : s.media}>
           {photos?.map((photo) => (
             <li key={photo.src}>
@@ -140,25 +138,8 @@ export default function EntryBody({
               />
             </li>
           ))}
-          {columnVideos?.map((src) => (
-            <li key={src}>
-              <video src={src} controls preload="none" playsInline className="w-full" />
-            </li>
-          ))}
         </ul>
       ) : null}
-
-      {looseVideos?.map((src) => (
-        // Metadata draws the first frame and the true shape before anything plays.
-        <video
-          key={src}
-          src={`${src}#t=0.001`}
-          controls
-          preload="metadata"
-          playsInline
-          className="mt-gutter max-h-[calc(var(--screen)*0.8)] w-full bg-surface-sunken"
-        />
-      ))}
     </>
   );
 }

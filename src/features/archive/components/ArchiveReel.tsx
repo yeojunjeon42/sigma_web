@@ -26,7 +26,6 @@ export interface ReelBuild {
   reading?: Reading;
   team?: string[];
   photos?: Photo[];
-  videos?: string[];
   tile: Tile;
 }
 

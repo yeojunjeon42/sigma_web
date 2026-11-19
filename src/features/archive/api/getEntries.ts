@@ -1,6 +1,6 @@
 import { getDoc, getSlugs } from "@/features/content/api/getContent";
 import type { Lang } from "@/features/content/types";
-import { getLocalPhotos, getLocalVideos } from "./getArchive";
+import { getLocalPhotos } from "./getArchive";
 import type { Photo } from "../types";
 
 interface Entry {
@@ -10,7 +10,6 @@ interface Entry {
   langs: Lang[];
   team: string[];
   photos: Photo[];
-  videos: string[];
 }
 
 const caches: Record<Lang, Map<string, Entry> | undefined> = { en: undefined, ko: undefined };
@@ -32,7 +31,6 @@ export async function getEntries(lang: Lang = "en"): Promise<Map<string, Entry>>
       langs: doc.langs,
       team: doc.team.map(name),
       photos: getLocalPhotos(doc.slug),
-      videos: getLocalVideos(doc.slug),
     });
   }
   caches[lang] = cache;
