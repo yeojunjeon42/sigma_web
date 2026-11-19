@@ -4,7 +4,7 @@ titleKo: 2025 SIGMA 성과공유회
 year: 2026
 date: 2026-02-20
 tags: [2026, Activity report]
-coverIllustration: /blog-illustrations/showcase.svg
+coverIllustration: /blog-illustrations/showcase-table.svg
 photos: year-end-showcase-2025-photo-1.jpg | Robots and other builds laid out on the club room table; year-end-showcase-2025-photo-2.jpg | Members around a table of pizza and drinks in the club room; year-end-showcase-2025-photo-3.jpg | Members posing around the table of robots in the club room
 ---
 

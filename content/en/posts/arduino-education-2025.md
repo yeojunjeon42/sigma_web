@@ -4,7 +4,7 @@ titleKo: 시그마 신입 부원 교육 & 트랙 평가 마무리!
 year: 2025
 date: 2025-04-17
 tags: [2025, Activity report]
-coverIllustration: /blog-illustrations/arduino.svg
+coverIllustration: /blog-illustrations/soldering.svg
 photos: arduino-education-2025-photo-1.jpg | Instructor at the lectern and members with laptops in a full lecture room; arduino-education-2025-photo-2.jpg | Instructor at the blackboard and members at desks with line-tracer cars; arduino-education-2025-photo-3.jpg | Members at laptops in a lecture room, seen from the back rows; arduino-education-2025-photo-4.jpg | Line-tracer car following a black track on white paper
 ---
 
