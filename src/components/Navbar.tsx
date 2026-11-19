@@ -3,19 +3,21 @@
 import { pageY, pageScroller, onPageScroll } from "@/lib/pageScroll";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import Link from "@/i18n/Link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { useLocale, usePath } from "@/i18n/LocaleProvider";
+import LocaleSwitch from "@/i18n/LocaleSwitch";
+import { SHELL } from "@/i18n/dict/shell";
 import { pageThemeMeta } from "@/lib/browserTheme";
 
 const NAV = [
-  { label: "Home", href: "/" },
-  { label: "Archive", href: "/archive" },
-  { label: "History", href: "/history" },
-  { label: "Members", href: "/members" },
-  { label: "Blog", href: "/blog" },
-  { label: "Contact", href: "/contact" },
-];
+  { key: "home", href: "/" },
+  { key: "archive", href: "/archive" },
+  { key: "history", href: "/history" },
+  { key: "members", href: "/members" },
+  { key: "blog", href: "/blog" },
+  { key: "contact", href: "/contact" },
+] as const;
 
 const INVERT = "text-white";
 
@@ -245,6 +247,7 @@ const TONE = {
     bar: "max-md:bg-canvas-inverse",
     rule: "border-overlay-ink/15",
     sheetLink: "text-overlay-ink",
+    lang: "[&>a]:text-overlay-ink/60 [&>a:hover]:text-overlay-ink [&>a[aria-current]]:text-overlay-ink",
   },
   solid: {
     link:
@@ -254,6 +257,7 @@ const TONE = {
     bar: "max-md:bg-canvas",
     rule: "border-rule",
     sheetLink: "text-ink",
+    lang: "",
   },
 } as const;
 
@@ -262,7 +266,8 @@ export default function Navbar({
 }: {
   tone?: keyof typeof TONE;
 }) {
-  const pathname = usePathname();
+  const pathname = usePath();
+  const say = SHELL[useLocale()];
   const [open, setOpen] = useState(false);
   const bar = useRef<HTMLElement>(null);
   const menu = useRef<HTMLButtonElement>(null);
@@ -397,7 +402,7 @@ export default function Navbar({
           </Link>
 
           <nav
-            aria-label="Primary"
+            aria-label={say.primary}
             className="hidden md:col-span-9 md:col-start-4 md:block lg:col-span-7 lg:col-start-6"
           >
             <ul className="flex items-center gap-md xl:gap-lg">
@@ -406,9 +411,9 @@ export default function Navbar({
                   <Link
                     href={item.href}
                     aria-current={isCurrent(item.href) ? "page" : undefined}
-                    className={`${LINE} -mx-xs flex items-center px-xs py-md font-[family-name:var(--f-display)] text-ui font-semibold uppercase tracking-[0.02em] [font-stretch:125%] transition-colors duration-250 motion-reduce:transition-none ${INVERT}`}
+                    className={`${LINE} -mx-xs flex items-center px-xs py-md font-[family-name:var(--f-display)] text-ui font-bold uppercase tracking-[0.02em] [font-stretch:125%] transition-colors duration-250 motion-reduce:transition-none ${INVERT}`}
                   >
-                    {item.label}
+                    {say.nav[item.key]}
                   </Link>
                 </li>
               ))}
@@ -425,7 +430,7 @@ export default function Navbar({
               className={`-mr-3 flex size-11 items-center justify-center ${open ? t.mark : "text-white"}`}
             >
               <span className="sr-only">
-                Menu
+                {say.menu}
               </span>
               <span aria-hidden="true" className="relative block h-[7px] w-5">
                 <span
@@ -454,7 +459,7 @@ export default function Navbar({
 
         <nav
           id="masthead-nav"
-          aria-label="Primary"
+          aria-label={say.primary}
           hidden={!open}
           className={`nav-sheet absolute inset-x-0 top-full max-h-[calc(100dvh-var(--masthead))] overflow-y-auto overscroll-contain rounded-b-[1.5rem] [clip-path:inset(0_-4rem_-4rem_-4rem)] shadow-[0_18px_40px_rgb(10_9_7/0.14)] [corner-shape:squircle] md:hidden ${
             open ? "nav-open" : ""
@@ -462,15 +467,15 @@ export default function Navbar({
         >
           <ul className="u-gutter u-arrive mx-auto max-w-wide pb-sm">
             {NAV.map((item) => (
-              <li key={item.href} className={`border-b last:border-b-0 ${t.rule}`}>
+              <li key={item.href} className={`border-b ${t.rule}`}>
                 <Link
                   href={item.href}
                   aria-current={isCurrent(item.href) ? "page" : undefined}
                   onClick={() => setOpen(false)}
-                  className={`flex min-h-14 items-center [@media(max-height:30rem)]:min-h-11 font-[family-name:var(--f-display)] text-title font-semibold uppercase tracking-[0.02em] [font-stretch:125%] ${t.sheetLink}`}
+                  className={`flex min-h-14 items-center [@media(max-height:30rem)]:min-h-11 font-[family-name:var(--f-display)] text-title font-bold uppercase tracking-[0.02em] [font-stretch:125%] ${t.sheetLink}`}
                 >
                   <span>
-                    {item.label}
+                    {say.nav[item.key]}
                     {isCurrent(item.href) ? (
                       <span aria-hidden="true" className="ml-sm inline-block size-[0.3em] bg-accent align-[calc((1cap-0.3em)/2)]" />
                     ) : null}
@@ -478,6 +483,10 @@ export default function Navbar({
                 </Link>
               </li>
             ))}
+            {/* The language, after the last link: the view switches' size, on a row as tall as a link's. */}
+            <li>
+              <LocaleSwitch className={`text-body [&>a]:flex [&>a]:min-h-14 [&>a]:-mx-xs [&>a]:px-xs [&>a]:items-center [@media(max-height:30rem)]:[&>a]:min-h-11 ${t.lang}`} />
+            </li>
           </ul>
         </nav>
       </header>

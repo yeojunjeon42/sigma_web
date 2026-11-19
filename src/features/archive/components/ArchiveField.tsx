@@ -1,5 +1,7 @@
 import type { CSSProperties } from "react";
-import Link from "next/link";
+import Link from "@/i18n/Link";
+import { pick, type Locale } from "@/i18n/config";
+import { ARCHIVE_TEXT } from "@/i18n/dict/archive";
 import { Container } from "@/components/ui";
 import type { Sort } from "../api/getArchive";
 import { eraLabel, type ArchiveProject } from "../types";
@@ -23,22 +25,31 @@ interface FieldGroup {
 
 type Band = { key: string; id?: string; note?: string; projects: ArchiveProject[] };
 
+// The letter a name is filed under: its first, or the first consonant of a Hangul syllable
+// (a doubled one with its single).
+const LEADS = "ㄱㄱㄴㄷㄷㄹㅁㅂㅂㅅㅅㅇㅈㅈㅊㅋㅌㅍㅎ";
+function initial(name: string) {
+  const syllable = name.charCodeAt(0) - 0xac00;
+  return syllable >= 0 && syllable <= 11171 ? LEADS[Math.floor(syllable / 588)] : name.charAt(0).toUpperCase();
+}
+
 // Year keeps its eras. Team size and Name fall into their own landmarks: a number, or a letter.
-function bandsOf(groups: FieldGroup[], sort: Sort, teamSize: Map<string, number>): Band[] {
+function bandsOf(groups: FieldGroup[], sort: Sort, teamSize: Map<string, number>, locale: Locale): Band[] {
+  const t = ARCHIVE_TEXT[locale];
   if (sort === "year") {
     return groups.map((g) => ({ key: g.era ?? "", id: g.era ? `era-${g.era}` : undefined, projects: g.projects }));
   }
   const by = new Map<string, ArchiveProject[]>();
   for (const p of groups.flatMap((g) => g.projects)) {
-    const key = sort === "team" ? String(teamSize.get(p.id) ?? "—") : splitTitle(p.title).en.charAt(0).toUpperCase();
+    const key = sort === "team" ? String(teamSize.get(p.id) ?? "—") : initial(pick(locale, splitTitle(p.title)));
     by.set(key, [...(by.get(key) ?? []), p]);
   }
   const rank = (k: string) => (k === "—" ? -1 : Number(k));
   return [...by]
-    .sort(([a], [b]) => (sort === "team" ? rank(b) - rank(a) : a.localeCompare(b, "en")))
+    .sort(([a], [b]) => (sort === "team" ? rank(b) - rank(a) : a.localeCompare(b, locale)))
     .map(([key, projects]) => ({
       key,
-      note: sort === "team" ? (key === "—" ? "Team size unknown" : key === "1" ? "person" : "people") : undefined,
+      note: sort === "team" ? (key === "—" ? t.teamUnknown : t.people(Number(key))) : undefined,
       projects,
     }));
 }
@@ -64,6 +75,7 @@ function rhythm(items: ArchiveProject[], mirrored: boolean): Spot[] {
 }
 
 export default function ArchiveField({
+  locale,
   groups,
   teamSize,
   sort,
@@ -71,6 +83,7 @@ export default function ArchiveField({
   eager = true,
   reelHref,
 }: {
+  locale: Locale;
   groups: FieldGroup[];
   teamSize: Map<string, number>;
   sort: Sort;
@@ -81,7 +94,7 @@ export default function ArchiveField({
   // Award first, then team size, so the first of each three is the one that goes large.
   const weight = (p: ArchiveProject) =>
     (p.award ? 100 : 0) + (teamSize.get(p.id) ?? 0) - (tileFor(p, look).kind === "none" ? 1000 : 0);
-  const bands = bandsOf(groups, sort, teamSize).map((b) => ({
+  const bands = bandsOf(groups, sort, teamSize, locale).map((b) => ({
     ...b,
     projects: b.projects.toSorted((x, y) => weight(y) - weight(x)),
   }));
@@ -127,12 +140,12 @@ export default function ArchiveField({
                         style={SQUARE}
                         className="w-full"
                       />
-                      <h3 className="u-trim absolute inset-x-0 bottom-0 z-10 font-[family-name:var(--f-display)] font-semibold [font-stretch:125%] text-body-sm text-ink">
-                        {splitTitle(p.title).en}
+                      <h3 className="u-trim absolute inset-x-0 bottom-0 z-10 font-[family-name:var(--f-display)] font-bold [font-stretch:125%] text-body-sm text-ink">
+                        {pick(locale, splitTitle(p.title))}
                       </h3>
                       <span className="sr-only">
                         {p.year ?? eraLabel(p.era)}
-                        {p.award ? `, ${p.award.en}` : ""}
+                        {p.award ? `, ${pick(locale, p.award)}` : ""}
                       </span>
                     </Link>
                   </li>

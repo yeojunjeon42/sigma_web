@@ -3,8 +3,11 @@
 import { pageY, onPageScroll } from "@/lib/pageScroll";
 
 import { square, turnAt } from "@/lib/halftone";
-import Link from "next/link";
+import Link from "@/i18n/Link";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { HOME } from "@/i18n/dict/home";
 import { useEffect, useRef } from "react";
+import { MachineFrame } from "@/components/ui/frame";
 import { PLATE_RELEASE, PLATE_SHOW } from "@/components/ui/HeroPlate";
 
 type LineBuild = { id: string; name: string; year: number | null; src: string | null };
@@ -52,6 +55,7 @@ export default function RecordLines({
   cohorts: number;
   people: number;
 }) {
+  const t = HOME[useLocale()];
   const root = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -432,10 +436,10 @@ export default function RecordLines({
     >
       <div className="flex items-baseline justify-between gap-x-lg">
         <h2 className={`${META} text-ink`}>
-          Builds
+          {t.builds}
         </h2>
         <Link href="/archive" className={`${META} ${ALL}`}>
-          {`All ${builds.length} ↗`}
+          {t.all(builds.length)}
         </Link>
       </div>
       <div data-offgrid className={`${fade} mt-sm`}>
@@ -450,30 +454,30 @@ export default function RecordLines({
 
       <div className="mt-lg flex items-baseline justify-between gap-x-lg">
         <h2 className={`${META} text-ink`}>
-          Competition results
+          {t.results}
         </h2>
         <Link href="/history" className={`${META} ${ALL}`}>
-          {`All ${total} ↗`}
+          {t.all(total)}
         </Link>
       </div>
 
       <div className="mt-lg flex items-baseline justify-between gap-x-lg">
         <h2 className={`${META} text-ink`}>
-          Members
+          {t.members}
         </h2>
         <Link href="/members" className={`${META} ${ALL}`}>
-          {`${cohorts} cohorts · ${people} members and alumni ↗`}
+          {t.roster(cohorts, people)}
         </Link>
       </div>
 
-      <div
+      <MachineFrame
         data-peek
         data-offgrid
         aria-hidden="true"
-        className="pointer-events-none absolute top-0 left-0 z-20 h-[176px] w-[220px] scale-[0.92] border border-rule-strong bg-canvas opacity-0 transition-[opacity,scale] duration-200 will-change-transform data-[show]:scale-100 data-[show]:opacity-100"
+        className="pointer-events-none absolute top-0 left-0 z-20 h-[176px] w-[220px] scale-[0.92] bg-canvas opacity-0 transition-[opacity,scale] duration-200 will-change-transform data-[show]:scale-100 data-[show]:opacity-100"
       >
         <canvas width={PEEK[0] * 2} height={PEEK[1] * 2} className="block h-full w-full" />
-      </div>
+      </MachineFrame>
     </div>
   );
 }

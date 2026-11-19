@@ -2,11 +2,12 @@
 
 import type { ReactNode } from "react";
 import type { MemberLinks as Links } from "../data/roster";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { MEMBERS } from "@/i18n/dict/members";
 
-const ICONS: { key: keyof Links; label: string; path: ReactNode }[] = [
+const ICONS: { key: keyof Links; path: ReactNode }[] = [
   {
     key: "email",
-    label: "Email",
     path: (
       <g fill="none" stroke="currentColor" strokeWidth="2">
         <rect x="1" y="3.5" width="22" height="17" />
@@ -16,7 +17,6 @@ const ICONS: { key: keyof Links; label: string; path: ReactNode }[] = [
   },
   {
     key: "instagram",
-    label: "Instagram",
     path: (
       <>
         <rect x="1" y="1" width="22" height="22" rx="6" fill="none" stroke="currentColor" strokeWidth="2" />
@@ -27,7 +27,6 @@ const ICONS: { key: keyof Links; label: string; path: ReactNode }[] = [
   },
   {
     key: "github",
-    label: "GitHub",
     path: (
       <path
         fill="currentColor"
@@ -38,7 +37,6 @@ const ICONS: { key: keyof Links; label: string; path: ReactNode }[] = [
   },
   {
     key: "linkedin",
-    label: "LinkedIn",
     path: (
       <path
         fill="currentColor"
@@ -48,7 +46,6 @@ const ICONS: { key: keyof Links; label: string; path: ReactNode }[] = [
   },
   {
     key: "site",
-    label: "Website",
     path: (
       <g fill="none" stroke="currentColor" strokeWidth="1.8">
         <circle cx="12" cy="12" r="11.1" />
@@ -72,6 +69,7 @@ export default function MemberLinks({
   variant?: "icons" | "text";
   className?: string;
 }) {
+  const t = MEMBERS[useLocale()];
   const present = ICONS.filter((i) => links?.[i.key]);
   if (present.length === 0) return null;
 
@@ -83,13 +81,13 @@ export default function MemberLinks({
             href={i.key === "email" ? `mailto:${links![i.key]}` : links![i.key]}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={`${name} on ${i.label}`}
-            title={i.label}
+            aria-label={t.linkOf(name, t.links[i.key])}
+            title={t.links[i.key]}
             className={variant === "text"
               ? `inline-flex min-h-11 items-center justify-center px-xs text-body text-ink-muted transition-[color,opacity] duration-200 hover:text-ink active:opacity-70 active:duration-0 focus-visible:underline focus-visible:underline-offset-4 motion-reduce:transition-none ${i.key === "site" ? "min-w-11" : ""}`
               : `relative grid h-11 w-7 place-items-center text-ink-muted transition-colors before:absolute before:top-1/2 before:left-1/2 before:size-11 before:-translate-1/2 before:content-[''] hover:text-ink focus-visible:text-ink lg:h-8 lg:before:hidden ${dense ? "lg:w-6" : "lg:w-8"}`}
           >
-            {variant === "text" && i.key !== "site" ? i.label : (
+            {variant === "text" && i.key !== "site" ? t.links[i.key] : (
               <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4">
                 {i.path}
               </svg>

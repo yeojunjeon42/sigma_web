@@ -1,0 +1,78 @@
+import { META } from "@/i18n/dict/meta";
+import { HISTORY } from "@/i18n/dict/history";
+import { localeOf, type PageProps } from "@/i18n/server";
+import type { Metadata } from "next";
+import { share } from "@/app/share";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { Container, GridField } from "@/components/ui";
+import { getTimeline } from "@/features/history/api/getTimeline";
+import { rowsOf } from "@/features/history/components/Chronology";
+import Chronology from "@/features/history/components/Chronology";
+import YearRuler, { type Mark } from "@/features/history/components/YearRuler";
+import HistoryHero from "@/features/history/components/HistoryHero";
+import Collage from "@/features/history/components/Collage";
+import { CLUB_EVENTS, HERO_PHOTO } from "@/features/history/data/photos";
+import { ALUMNI_TOTAL, COHORT_COUNT } from "@/features/alumni/data/cohorts";
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const locale = await localeOf(params);
+  const { title, description } = META[locale].history;
+  return { title, description, ...share(locale, "/history", { title, description }) };
+}
+
+export default async function ClubLifePage({ params }: PageProps) {
+  const locale = await localeOf(params);
+  const nodes = await getTimeline();
+  const marks: Mark[] = nodes.flatMap((n) =>
+    rowsOf(n.events, locale).map((e, i) => ({
+      id: e.id,
+      year: n.year,
+      first: i === 0,
+      targetId: i === 0 ? `y${n.year}` : `e-${e.id}`,
+    })),
+  );
+
+  const latest = nodes[0];
+  const now = latest.events.toReversed().slice(0, 3);
+  const facts = [
+    { label: HISTORY[locale].cohorts, value: String(COHORT_COUNT) },
+    { label: HISTORY[locale].people, value: String(ALUMNI_TOTAL) },
+  ];
+
+  return (
+    <>
+      <Navbar />
+
+      <div className="relative z-10 bg-canvas">
+        <main id="main">
+          <GridField>
+            <Container className="pb-section max-md:pb-[8rem]">
+              <HistoryHero
+                locale={locale}
+                now={now}
+                facts={facts}
+                latest={latest.year}
+                photo={HERO_PHOTO}
+                event={CLUB_EVENTS[0]}
+              />
+
+              <div className="md:grid md:grid-cols-12 md:gap-x-gutter">
+                <div id="ledger" className="md:col-span-full md:grid md:grid-cols-subgrid lg:col-span-8 lg:self-start">
+                  <Chronology nodes={nodes} locale={locale} />
+                </div>
+                <aside data-offgrid className="hidden lg:col-span-4 lg:block">
+                  <Collage events={CLUB_EVENTS} />
+                </aside>
+              </div>
+            </Container>
+          </GridField>
+
+          <YearRuler marks={marks} />
+        </main>
+
+        <Footer />
+      </div>
+    </>
+  );
+}

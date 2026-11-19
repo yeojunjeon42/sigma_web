@@ -4,6 +4,7 @@ import { pageY, scrollPage } from "@/lib/pageScroll";
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { splitPath } from "@/i18n/config";
 
 const STYLE = `
 @media (prefers-reduced-motion: no-preference) {
@@ -64,7 +65,7 @@ export default function ArchiveTransitions() {
     const go = (href: string) => {
       if (!able()) return false;
       const url = new URL(href, window.location.href);
-      if (url.pathname !== "/archive" || url.search === window.location.search) return false;
+      if (splitPath(url.pathname).path !== "/archive" || url.search === window.location.search) return false;
       const from = window.location.search;
       const [a, b] = [view(from), view(url.search)];
       const hero = a === b ? "all" : b === "reel" ? atOf(url.search) : a === "reel" ? atOf(from) : null;

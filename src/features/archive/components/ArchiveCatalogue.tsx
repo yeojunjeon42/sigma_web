@@ -1,4 +1,6 @@
-import Link from "next/link";
+import Link from "@/i18n/Link";
+import { pick, type Locale } from "@/i18n/config";
+import { ARCHIVE_TEXT } from "@/i18n/dict/archive";
 import { Container } from "@/components/ui";
 import { displayTags } from "@/features/content/data/tags";
 import { eraLabel, type ArchiveProject, type Bilingual } from "../types";
@@ -19,7 +21,7 @@ const META = "text-caption tracking-normal leading-[1.35]";
 const COLS = "md:grid md:grid-cols-12 md:gap-x-gutter";
 const LIFT = "u-trim";
 
-function Preview({ project, look }: { project: ArchiveProject; look: Look }) {
+function Preview({ locale, project, look }: { locale: Locale; project: ArchiveProject; look: Look }) {
   const tile = tileFor(project, look);
   return (
     <span
@@ -35,7 +37,7 @@ function Preview({ project, look }: { project: ArchiveProject; look: Look }) {
         <span className="flex gap-x-xs bg-canvas-inverse px-xs py-xs text-caption text-ink-inverse">
           <span aria-hidden="true" className="inline-block size-[0.5em] shrink-0 self-center bg-accent" />
           <span>
-            {project.award.en}
+            {pick(locale, project.award)}
           </span>
         </span>
       ) : null}
@@ -44,6 +46,7 @@ function Preview({ project, look }: { project: ArchiveProject; look: Look }) {
 }
 
 function Row({
+  locale,
   project,
   era,
   anchor,
@@ -52,6 +55,7 @@ function Row({
   team,
   look,
 }: {
+  locale: Locale;
   project: ArchiveProject;
   era: string | null;
   anchor?: string;
@@ -60,7 +64,7 @@ function Row({
   team?: number;
   look: Look;
 }) {
-  const name = splitTitle(project.title);
+  const name = pick(locale, splitTitle(project.title));
   const year = project.year ?? eraLabel(project.era);
 
   const body = (
@@ -73,17 +77,17 @@ function Row({
         ) : null}
       </p>
       <div className="pointer-events-none absolute inset-y-0 hidden md:left-[calc((100%-11*var(--gutter))/12+var(--gutter))] md:right-[calc(4*(100%-11*var(--gutter))/12+4*var(--gutter))] lg:block" aria-hidden="true">
-        <Preview project={project} look={look} />
+        <Preview locale={locale} project={project} look={look} />
       </div>
       <h3
         className={`u-trim text-title text-ink transition-[translate] duration-200 ease-out motion-reduce:transition-none md:col-span-7 lg:col-span-5 lg:group-hover/row:translate-x-sm lg:group-focus-visible/row:translate-x-sm`}
       >
-        {name.en}
+        {name}
         {project.award ? (
           <>
             <span aria-hidden="true" className="ml-xs inline-block size-[0.34em] bg-accent align-[0.167em]" />
             <span className="sr-only">
-              {project.award.en}
+              {pick(locale, project.award)}
             </span>
           </>
         ) : null}
@@ -93,7 +97,7 @@ function Row({
       >
         {tags.map((t) => (
           <span key={t.ko} className="md:my-[calc((1lh-1cap)/2)] md:[text-box:trim-both_cap_alphabetic]">
-            {t.en}
+            {pick(locale, t)}
           </span>
         ))}
       </p>
@@ -131,6 +135,7 @@ function Row({
 }
 
 export default function ArchiveCatalogue({
+  locale,
   groups,
   tags,
   teamSize,
@@ -139,6 +144,7 @@ export default function ArchiveCatalogue({
   look,
   reelHref,
 }: {
+  locale: Locale;
   groups: CatalogueGroup[];
   tags: Map<string, string[]>;
   teamSize: Map<string, number>;
@@ -147,6 +153,7 @@ export default function ArchiveCatalogue({
   look: Look;
   reelHref: (id: string) => string;
 }) {
+  const heads = ARCHIVE_TEXT[locale].heads;
   const head = (key: Sort, label: string, className: string) => (
     <Link
       href={sortHref[key]}
@@ -170,14 +177,14 @@ export default function ArchiveCatalogue({
       <Container>
         <div className={`hidden border-b border-rule-strong pb-sm text-ink-muted ${COLS} ${META}`}>
           <span className="md:col-span-1 lg:col-span-3">
-            Era
+            {heads.era}
           </span>
-          {head("name", "Name", "md:col-span-7 lg:col-span-5")}
+          {head("name", heads.name, "md:col-span-7 lg:col-span-5")}
           <span className="md:col-span-2 lg:col-start-10 lg:row-start-1">
-            Tags
+            {heads.tags}
           </span>
-          {head("team", "Team", "md:col-span-1 lg:col-start-9 lg:row-start-1")}
-          {head("year", "Year", "md:col-span-1 md:text-right")}
+          {head("team", heads.team, "md:col-span-1 lg:col-start-9 lg:row-start-1")}
+          {head("year", heads.year, "md:col-span-1 md:text-right")}
         </div>
         <ul>
           {groups.flatMap((g) => {
@@ -185,6 +192,7 @@ export default function ArchiveCatalogue({
             return g.projects.map((p, i) => (
               <Row
                 key={p.id}
+                locale={locale}
                 project={p}
                 era={i === 0 ? g.era : null}
                 anchor={i === 0 && g.era ? `era-${g.era.replace("\u2013", "-")}` : undefined}

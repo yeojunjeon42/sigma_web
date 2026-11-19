@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { useMedia } from "@/lib/media";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { HISTORY } from "@/i18n/dict/history";
 
 const LOCK_START = 500;
 const LOCK_STEP = 180;
@@ -26,12 +28,12 @@ const age = () => {
   return [p.year - 1984, p.month - 1, p.day - 1, p.hour, p.minute, p.second].map(p2).join("");
 };
 
-const UNITS = ["Y", "M", "D", "H", "M", "S"];
 const ROWS = [[0, 1, 2], [3, 4, 5]];
 const random = () => String(Math.floor(Math.random() * 10));
 
 export default function RollingDate({ className = "" }: { className?: string }) {
   const still = useMedia("(prefers-reduced-motion: reduce)", false);
+  const units = HISTORY[useLocale()].units;
   const box = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
@@ -103,7 +105,7 @@ export default function RollingDate({ className = "" }: { className?: string }) 
               0
             </span>
           ))}
-          <span className="ml-[0.08em] font-sans text-caption tracking-normal text-ink-muted lowercase">{UNITS[u]}</span>
+          <span className="ml-[0.08em] font-sans text-caption tracking-normal text-ink-muted lowercase">{units[u]}</span>
         </span>
       ))}
     </span>

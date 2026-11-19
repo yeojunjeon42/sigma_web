@@ -384,7 +384,7 @@ export default function DotThread({ builds }: { builds: Build[] }) {
       const line = (n: number) => gutter + (n - 1) * (col + gutter);
       const heads = [...document.querySelectorAll("main h2")];
       const span = (name?: string) => {
-        const h2 = name ? heads.find((h) => h.textContent?.trim() === name) : undefined;
+        const h2 = name ? heads.find((h) => h.getAttribute("data-thread") === name) : undefined;
         const list = h2?.nextElementSibling;
         if (!h2 || !list) return null;
         const a = h2.getBoundingClientRect();
@@ -406,8 +406,8 @@ export default function DotThread({ builds }: { builds: Build[] }) {
         if (half <= 0) return;
         out.push({ x: line(from), y: mid - half, w: line(to + 1) - gutter - line(from), h: half * 2 });
       };
-      beside("Stacks", 8, 12, undefined, "Equipments");
-      beside("Equipments", 1, 5, "Stacks", "Intake");
+      beside("stacks", 8, 12, undefined, "equipments");
+      beside("equipments", 1, 5, "stacks", "intake");
       return out;
     };
 
@@ -438,14 +438,14 @@ export default function DotThread({ builds }: { builds: Build[] }) {
       const y = pageY();
       middle = { x: plate.left + plate.width / 2, y: plate.top + y + plate.height / 2 };
       start = middle.y - LEAVE * H;
-      const band = document.querySelector("main section[aria-label^='Founded']");
+      const band = document.querySelector("main section[data-thread='founded']");
       const first = band?.querySelector("p")?.getBoundingClientRect();
       const box = band?.getBoundingClientRect();
       const gutter = parseFloat(getComputedStyle(hero).getPropertyValue("--gutter")) || 24;
       gap = first && box ? [first.right + gutter / 2, box.top + y + box.height / 2] : null;
       // The supporters' row lies on the way to the gap. The thread passes it at the clear spot
       // nearest the gap, between two logos or past the row's end, so no dot crosses a logo.
-      const logos = [...document.querySelectorAll("main section[aria-label='Supported by'] li")].map((li) => li.getBoundingClientRect());
+      const logos = [...document.querySelectorAll("main section[data-thread='supporters'] li")].map((li) => li.getBoundingClientRect());
       const g = gap;
       rule = null;
       if (g && logos.length) {

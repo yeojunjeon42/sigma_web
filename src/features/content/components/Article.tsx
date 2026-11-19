@@ -1,41 +1,27 @@
-import path from "node:path";
 import Image from "next/image";
-import Link from "next/link";
-import { Arrow } from "@/components/ui";
+import { pick, type Locale } from "@/i18n/config";
+import { BLOG } from "@/i18n/dict/blog";
+import { COMMON } from "@/i18n/dict/common";
+import Link from "@/i18n/Link";
+import { Arrow, PhotoFrame } from "@/components/ui";
 import { displayTags } from "../data/tags";
 import { formatDate } from "@/lib/date";
-import { imageSize } from "@/features/archive/api/imageSize";
-import type { Photo } from "@/features/archive/types";
-import type { Doc } from "../types";
-import { coverFor } from "../data/covers";
-import CardReel from "./CardReel";
+import { focusOf, type Doc } from "../types";
 import CodeCopy from "./CodeCopy";
-import PostImage from "./PostImage";
+import PhotoReel from "./PhotoReel";
 
-export default function Article({
-  doc,
-  photos = [],
-  videos = [],
-  back,
-}: {
-  doc: Doc;
-  photos?: Photo[];
-  videos?: string[];
-  back: { href: string; label: string };
-}) {
+export default function Article({ doc, locale, back }: { doc: Doc; locale: Locale; back: { href: string; label: string } }) {
+  const t = BLOG[locale];
+  // The text is in the other language where the reader's has none.
+  const lent = doc.lang !== locale;
   const stamp = doc.date ?? (doc.year ? String(doc.year) : undefined);
-  const dateLabel = formatDate(stamp);
+  const dateLabel = formatDate(stamp, locale);
   const tags = displayTags(doc.tags, Infinity);
-  const [leadPhoto, ...inline] = photos;
-  const cards = doc.cards.map((alt, i) => {
-    const src = `/blog-photos/${doc.slug}-card-${i + 1}.jpg`;
-    const size = imageSize(path.join(process.cwd(), "public", src)) ?? { width: 1080, height: 1080 };
-    return { src, alt, ...size };
-  });
-  const cover = leadPhoto || cards.length ? undefined : coverFor(doc.slug);
+  // Body photographs are unedited photographs at one shape, 3:2: several run as a reel, one sits in
+  // the column, and a post with none shows no picture.
+  const [only, ...more] = doc.photos;
 
   const COL = "col-span-full md:col-span-10 md:col-start-2 lg:col-span-8 lg:col-start-3 xl:col-span-6 xl:col-start-4";
-  const imageSizes = "(min-width: 708px) 50vw, calc(100vw - 2rem)";
 
   return (
     <article>
@@ -52,10 +38,11 @@ export default function Article({
               </span>
             )}
             {tags.map((tag) => (
-              <span key={tag.ko}>
-                {tag.en}
+              <span key={tag.en}>
+                {pick(locale, tag)}
               </span>
             ))}
+            {lent && <span>{COMMON[locale].onlyIn[doc.lang]}</span>}
           </p>
           <h1 className="mt-lg text-center text-[clamp(2rem,1.3rem+3vw,4rem)] leading-[1.13] tracking-[-0.03em] md:leading-[1.06] text-balance text-ink">
             {doc.title}
@@ -66,68 +53,44 @@ export default function Article({
             </p>
           )}
           <p className="mt-md text-center text-[0.875rem] text-ink-muted">
-            By{" "}
+            {t.by}{" "}
             <span className="text-ink">{doc.authors.length ? doc.authors.join(", ") : "SIGMA INTELLIGENCE"}</span>
             {doc.team.length > 0 && (
               <>
                 <span aria-hidden="true" className="mx-xs">·</span>
-                Team {doc.team.join(", ")}
+                {t.team} {doc.team.join(", ")}
               </>
             )}
           </p>
         </header>
 
-        {cards.length > 0 && <CardReel cards={cards} column={COL} />}
+        {more.length > 0 && <PhotoReel photos={doc.photos} title={doc.title} column={COL} />}
 
-        {(leadPhoto || cover) && (
-          <div className={`mt-xxl md:mt-16 ${COL}`}>
-            {leadPhoto ? (
-              <Image
-                src={leadPhoto.src}
-                alt={doc.title}
-                width={leadPhoto.width}
-                height={leadPhoto.height}
-                sizes={imageSizes}
-                className="u-corner h-auto w-full"
-                preload
-                fetchPriority="high"
-              />
-            ) : (
-              <PostImage src={cover} ratio="16 / 9" sizes={imageSizes} eager className="u-corner w-full" />
-            )}
-          </div>
+        {only && more.length === 0 && (
+          <PhotoFrame className={`relative mt-xxl aspect-[3/2] md:mt-16 ${COL}`}>
+            <Image
+              src={only.src}
+              alt={only.alt ?? doc.title}
+              fill
+              sizes="(min-width: 708px) 50vw, calc(100vw - 2rem)"
+              preload
+              fetchPriority="high"
+              style={{ objectPosition: focusOf(only) }}
+              className="object-cover"
+            />
+          </PhotoFrame>
         )}
 
         <div className="col-span-full mt-xxl grid grid-cols-subgrid md:mt-16">
           {doc.html ? (
             <div
+              lang={lent ? doc.lang : undefined}
               className={`${COL} prose flow article-prose u-trim [&_figure[data-placeholder]]:my-xl [&_figure[data-placeholder]]:aspect-[16/9] [&_figure[data-placeholder]]:u-corner [&_figure[data-placeholder]]:bg-ink/5`}
               dangerouslySetInnerHTML={{ __html: doc.html }}
             />
           ) : null}
           <CodeCopy />
 
-          {(inline.length > 0 || videos.length > 0) && (
-            <ul className={`mt-xxl flex flex-col gap-lg ${COL}`}>
-              {inline.map((photo) => (
-                <li key={photo.src} className="u-settle">
-                  <Image
-                    src={photo.src}
-                    alt={doc.title}
-                    width={photo.width}
-                    height={photo.height}
-                    sizes={imageSizes}
-                    className="h-auto w-full"
-                  />
-                </li>
-              ))}
-              {videos.map((src) => (
-                <li key={src}>
-                  <video src={src} controls preload="metadata" playsInline className="w-full" />
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
       </div>
     </article>

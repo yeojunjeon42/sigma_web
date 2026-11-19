@@ -2,14 +2,16 @@ import fs from "node:fs";
 import path from "node:path";
 import { ROSTER, type RosterMember } from "../data/roster";
 
-const PHOTO_ROOT = path.join(process.cwd(), "public", "members");
+// The page shows each member's ink portrait, drawn from the photograph of the same name one
+// folder up. A member with no drawing gets the shared placeholder.
+const INK_ROOT = path.join(process.cwd(), "public", "members", "ink");
 
 function getLocalPortrait(id: string): string | null {
-  if (!/^[a-z0-9-]+$/.test(id) || !fs.existsSync(PHOTO_ROOT)) return null;
+  if (!/^[a-z0-9-]+$/.test(id) || !fs.existsSync(INK_ROOT)) return null;
   const hit = fs
-    .readdirSync(PHOTO_ROOT)
+    .readdirSync(INK_ROOT)
     .find((f) => f.replace(/\.[^.]+$/, "") === id && /\.(jpe?g|png|webp)$/i.test(f));
-  return hit ? `/members/${hit}` : null;
+  return hit ? `/members/ink/${hit}` : null;
 }
 
 interface TeamMember extends RosterMember {

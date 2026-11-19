@@ -1,13 +1,18 @@
 "use client";
 
-import Link from "next/link";
+import { BLOG } from "@/i18n/dict/blog";
+import Link from "@/i18n/Link";
+import { useLocale } from "@/i18n/LocaleProvider";
 import { useSyncExternalStore } from "react";
+import type { Cover } from "../api/cover";
+import PostCard from "./PostCard";
 import PostCover from "./PostCover";
 
 export type BlogItem = {
   slug: string;
   title: string;
   date?: string;
+  cover?: Cover;
   year: number;
   section?: string;
   keys: string[];
@@ -41,24 +46,13 @@ function Section({ post, className = "" }: { post: BlogItem; className?: string 
   return post.section ? <span className={className}>{post.section}</span> : null;
 }
 
-// The cover carries the section and the title, so only the date sits under it.
+
 function Grid({ posts }: { posts: BlogItem[] }) {
   return (
     <ul className="grid gap-x-gutter gap-y-xxl sm:grid-cols-2 lg:grid-cols-3 lg:gap-y-section">
       {posts.map((post, i) => (
         <li key={post.slug}>
-          <Link href={`/blog/${post.slug}`} className="flex flex-col">
-            <PostCover
-              slug={post.slug}
-              title={post.title}
-              section={post.section}
-              sizes="(min-width: 1024px) 30vw, (min-width: 768px) 45vw, 100vw"
-              eager={i < 3}
-              heading
-              className="u-corner w-full"
-            />
-            {post.date && <p className={`mt-md ${META} tabular-nums text-ink-muted`}>{post.date}</p>}
-          </Link>
+          <PostCard post={post} eager={i < 3} />
         </li>
       ))}
     </ul>
@@ -66,20 +60,21 @@ function Grid({ posts }: { posts: BlogItem[] }) {
 }
 
 function List({ posts }: { posts: BlogItem[] }) {
+  const t = BLOG[useLocale()].heads;
   return (
     <>
       <div className={`hidden border-b border-rule-strong pb-sm text-ink-muted ${COLS} ${META}`}>
         <span className="md:col-span-1 lg:col-span-3">
-          Year
+          {t.year}
         </span>
         <span className="md:col-span-7 lg:col-span-6">
-          Title
+          {t.title}
         </span>
         <span className="md:col-span-2 lg:col-span-1">
-          Section
+          {t.section}
         </span>
         <span className="md:col-span-2 md:text-right">
-          Date
+          {t.date}
         </span>
       </div>
       <ul>
@@ -97,8 +92,8 @@ function List({ posts }: { posts: BlogItem[] }) {
                     aria-hidden="true"
                     className="pointer-events-none absolute inset-y-0 hidden md:left-[calc((100%-11*var(--gutter))/12+var(--gutter))] md:right-[calc(4*(100%-11*var(--gutter))/12+4*var(--gutter))] lg:block"
                   >
-                    <span className="u-corner absolute top-1/2 right-0 z-30 hidden w-[12rem] -translate-y-1/2 overflow-hidden lg:group-hover/row:block lg:group-focus-visible/row:block">
-                      <PostCover slug={post.slug} title={post.title} section={post.section} ratio="3 / 2" sizes="192px" className="w-full" />
+                    <span className="absolute top-1/2 right-0 z-30 hidden w-[12rem] -translate-y-1/2 lg:group-hover/row:block lg:group-focus-visible/row:block">
+                      <PostCover title={post.title} section={post.section} cover={post.cover} ratio="3 / 2" className="w-full" />
                     </span>
                   </div>
                   <h2 className="u-trim text-title text-ink transition-[translate] duration-200 ease-out motion-reduce:transition-none md:col-span-7 lg:col-span-6 lg:group-hover/row:translate-x-sm lg:group-focus-visible/row:translate-x-sm">
@@ -122,6 +117,7 @@ function List({ posts }: { posts: BlogItem[] }) {
 }
 
 export default function BlogIndex({ posts, topics, span }: { posts: BlogItem[]; topics: Topic[]; span: string }) {
+  const words = BLOG[useLocale()];
   const query = new URLSearchParams(useSyncExternalStore(subscribe, readQuery, () => ""));
   const asked = query.get("topic");
   const topic = asked && topics.some((t) => t.key === asked) ? asked : null;
@@ -146,7 +142,7 @@ export default function BlogIndex({ posts, topics, span }: { posts: BlogItem[]; 
       className={`${HIT} flex cursor-pointer items-baseline ${topic === key ? ON : OFF}`}
     >
       {key === null ? (
-        "All"
+        words.all
       ) : (
         topics.find((t) => t.key === key)?.label ?? key
       )}
@@ -154,18 +150,18 @@ export default function BlogIndex({ posts, topics, span }: { posts: BlogItem[]; 
   );
 
   const views: { key: View; label: string }[] = [
-    { key: "grid", label: "Grid" },
-    { key: "list", label: "List" },
+    { key: "grid", label: words.grid },
+    { key: "list", label: words.list },
   ];
 
   return (
     <>
       <div className="u-scroll-in flex flex-nowrap items-baseline justify-between gap-x-md whitespace-nowrap border-b border-rule pt-xl pb-sm text-body md:pt-xxl md:grid md:grid-cols-12 md:gap-x-gutter min-[90rem]:text-title">
         <h1 className="flex shrink-0 items-baseline gap-x-sm text-ink md:col-span-3 md:row-start-1">
-          Blog
+          {words.title}
           <span className="tabular-nums text-ink-muted">{span}</span>
         </h1>
-        <nav aria-label="Sections" className="u-scroll-x -my-3 min-w-0 overflow-x-auto py-3 max-md:hidden md:col-start-4 md:col-end-11 md:row-start-1">
+        <nav aria-label={words.sections} className="u-scroll-x -my-3 min-w-0 overflow-x-auto py-3 max-md:hidden md:col-start-4 md:col-end-11 md:row-start-1">
           <ul className="flex items-baseline gap-x-md lg:gap-x-sm xl:gap-x-md">
             <li className="shrink-0">{pick(null)}</li>
             {topics.map((t) => (
@@ -175,7 +171,7 @@ export default function BlogIndex({ posts, topics, span }: { posts: BlogItem[]; 
             ))}
           </ul>
         </nav>
-        <nav aria-label="View" className="flex shrink-0 items-baseline gap-x-md md:col-start-11 md:col-end-13 md:row-start-1 md:justify-self-end lg:gap-x-sm xl:gap-x-md">
+        <nav aria-label={words.view} className="flex shrink-0 items-baseline gap-x-md md:col-start-11 md:col-end-13 md:row-start-1 md:justify-self-end lg:gap-x-sm xl:gap-x-md">
           {views.map((v) => (
             <button
               key={v.key}

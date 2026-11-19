@@ -28,14 +28,17 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // English has no prefix: every page address that is not Korean, the terminal, a share image or a
+  // file is served from /en. `usePath` (src/i18n) hides the difference from the page.
   async rewrites() {
+    const bare = ["era", "view", "sort", "look", "at"].map((key) => ({ type: "query" as const, key }));
     return {
       beforeFiles: [
-        {
-          source: "/archive",
-          missing: ["era", "view", "sort", "look", "at"].map((key) => ({ type: "query" as const, key })),
-          destination: "/archive/all",
-        },
+        // The archive with no query is prerendered at /archive/all.
+        { source: "/archive", missing: bare, destination: "/en/archive/all" },
+        { source: "/ko/archive", missing: bare, destination: "/ko/archive/all" },
+        { source: "/", destination: "/en" },
+        { source: "/:path((?!ko(?:/|$)|en(?:/|$)|ai(?:/|$)|og/|_next/)[^.]+)", destination: "/en/:path" },
       ],
     };
   },
@@ -56,6 +59,24 @@ const nextConfig: NextConfig = {
       { source: "/people", destination: "/members", permanent: true },
       { source: "/posts", destination: "/blog", permanent: true },
       { source: "/posts/:slug", destination: "/blog/:slug", permanent: true },
+
+      // The same old addresses under /ko.
+      { source: "/ko/about", destination: "/ko/ko", permanent: true },
+      { source: "/ko/mabang", destination: "/ko/archive", permanent: true },
+      { source: "/ko/club-life", destination: "/ko/history", permanent: true },
+      { source: "/ko/record", destination: "/ko/history", permanent: true },
+      { source: "/ko/archive/:slug", destination: "/ko/archive?view=reel&at=:slug", permanent: true },
+      { source: "/ko/mabang/:slug", destination: "/ko/archive?view=reel&at=:slug", permanent: true },
+      { source: "/ko/projects", destination: "/ko/archive", permanent: true },
+      { source: "/ko/awards", destination: "/ko/history", permanent: true },
+      { source: "/ko/alumni", destination: "/ko/members", permanent: true },
+      { source: "/ko/people", destination: "/ko/members", permanent: true },
+      { source: "/ko/posts", destination: "/ko/blog", permanent: true },
+      { source: "/ko/posts/:slug", destination: "/ko/blog/:slug", permanent: true },
+
+      // /en is not an address: English lives at the root.
+      { source: "/en", destination: "/", permanent: true },
+      { source: "/en/:path*", destination: "/:path*", permanent: true },
 
       { source: "/ai/mabang", destination: "/ai/archive", permanent: true },
       { source: "/ai/club-life", destination: "/ai/history", permanent: true },

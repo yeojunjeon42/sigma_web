@@ -3,6 +3,8 @@ export interface Photo {
   width: number;
   height: number;
   focus?: string;
+  // What the picture shows, in a few words. The page puts the build's or the post's name before it.
+  alt?: string;
 }
 
 export interface Bilingual {

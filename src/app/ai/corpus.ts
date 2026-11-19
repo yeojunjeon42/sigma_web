@@ -110,7 +110,7 @@ export interface Build {
 export function getBuilds(): Build[] {
   return ARCHIVE.toSorted((a, b) => (b.year ?? 0) - (a.year ?? 0) || a.title.localeCompare(b.title))
     .map((p) => {
-      const doc = readMd(path.join(process.cwd(), "content", "archive", `${p.id}.md`));
+      const doc = readMd(path.join(process.cwd(), "content", "en", "archive", `${p.id}.md`));
       const t = splitTitle(p.title);
       const ko = doc?.data.titleKo || (t.ko !== t.en ? t.ko : undefined);
       return {
@@ -139,7 +139,7 @@ export interface Post {
 }
 
 export function getPosts(): Post[] {
-  const dir = path.join(process.cwd(), "content", "posts");
+  const dir = path.join(process.cwd(), "content", "en", "posts");
   if (!fs.existsSync(dir)) return [];
   return fs
     .readdirSync(dir)

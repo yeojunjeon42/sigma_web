@@ -1,25 +1,23 @@
 "use client";
 
-import { pageY } from "@/lib/pageScroll";
 import { spring, type Sprung } from "@/lib/spring";
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { MachineFrame } from "@/components/ui";
 import type { Bilingual } from "@/features/site/data/about";
-import { FACES, type Face } from "../data/faces";
+import { INKED, InkDefs } from "@/features/hand/HandLayer";
 import { Fact } from "@/features/archive/components/EntryBody";
 import type { MemberLinks as Links } from "../data/roster";
 import MemberLinks from "./MemberLinks";
-import { DOT, SCREEN, relief, square, turnAt } from "@/lib/halftone";
+import { pick, type Locale } from "@/i18n/config";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { MEMBERS } from "@/i18n/dict/members";
 
 type CrewGroup = "alumni" | "executives" | "members";
 
 // A group with nobody in it keeps its heading and one row: the link to the profile form.
-const GROUPS: { key: CrewGroup; label: string; invite?: string }[] = [
-  { key: "alumni", label: "Alumni", invite: "Add your alumni profile" },
-  { key: "executives", label: "Executives" },
-  { key: "members", label: "Members", invite: "Add your member profile" },
-];
+const GROUPS: CrewGroup[] = ["alumni", "executives", "members"];
 
 export interface CrewMember {
   id: string;
@@ -34,263 +32,21 @@ export interface CrewMember {
   links?: Links;
 }
 
-// A cropped head fills this share of the tile's height, with this share clear above it.
-const HEAD = 0.52;
-const HEADROOM = 0.09;
+// Everyone without a portrait shares this one: the club's mark, drawn in the same ink.
+const PLACEHOLDER = "/members/ink/placeholder.svg";
 
-// The archive field's plate fade: 620ms to the photograph, 420ms back.
-const IN = 620;
-const OUT = 420;
-const FACE_RELIEF = 0.3;
-
-type Sheet = {
-  bmp: HTMLImageElement;
-  tone: Float32Array;
-  spin: Float32Array;
-  cols: number;
-  rows: number;
-  cell: number;
-  w: number;
-  h: number;
-  crop: [number, number, number];
-  dots: HTMLCanvasElement | null;
-};
-
-export function Print({
-  src,
-  className = "",
-  live = false,
-  lazy = false,
-  portrait = false,
-  sizes = "(min-width: 1024px) 34vw, 8rem",
-  face,
-  still = false,
-}: {
-  src: string | null;
-  className?: string;
-  live?: boolean;
-  lazy?: boolean;
-  portrait?: boolean;
-  sizes?: string;
-  face?: Face;
-  // Shows the plain picture from the start, with no print and no dissolve.
-  still?: boolean;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const st = useRef({ t: 0, goal: 0, last: 0, raf: 0, paint: (() => false) as () => boolean, run: () => {} });
-
-  useEffect(() => {
-    const box = ref.current;
-    const canvas = box?.querySelector("canvas");
-    const img = box?.querySelector("img");
-    if (!box || !canvas || !img) return;
-    const s = st.current;
-    const bmp = new window.Image();
-    let sheet: Sheet | null = null;
-    let frame = 0;
-
-    const measure = () => {
-      const w = canvas.clientWidth;
-      const h = canvas.clientHeight;
-      if (!w || !h || !img.complete || !img.currentSrc) return null;
-      if (bmp.src !== img.currentSrc) bmp.src = img.currentSrc;
-      if (!bmp.complete || !bmp.naturalWidth) {
-        bmp.addEventListener("load", redraw, { once: true });
-        return null;
-      }
-      const cell = Math.max(3.5, Math.min(SCREEN, w / 28));
-      const cols = Math.ceil(w / cell);
-      const rows = Math.ceil(h / cell);
-      const nw = bmp.naturalWidth;
-      const nh = bmp.naturalHeight;
-      const cover = Math.min(nw / w, nh / h);
-      const k = face ? Math.min(cover, ((face.chin - face.top) * nh) / (HEAD * h)) : cover;
-      const crop: [number, number, number] = face
-        ? [
-            Math.min(Math.max(face.x * nw - (w * k) / 2, 0), nw - w * k),
-            Math.min(Math.max(face.top * nh - HEADROOM * h * k, 0), nh - h * k),
-            k,
-          ]
-        : [(nw - w * k) / 2, (nh - h * k) * 0.2, k];
-      const src = document.createElement("canvas");
-      src.width = cols * 3;
-      src.height = rows * 3;
-      const g = src.getContext("2d", { willReadFrequently: true });
-      if (!g) return null;
-      g.drawImage(bmp, crop[0], crop[1], cols * cell * k, rows * cell * k, 0, 0, src.width, src.height);
-      let data: Uint8ClampedArray;
-      try {
-        data = g.getImageData(0, 0, src.width, src.height).data;
-      } catch {
-        return null;
-      }
-      const tone = new Float32Array(cols * rows);
-      for (let y = 0; y < rows; y++)
-        for (let x = 0; x < cols; x++) {
-          let sum = 0;
-          for (let yy = 0; yy < 3; yy++)
-            for (let xx = 0; xx < 3; xx++) {
-              const i = ((y * 3 + yy) * src.width + x * 3 + xx) * 4;
-              sum += 0.3 * data[i] + 0.59 * data[i + 1] + 0.11 * data[i + 2];
-            }
-          tone[y * cols + x] = sum / 9 / 255;
-        }
-      const sorted = Float32Array.from(tone).sort();
-      const lo = sorted[Math.floor(0.04 * sorted.length)];
-      const hi = Math.max(lo + 0.08, sorted[Math.min(sorted.length - 1, Math.floor(0.96 * sorted.length))]);
-      for (let i = 0; i < tone.length; i++) tone[i] = Math.min(1, Math.max(0, (tone[i] - lo) / (hi - lo)));
-      relief(tone, cols, rows, undefined, FACE_RELIEF);
-      for (let i = 0; i < tone.length; i++) tone[i] = 0.12 + 0.88 * tone[i];
-      // One turn field across the page, so a wall of portraits doesn't repeat one pattern.
-      const at = canvas.getBoundingClientRect();
-      const spin = new Float32Array(cols * rows);
-      for (let y = 0; y < rows; y++)
-        for (let x = 0; x < cols; x++) spin[y * cols + x] = turnAt(at.left + window.scrollX + (x + 0.5) * cell, at.top + pageY() + (y + 0.5) * cell);
-      const dpr = Math.min(window.devicePixelRatio || 1, 3);
-      canvas.width = Math.round(w * dpr);
-      canvas.height = Math.round(h * dpr);
-      return { bmp, tone, spin, cols, rows, cell, w, h, crop, dots: null };
-    };
-
-    const paint = () => {
-      if (!sheet) sheet = measure();
-      if (!sheet) return false;
-      const g = canvas.getContext("2d");
-      if (!g) return false;
-      const { bmp, w, h, crop } = sheet;
-      const dpr = canvas.width / w;
-      g.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const t = s.t;
-      if (t >= 1 || t <= 0) sheet.dots = null;
-      // Use high-quality resampling when shrinking portraits.
-      g.imageSmoothingQuality = "high";
-      if (t >= 1) {
-        g.imageSmoothingEnabled = true;
-        g.drawImage(bmp, crop[0], crop[1], w * crop[2], h * crop[2], 0, 0, w, h);
-        return true;
-      }
-      if (t <= 0) press(g, sheet);
-      else {
-        if (!sheet.dots) {
-          const c = document.createElement("canvas");
-          c.width = canvas.width;
-          c.height = canvas.height;
-          const cg = c.getContext("2d");
-          if (cg) {
-            cg.setTransform(dpr, 0, 0, dpr, 0, 0);
-            press(cg, sheet);
-            sheet.dots = c;
-          }
-        }
-        if (sheet.dots) g.drawImage(sheet.dots, 0, 0, w, h);
-        else press(g, sheet);
-      }
-      if (t > 0) {
-        g.globalAlpha = t * t * (3 - 2 * t);
-        g.drawImage(bmp, crop[0], crop[1], w * crop[2], h * crop[2], 0, 0, w, h);
-        g.globalAlpha = 1;
-      }
-      return true;
-    };
-    s.paint = paint;
-
-    const ready = () => {
-      if (paint() && s.t !== s.goal) s.run();
-    };
-    const redraw = () => {
-      sheet = null;
-      if (img.complete && img.naturalWidth) ready();
-      else img.addEventListener("load", ready, { once: true });
-    };
-    const ro = new ResizeObserver(() => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(redraw);
-    });
-    ro.observe(canvas);
-    return () => {
-      ro.disconnect();
-      bmp.removeEventListener("load", redraw);
-      img.removeEventListener("load", ready);
-      cancelAnimationFrame(frame);
-      cancelAnimationFrame(s.raf);
-      s.raf = 0;
-    };
-  }, [src, face]);
-
-  useEffect(() => {
-    const s = st.current;
-    s.goal = live ? 1 : 0;
-    if (still || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      s.t = s.goal;
-      s.paint();
-      return;
-    }
-    const step = (now: number) => {
-      s.raf = 0;
-      if (s.last) {
-        const dt = now - s.last;
-        s.t = s.goal > s.t ? Math.min(1, s.t + dt / IN) : Math.max(0, s.t - dt / OUT);
-      }
-      s.last = now;
-      // Image load or resize resumes painting when dimensions are available.
-      if (!s.paint()) return;
-      if (s.t !== s.goal) s.raf = requestAnimationFrame(step);
-    };
-    s.run = () => {
-      cancelAnimationFrame(s.raf);
-      s.last = 0;
-      s.raf = requestAnimationFrame(step);
-    };
-    s.run();
-    return () => {
-      cancelAnimationFrame(s.raf);
-      s.raf = 0;
-    };
-  }, [live, still]);
-
+// A member's tile: their ink portrait, or the shared placeholder, square behind a hairline. The
+// drawings are all 4:5 with one framing, so the tile shows the whole of each.
+function Portrait({ m, sizes, className = "" }: { m: CrewMember; sizes: string; className?: string }) {
   return (
-    // Keep print corners square to preserve the halftone dots.
-    <div ref={ref} aria-hidden="true" data-print className={`relative ${portrait ? "aspect-[4/5]" : "aspect-square"} overflow-hidden ${className}`}>
-      {src ? (
-        <>
-          <Image src={src} alt="" fill sizes={sizes} loading={lazy ? "lazy" : "eager"} className="object-cover opacity-0" />
-          <canvas className="absolute inset-0 size-full" />
-        </>
+    <MachineFrame className={`aspect-[4/5] overflow-hidden bg-canvas ${className}`}>
+      {m.portrait ? (
+        <Image src={m.portrait} alt={m.name} fill sizes={sizes} loading="lazy" className="rounded-none object-cover" />
       ) : (
-        <div className="absolute inset-0 grid place-items-center bg-surface-sunken max-lg:bg-canvas">
-          <Image src="/logo-mark.svg" alt="" width={253} height={274} className="h-auto w-[28%] max-w-9 opacity-35 grayscale" />
-        </div>
+        <Image src={PLACEHOLDER} alt="" fill unoptimized loading="lazy" style={INKED} className="rounded-none object-contain" />
       )}
-    </div>
+    </MachineFrame>
   );
-}
-
-function press(g: CanvasRenderingContext2D, { tone, spin, cols, rows, cell, w, h }: Sheet) {
-  const css = getComputedStyle(document.documentElement);
-  g.fillStyle = css.getPropertyValue("--color-canvas").trim() || "#e4e4e4";
-  g.fillRect(0, 0, w, h);
-  g.fillStyle = css.getPropertyValue("--color-ink").trim() || "#000000";
-  g.beginPath();
-  for (let y = 0; y < rows; y++)
-    for (let x = 0; x < cols; x++) {
-      const r = (1 - tone[y * cols + x]) * cell * DOT;
-      if (r < 0.3) continue;
-      square(g, x * cell + cell / 2, y * cell + cell / 2, r, spin[y * cols + x]);
-    }
-  g.fill();
-}
-
-export function useInView<T extends Element>(share = 0.6) {
-  const ref = useRef<T>(null);
-  const [seen, setSeen] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([e]) => setSeen(e.isIntersecting), { threshold: share });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [share]);
-  return [ref, seen] as const;
 }
 
 // Keep hyphenated words on one line.
@@ -298,20 +54,20 @@ function whole(text: string) {
   return text.split(/(\S*-\S*)/).map((part, i) => (i % 2 ? <span key={i} className="whitespace-nowrap">{part}</span> : part));
 }
 
-function Meta({ m, className = "" }: { m: CrewMember; className?: string }) {
+function Meta({ m, locale, className = "" }: { m: CrewMember; locale: Locale; className?: string }) {
   if (m.group === "alumni") {
     return (
       <span className={className}>
         <span className="tabular-nums">{m.year}</span>
-        <span className="xl:hidden"> · {m.department.en}</span>
+        <span className="xl:hidden"> · {pick(locale, m.department)}</span>
       </span>
     );
   }
   return (
     <span className={className}>
-      {m.post && whole(m.post.en)}
+      {m.post && whole(pick(locale, m.post))}
       {m.post && m.duty && <span className="text-ink-muted"> · </span>}
-      {m.duty && <span>{whole(m.duty.en)}</span>}
+      {m.duty && <span>{whole(pick(locale, m.duty))}</span>}
     </span>
   );
 }
@@ -345,16 +101,14 @@ function Invite({ href, label, className = "" }: { href: string; label: string; 
   );
 }
 
-// A paper tile's edge, drawn over it so a tile with a frame and one without stay the same size.
-const FRAME = "relative after:pointer-events-none after:absolute after:inset-0 after:border after:border-rule";
-
 function Card({ m, onSelect }: { m: CrewMember; onSelect: (member: CrewMember) => void }) {
+  const t = MEMBERS[useLocale()];
   return (
-    <li className={`min-w-0 ${m.portrait ? "" : FRAME}`}>
+    <li className="min-w-0">
       <button
         type="button"
         aria-haspopup="dialog"
-        aria-label={`${m.name}, view profile`}
+        aria-label={t.viewProfile(m.name)}
         onClick={(e) => {
           // Safari doesn't focus a tapped button, and the dialog hands focus back to whatever had it.
           e.currentTarget.focus({ preventScroll: true });
@@ -362,7 +116,7 @@ function Card({ m, onSelect }: { m: CrewMember; onSelect: (member: CrewMember) =
         }}
         className="block w-full transition-opacity duration-200 [-webkit-tap-highlight-color:transparent] active:opacity-70 active:duration-0 motion-reduce:transition-none"
       >
-        <Print src={m.portrait} live still lazy portrait sizes="(min-width: 768px) 32vw, 50vw" face={FACES[m.id]} />
+        <Portrait m={m} sizes="(min-width: 768px) 32vw, 50vw" />
       </button>
     </li>
   );
@@ -371,11 +125,13 @@ function Card({ m, onSelect }: { m: CrewMember; onSelect: (member: CrewMember) =
 // Closes the group's last row: pale and blank, so it never reads as a person.
 function Spare({ members, cols, className }: { members: number; cols: number; className: string }) {
   return Array.from({ length: (cols - (members % cols)) % cols }, (_, i) => (
-    <li key={i} aria-hidden="true" className={`${FRAME} ${className}`} />
+    <MachineFrame as="li" key={i} aria-hidden="true" className={className} />
   ));
 }
 
 function MemberProfile({ member: m, onClose }: { member: CrewMember; onClose: () => void }) {
+  const locale = useLocale();
+  const t = MEMBERS[locale];
   const ref = useRef<HTMLDialogElement>(null);
   const motion = useRef<{ animation: Animation; path: Sprung | null } | null>(null);
 
@@ -468,14 +224,14 @@ function MemberProfile({ member: m, onClose }: { member: CrewMember; onClose: ()
         <article data-profile-paper className="min-h-0 overflow-y-auto overscroll-contain px-gutter">
           <div className="flex flex-col gap-y-sm">
             <header className="flex min-w-0 flex-col gap-y-sm [overflow-wrap:anywhere]">
-              <h2 data-profile-part id={`profile-${m.id}`} className="font-member-name text-body">{m.name}</h2>
+              <h2 data-profile-part id={`profile-${m.id}`} className="text-body">{m.name}</h2>
               <dl data-profile-part="details" className="flex min-w-0 flex-wrap gap-x-gutter gap-y-sm [&_dd]:text-body [&_dt]:sr-only">
                 {m.group === "alumni" ? (
-                  <Fact label="Year"><span className="tabular-nums">{m.year}</span></Fact>
+                  <Fact label={t.year}><span className="tabular-nums">{m.year}</span></Fact>
                 ) : m.post || m.duty ? (
-                  <Fact label="Role"><Meta m={m} /></Fact>
+                  <Fact label={t.role}><Meta m={m} locale={locale} /></Fact>
                 ) : null}
-                <Fact label={m.group === "alumni" ? "Field" : "Department"} className="[&_dd]:text-ink-muted">{m.department.en}</Fact>
+                <Fact label={m.group === "alumni" ? t.field : t.department} className="[&_dd]:text-ink-muted">{pick(locale, m.department)}</Fact>
               </dl>
             </header>
             {m.bio && <p data-profile-part="bio" lang={korean ? "ko" : "en"} className="max-w-[60ch] text-body [overflow-wrap:anywhere]">{m.bio}</p>}
@@ -488,7 +244,7 @@ function MemberProfile({ member: m, onClose }: { member: CrewMember; onClose: ()
             onClick={leave}
             className="-mr-xs min-h-11 min-w-11 shrink-0 px-xs text-body text-ink transition-opacity duration-200 hover:opacity-70 active:opacity-70 active:duration-0 focus-visible:underline focus-visible:underline-offset-4 motion-reduce:transition-none"
           >
-            Close
+            {t.close}
           </button>
         </div>
       </div>
@@ -535,11 +291,8 @@ function BioLine({ text, on }: { text: string; on: boolean }) {
       ref={box}
       aria-hidden="true"
       lang={HANGUL.test(text) ? "ko" : "en"}
-      className={`pointer-events-none absolute inset-0 col-start-3 col-end-[-2] row-end-2 flex xl:col-start-2 items-center overflow-hidden font-serif text-[0.9375rem] leading-[21px] text-ink transition-[opacity,visibility] duration-200 motion-reduce:transition-none data-[over]:[mask-image:linear-gradient(90deg,transparent,#000_0.35em,#000_calc(100%-2em),transparent)] ${
-        HANGUL.test(text) ? "" : "italic"
-      } ${on ? "visible opacity-100" : "invisible opacity-0"}`}
+      className={`pointer-events-none absolute inset-0 col-start-3 col-end-[-2] row-end-2 flex xl:col-start-2 items-center overflow-hidden text-[0.9375rem] leading-[21px] text-ink transition-[opacity,visibility] duration-200 motion-reduce:transition-none data-[over]:[mask-image:linear-gradient(90deg,transparent,#000_0.35em,#000_calc(100%-2em),transparent)] ${on ? "visible opacity-100" : "invisible opacity-0"}`}
     >
-      {/* Align serif and sans cap centres. */}
       <span ref={line} className="shrink-0 whitespace-nowrap [text-box:trim-both_cap_alphabetic]">
         {`“${text}”`}
       </span>
@@ -550,15 +303,18 @@ function BioLine({ text, on }: { text: string; on: boolean }) {
 export default function MemberCrew({ members, total, form }: { members: CrewMember[]; total: number; form: string }) {
   const [hot, setHot] = useState<string | null>(null);
   const [selected, setSelected] = useState<CrewMember | null>(null);
+  const locale = useLocale();
+  const t = MEMBERS[locale];
   // Members counts everyone in the club who has no row here.
-  const groups = GROUPS.map((g) => {
-    const listed = members.filter((m) => m.group === g.key);
-    return { ...g, members: listed, count: listed.length + (g.key === "members" ? total - members.length : 0) };
+  const groups = GROUPS.map((key) => {
+    const listed = members.filter((m) => m.group === key);
+    return { key, label: t.groups[key], invite: t.invite[key], members: listed, count: listed.length + (key === "members" ? total - members.length : 0) };
   }).filter((g) => g.members.length > 0 || g.invite);
   const order = groups.flatMap((g) => g.members);
 
   return (
     <>
+      <InkDefs />
       <div className="lg:hidden">
         {groups.map((g, i) => (
           <section key={g.key} aria-labelledby={`crew-m-${g.key}`} className={`pb-xl ${i === 0 ? "pt-sm" : ""}`}>
@@ -618,9 +374,9 @@ export default function MemberCrew({ members, total, form }: { members: CrewMemb
                       hot && hot !== m.id ? "text-ink-muted" : "text-ink"
                     }`}
                   >
-                    <span className="col-span-2 col-start-1 font-member-name whitespace-nowrap xl:col-span-1">{m.name}</span>
-                    <Meta m={m} className={`col-span-3 col-start-3 xl:col-span-2 xl:col-start-2 ${away}`} />
-                    <span className={`col-span-4 col-start-4 hidden text-ink-muted xl:block ${away}`}>{m.department.en}</span>
+                    <span className="col-span-2 col-start-1 whitespace-nowrap xl:col-span-1">{m.name}</span>
+                    <Meta m={m} locale={locale} className={`col-span-3 col-start-3 xl:col-span-2 xl:col-start-2 ${away}`} />
+                    <span className={`col-span-4 col-start-4 hidden text-ink-muted xl:block ${away}`}>{pick(locale, m.department)}</span>
                     {/* Centre 32px hit areas on the 21px text line. */}
                     <MemberLinks name={m.name} links={m.links} dense className="col-start-6 -my-[5.5px] -mr-xxs justify-self-end xl:col-start-7" />
                     {m.bio && (
@@ -644,11 +400,8 @@ export default function MemberCrew({ members, total, form }: { members: CrewMemb
           <ul data-offgrid className="grid grid-cols-5 gap-xs">
             {order.map((m) => (
               <li key={m.id} onPointerEnter={() => setHot(m.id)}>
-                <Print
-                  src={m.portrait}
-                  live={hot === m.id}
-                  lazy
-                  portrait
+                <Portrait
+                  m={m}
                   sizes="(min-width: 1280px) 8vw, 10vw"
                   className={`transition-opacity duration-200 motion-reduce:transition-none ${hot && hot !== m.id ? "opacity-45" : ""}`}
                 />

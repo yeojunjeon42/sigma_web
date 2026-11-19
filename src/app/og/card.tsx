@@ -1,121 +1,64 @@
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { ImageResponse } from "next/og";
-import { coverFile } from "@/features/content/data/coverFile";
+import { coverOf, drawingFile, type Cover } from "@/features/content/api/cover";
+import { getDoc } from "@/features/content/api/getContent";
+import { displayTags } from "@/features/content/data/tags";
+import { pick, type Locale } from "@/i18n/config";
+import { INK_FILTER, inkFilter } from "@/features/hand/filter";
 
+// A post's share image is its index cover at this size: the page's paper inside a hairline, the
+// section and the title in the same corners, and the same drawing through the same filter.
 const W = 1200;
 const H = 630;
-const PAD = 80;
-const PT = (95 * 4) / 3;
-const LEAD = 1.05;
-const LINES = 3;
-const CORAL = "#f0d8d1";
+const PAPER = "#e4e4e4";
+const RULE = "#bebebe";
 const INK = "#000000";
-const HANGUL = /[ㄱ-ㆎ가-힣]/;
-
-const advance = (c: string) =>
-  c === " "
-    ? 0.31
-    : HANGUL.test(c)
-      ? 1
-      : /[A-Z]/.test(c)
-        ? 0.9
-        : /[a-z]/.test(c)
-          ? 0.67
-          : /\d/.test(c)
-            ? 0.77
-            : c === "—"
-              ? 1.25
-              : 0.5;
-const measure = (s: string, size: number) => [...s].reduce((a, c) => a + advance(c) - 0.02, 0) * size;
-
-function fits(text: string, size: number) {
-  const room = (W - 2 * PAD) * 0.82;
-  let lines = 1;
-  let line = "";
-  for (const word of text.split(" ")) {
-    if (measure(word, size) > room) return false;
-    const next = line ? `${line} ${word}` : word;
-    if (measure(next, size) > room) {
-      lines += 1;
-      line = word;
-    } else line = next;
-  }
-  return lines <= LINES && lines * size * LEAD <= H - 2 * PAD;
-}
+const EDGE = W * 0.06;
+const LABEL = W * 0.034;
+const DRAWING = 500;
+// A word space, as a share of the type size.
+const SPACE = 0.24;
+const TITLE = [
+  [24, W * 0.075],
+  [40, W * 0.065],
+  [Infinity, W * 0.055],
+] as const;
 
 const font = (name: string) => readFile(path.join(process.cwd(), "src/app/og", name));
 
-export async function titleCard(title: string) {
-  let size = PT;
-  while (size > 40 && !fits(title, size)) size -= 2;
-  const [latin, hangul] = await Promise.all([font("archivo-expanded-bold.ttf"), font("pretendard-bold-hangul.woff")]);
-
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: `0 ${PAD}px`,
-          background: CORAL,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            textAlign: "center",
-            fontFamily: "Archivo, Pretendard",
-            fontSize: size,
-            lineHeight: LEAD,
-            letterSpacing: "-0.02em",
-            color: INK,
-          }}
-        >
-          {title}
-        </div>
-      </div>
-    ),
-    {
-      width: W,
-      height: H,
-      fonts: [
-        { name: "Archivo", data: latin, weight: 700, style: "normal" },
-        { name: "Pretendard", data: hangul, weight: 700, style: "normal" },
-      ],
-    },
-  );
+// The drawing as the page shows it: its own paths inside the hand layer's filter.
+async function drawing(cover: Cover) {
+  const file = drawingFile(cover.src);
+  if (!existsSync(file)) return null;
+  const svg = await readFile(file, "utf8");
+  const [, box = "0 0 300 300"] = /viewBox="([^"]+)"/.exec(svg) ?? [];
+  const inner = svg.replace(/^[\s\S]*?<svg[^>]*>/, "").replace(/<\/svg>\s*$/, "");
+  const inked = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${box}" width="${DRAWING}" height="${DRAWING}"><defs>${inkFilter()}</defs><g filter="${INK_FILTER}">${inner}</g></svg>`;
+  return `data:image/svg+xml;base64,${Buffer.from(inked).toString("base64")}`;
 }
 
-// A post's share image is its index cover at this size: the same file, with the section and
-// the title in the same corners. Sizes are the cover's, as shares of the width.
-const DEEP = "#8e1316";
-const PAPER = "#ffffff";
-const EDGE = W * 0.06;
-const LABEL = W * 0.034;
-const TITLE = [
-  [24, W * 0.08],
-  [40, W * 0.07],
-  [Infinity, W * 0.06],
-] as const;
+// A post's card in a language: /og/blog/<slug> and /og/ko/blog/<slug> are the same drawing with
+// the title and the section in that language.
+export async function postImage(slug: string, locale: Locale) {
+  const doc = await getDoc("posts", slug, locale);
+  if (!doc) return new Response("Not found", { status: 404 });
+  return postCard({ title: doc.title, section: displayTags(doc.tags, 1).map((tag) => pick(locale, tag))[0], cover: coverOf(doc, locale), whole: locale === "ko" });
+}
 
-export async function postCard({ slug, title, section }: { slug: string; title: string; section?: string }) {
-  const file = coverFile(slug);
-  // The folder is named in full: a path that could be anywhere under public/ makes the build pack all
-  // of public/ into this function, and that is past the platform's size limit.
-  const cover = file ? await readFile(path.join(process.cwd(), "public/blog-covers", path.basename(file))) : null;
+// `whole` keeps each word in one piece: Korean breaks between words, as the page's cover does, where
+// the renderer would break it between any two syllables.
+export async function postCard({ title, section, cover, whole = false }: { title: string; section?: string; cover?: Cover; whole?: boolean }) {
   const size = TITLE.find(([most]) => [...title].length <= most)![1];
-  const [latin, hangul] = await Promise.all([font("authentic-sans-100.otf"), font("pretendard-445-hangul.woff")]);
+  const [latin, hangul, drawn] = await Promise.all([font("authentic-sans-100.otf"), font("pretendard-445-hangul.woff"), cover ? drawing(cover) : null]);
 
   return new ImageResponse(
     (
-      <div style={{ position: "relative", width: "100%", height: "100%", display: "flex", background: DEEP }}>
-        {cover ? (
+      <div style={{ position: "relative", width: "100%", height: "100%", display: "flex", background: PAPER, border: `2px solid ${RULE}` }}>
+        {drawn ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img alt="" width={W} height={H} src={`data:image/png;base64,${cover.toString("base64")}`} style={{ position: "absolute", left: 0, top: 0 }} />
+          <img alt="" width={DRAWING} height={DRAWING} src={drawn} style={{ position: "absolute", right: EDGE * 0.7, top: (H - DRAWING) / 2 - 2 }} />
         ) : null}
         <div
           style={{
@@ -129,13 +72,19 @@ export async function postCard({ slug, title, section }: { slug: string; title: 
             justifyContent: "space-between",
             padding: EDGE,
             fontFamily: "Sans, Pretendard",
-            color: PAPER,
+            color: INK,
           }}
         >
           <div style={{ display: "flex", fontSize: LABEL, lineHeight: 1 }}>{section ?? ""}</div>
-          <div style={{ display: "flex", maxWidth: W * 0.78, fontSize: size, lineHeight: 1.06, letterSpacing: "-0.02em" }}>
-            {title}
-          </div>
+          {whole ? (
+            <div style={{ display: "flex", flexWrap: "wrap", columnGap: size * SPACE, maxWidth: W * 0.5, fontSize: size, lineHeight: 1.06, letterSpacing: "-0.02em" }}>
+              {title.split(/\s+/).map((word, i) => (
+                <span key={i}>{word}</span>
+              ))}
+            </div>
+          ) : (
+            <div style={{ display: "flex", maxWidth: W * 0.5, fontSize: size, lineHeight: 1.06, letterSpacing: "-0.02em" }}>{title}</div>
+          )}
         </div>
       </div>
     ),

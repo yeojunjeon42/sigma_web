@@ -1,28 +1,38 @@
+"use client";
+
 import { Fragment } from "react";
-import Link from "next/link";
+import Link from "@/i18n/Link";
+import { useLocale } from "@/i18n/LocaleProvider";
+import LocaleSwitch from "@/i18n/LocaleSwitch";
+import { SHELL } from "@/i18n/dict/shell";
 import { SOCIAL } from "@/features/site/data/social";
 import FootGround from "./FootGround";
 
 const FOUNDED = 1984;
 const EMAIL = "record.snusigma@gmail.com";
+// Read once, so the page a server drew and the browser's own agree within a visit.
+const YEAR = new Date().getFullYear();
 
 const PAGES = [
-  { label: "Archive", href: "/archive" },
-  { label: "History", href: "/history" },
-  { label: "Members", href: "/members" },
-  { label: "Blog", href: "/blog" },
-  { label: "Contact", href: "/contact" },
-  { label: "Terminal", href: "/ai" },
-];
+  { key: "archive", href: "/archive" },
+  { key: "history", href: "/history" },
+  { key: "members", href: "/members" },
+  { key: "blog", href: "/blog" },
+  { key: "contact", href: "/contact" },
+  { key: "terminal", href: "/ai" },
+] as const;
 
 const LEGAL = [
-  { label: "Seoul National University", href: "https://www.snu.ac.kr" },
-  { label: "Electrical and Computer Engineering", href: "https://ece.snu.ac.kr" },
-];
+  { key: "university", href: "https://www.snu.ac.kr" },
+  { key: "department", href: "https://ece.snu.ac.kr" },
+] as const;
 
 const HIT = "relative before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] lg:before:hidden";
 const ITEM = `${HIT} u-swipe`;
 const LINK = "u-swipe-rest whitespace-nowrap";
+// The language switch's words get a finger's room below lg, as the links do.
+const LANG_HIT =
+  "[&>a]:relative [&>a]:before:absolute [&>a]:before:inset-x-[-0.5rem] [&>a]:before:top-1/2 [&>a]:before:h-11 [&>a]:before:-translate-y-1/2 [&>a]:before:content-['']";
 
 function Wordmark() {
   return (
@@ -35,7 +45,8 @@ function Wordmark() {
 }
 
 export default function Footer() {
-  const year = new Date().getFullYear();
+  const say = SHELL[useLocale()];
+  const foot = say.footer;
 
   return (
     <div className="overflow-clip bg-canvas">
@@ -44,25 +55,31 @@ export default function Footer() {
           <div className="grid grid-cols-2 gap-x-gutter gap-y-xxxl text-body lg:grid-cols-12 lg:gap-y-xl">
             {/* The tagline and the email sit on the lists' first two lines. */}
             <div className="hidden lg:col-span-4 lg:flex lg:flex-col lg:gap-y-xxs">
-              <p>Where Imagination Meets Reality</p>
+              <p>{foot.tagline}</p>
               <p>
                 <a href={`mailto:${EMAIL}`} className={LINK}>
                   {EMAIL}&nbsp;↗
                 </a>
               </p>
+              {/* The language, on the lists' last line. */}
+              <LocaleSwitch className="mt-auto" />
             </div>
 
-            <nav aria-label="Footer" className="lg:col-span-2 lg:col-start-6">
-              <ul className="flex flex-col gap-y-xxs">
-                {PAGES.map((page) => (
-                  <li key={page.href}>
-                    <Link href={page.href} className={ITEM}>
-                      {page.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+            <div className="flex flex-col lg:col-span-2 lg:col-start-6">
+              <nav aria-label={foot.label}>
+                <ul className="flex flex-col gap-y-xxs">
+                  {PAGES.map((page) => (
+                    <li key={page.href}>
+                      <Link href={page.href} className={ITEM}>
+                        {say.nav[page.key]}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+              {/* Below lg the language sits under the page links, on the second list's last line. */}
+              <LocaleSwitch className={`mt-auto lg:hidden ${LANG_HIT}`} />
+            </div>
 
             {/* Below lg, align the list with the last page link. */}
             <div className="max-lg:mt-[calc(5*(1lh+var(--spacing-xxs)))] max-lg:text-right lg:col-span-2">
@@ -80,9 +97,9 @@ export default function Footer() {
             <div className="col-span-2 lg:col-span-3">
               {/* One line to a row, on the lists' rows. */}
               <p className="flex flex-col gap-y-xxs">
-                <span>Building 302, Room 215‑2</span>
-                <span>Seoul National University</span>
-                <span>1 Gwanak-ro, Gwanak-gu, Seoul</span>
+                {foot.address.map((line) => (
+                  <span key={line}>{line}</span>
+                ))}
               </p>
             </div>
 
@@ -94,29 +111,29 @@ export default function Footer() {
           </div>
 
           <div className="mt-xxxl flex flex-col gap-y-xxs text-body text-ink-muted lg:mt-section lg:grid lg:grid-cols-12 lg:gap-x-gutter lg:text-caption">
-            <p className="lg:col-span-5">
-              © {year} SIGMA INTELLIGENCE · {`EST. ${FOUNDED}`}
+            <p suppressHydrationWarning className="lg:col-span-5">
+              © {YEAR} SIGMA INTELLIGENCE · {foot.est(FOUNDED)}
             </p>
             <p className="max-lg:hidden lg:col-span-4 lg:col-start-6">
               {LEGAL.map((l, i) => (
                 <Fragment key={l.href}>
                   {i > 0 && " · "}
                   <a href={l.href} target="_blank" rel="noopener noreferrer" className={LINK}>
-                    {l.label}
+                    {foot[l.key]}
                   </a>
                 </Fragment>
               ))}
             </p>
             <p className="lg:col-span-3 lg:col-start-10 lg:justify-self-end lg:text-right">
               <span className="whitespace-nowrap">
-                Powered by{" "}
+                {foot.powered}{" "}
                 <a href="https://github.com/yeojunjeon42" target="_blank" rel="noopener noreferrer" className={LINK}>
                   Yeojun Jeon
                 </a>
                 ,
               </span>{" "}
               <span className="whitespace-nowrap">
-                Designed by{" "}
+                {foot.designed}{" "}
                 <a href="https://xlaude2040.com/" target="_blank" rel="noopener noreferrer" className={LINK}>
                   Jin Myung Lee
                 </a>

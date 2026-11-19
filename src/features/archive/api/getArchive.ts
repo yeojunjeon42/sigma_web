@@ -2,7 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { ARCHIVE } from "../data/projects";
 import { COVERS } from "../data/covers";
+import alts from "../data/photo-alts.json";
+import { DEFAULT, pick, type Locale } from "@/i18n/config";
 import { ERAS, type ArchiveProject, type Era, type Photo } from "../types";
+import { splitTitle } from "../components/splitTitle";
 import { imageSize } from "./imageSize";
 
 const PHOTO_ROOT = path.join(process.cwd(), "public", "archive-photos");
@@ -20,7 +23,10 @@ function listMedia(root: string, urlBase: string, id: string, ext: RegExp): stri
 
 function sized(src: string): Photo {
   const size = imageSize(path.join(process.cwd(), "public", src));
-  return { src, width: size?.width ?? 1000, height: size?.height ?? 1000 };
+  // photo-alts.json is keyed by folder and file, "atlas/01.jpg". A photograph without a line there
+  // is described by its build's name alone.
+  const alt = (alts as Record<string, string>)[src.replace("/archive-photos/", "")];
+  return { src, width: size?.width ?? 1000, height: size?.height ?? 1000, ...(alt ? { alt } : {}) };
 }
 
 export function getLocalPhotos(id: string): Photo[] {
@@ -72,9 +78,15 @@ export function sortArchive(
   projects: ArchiveProject[],
   sort: Sort,
   teamSize: Map<string, number>,
+  locale: Locale = DEFAULT,
 ): ArchiveProject[] {
   const out = [...projects];
   if (sort === "name") {
+    // In Korean a build is filed under the name it is shown by.
+    if (locale !== DEFAULT) {
+      const name = (p: ArchiveProject) => pick(locale, splitTitle(p.title));
+      return out.sort((a, b) => name(a).localeCompare(name(b), locale));
+    }
     return out.sort((a, b) => a.title.localeCompare(b.title, "en"));
   }
   if (sort === "team") {

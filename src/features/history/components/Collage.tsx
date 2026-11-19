@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
+import { ACCENT, HANDWRITING, INK, InkDefs } from "@/features/hand/HandLayer";
 import { useMedia } from "@/lib/media";
 import type { ClubEvent } from "../data/photos";
-import { BinderClip, PaperClip, Pin, Stamp, Sticker, Tape, TornNote, type TapeKind } from "./Deco";
+import { Pointer, Tape } from "./Deco";
 
 type Card = {
   key: string;
@@ -17,12 +18,22 @@ type Card = {
 };
 
 type Slot = { top: number; left: number; width: number; height: number };
+type Note = { colour: string };
 
 const TUCK = 0.08;
-const HOLD = ["tape", "binder", "pin", "tapes", "paperclip", "tape", "pin", "tapes"] as const;
-const TAPES: TapeKind[] = ["paper", "stripe", "dots", "accent", "grid"];
+// The steepest a photograph lies on the page, in degrees either way.
+const TILT = 4;
+// The gap a note keeps from its photograph: room for the arrow between them.
+const REACH = 34;
 
-const pick = (n: number, k: number) => ((n * (37 + k * 16) + 11) >>> 0) % 97;
+// A photograph's own seed, from its key: its tilt, its tape and its arrow stay the same however
+// the column is laid out around it.
+function seedOf(key: string) {
+  let h = 2166136261;
+  for (let i = 0; i < key.length; i++) h = Math.imul(h ^ key.charCodeAt(i), 16777619);
+  return h >>> 0;
+}
+const pick = (seed: number, k: number) => (Math.imul(seed ^ (k * 0x9e3779b1), 2654435761) >>> 0) % 97;
 
 function cards(events: ClubEvent[]): Card[] {
   const out: Card[] = [];
@@ -38,34 +49,31 @@ function cards(events: ClubEvent[]): Card[] {
   return out;
 }
 
-function Hold({ k, card }: { k: number; card: Card }) {
-  const kind = HOLD[k % HOLD.length];
-  const tape = TAPES[pick(k, 1) % TAPES.length];
-  const turn = (pick(k, 2) % 9) - 4;
+// One strip of tape across the top, or two on opposite corners. A strip of photographs is held at
+// both ends.
+function Hold({ seed, card, width }: { seed: number; card: Card; width: number }) {
+  const turn = (pick(seed, 2) % 9) - 4;
   if (card.strip)
     return (
       <>
-        <Tape kind={tape} width="74%" turn={turn} className="left-1/2 top-0 -translate-x-1/2 -translate-y-1/2" />
-        <Tape kind="paper" width="74%" turn={-turn} className="bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2" />
+        <Tape width={width * 0.74} seed={seed} turn={turn} className="left-1/2 top-0 -translate-x-1/2 -translate-y-1/2" />
+        <Tape width={width * 0.74} seed={seed + 1} turn={-turn} className="bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2" />
       </>
     );
-  if (kind === "binder") return <BinderClip className="left-1/2 top-0 -translate-x-1/2 -translate-y-[62%]" />;
-  if (kind === "pin") return <Pin className="left-1/2 top-[3%] -translate-x-1/2 -translate-y-1/2" />;
-  if (kind === "paperclip") return <PaperClip className="right-[12%] top-0 -translate-y-[28%]" />;
-  if (kind === "tapes")
+  if (pick(seed, 3) % 2)
     return (
       <>
-        <Tape kind={tape} turn={turn} className="left-0 top-0 -translate-x-[30%] -translate-y-[10%] -rotate-[38deg]" />
-        <Tape kind="paper" turn={-turn} className="bottom-0 right-0 translate-x-[30%] translate-y-[10%] -rotate-[38deg]" />
+        <Tape width={width * 0.3} seed={seed} turn={turn - 38} className="left-0 top-0 -translate-x-[40%] -translate-y-[40%]" />
+        <Tape width={width * 0.3} seed={seed + 1} turn={-turn - 38} className="bottom-0 right-0 translate-x-[40%] translate-y-[40%]" />
       </>
     );
-  return <Tape kind={tape} turn={turn} className="left-1/2 top-0 -translate-x-1/2 -translate-y-1/2" />;
+  return <Tape width={width * 0.34} seed={seed} turn={turn} className="left-1/2 top-0 -translate-x-1/2 -translate-y-1/2" />;
 }
 
 function Print({ card }: { card: Card }) {
   if (card.strip)
     return (
-      <div className="flex size-full flex-col gap-[4%] bg-[#fbfaf6] p-[9%] pb-[14%] ring-1 ring-black/5">
+      <div className="flex size-full flex-col gap-[4%] bg-canvas p-[9%] pb-[14%] ring-1 ring-rule">
         {card.strip.map((src) => (
           <div key={src} className="relative w-full flex-1 overflow-hidden bg-ink/80">
             <Image src={src} alt="" fill sizes="(min-width: 1024px) 12vw, 1px" className="object-cover" />
@@ -74,7 +82,7 @@ function Print({ card }: { card: Card }) {
       </div>
     );
   return (
-    <div className="size-full bg-[#fbfaf6] p-[3.5%] ring-1 ring-black/5">
+    <div className="size-full bg-canvas p-[3.5%] ring-1 ring-rule">
       <div className="relative size-full overflow-hidden bg-ink/80">
         <Image src={card.src!} alt="" fill sizes="(min-width: 1024px) 22vw, 1px" className="object-cover" />
       </div>
@@ -82,9 +90,10 @@ function Print({ card }: { card: Card }) {
   );
 }
 
-function Piece({ card, k, slot, side, lone, shown, still }: { card: Card; k: number; slot: Slot; side: number; lone: boolean; shown: boolean; still: boolean }) {
+function Piece({ card, k, slot, side, room, note, shown, still }: { card: Card; k: number; slot: Slot; side: number; room: number; note?: Note; shown: boolean; still: boolean }) {
   const el = useRef<HTMLDivElement>(null);
-  const r = side * (3 + (pick(k, 4) % 5));
+  const seed = seedOf(card.key);
+  const r = side * (1 + ((pick(seed, 4) % 31) / 30) * (TILT - 1));
   const rest = `rotate(${r}deg)`;
   useEffect(() => {
     if (!shown || still || !el.current) return;
@@ -98,12 +107,10 @@ function Piece({ card, k, slot, side, lone, shown, still }: { card: Card; k: num
     );
   }, [shown, still, rest, r]);
 
-  const name = card.event.name;
-  const extras: ReactNode[] = [];
-  if (card.nth === 1) extras.push(<Stamp key="stamp" text={card.event.when} turn={-side * 9} className={side < 0 ? "-right-6 -bottom-6" : "-left-6 -bottom-6"} />);
-  if (card.nth === 3 && lone) extras.push(<TornNote key="note" text={name} turn={side * 4} className={side < 0 ? "left-[calc(100%+1rem)] top-[30%]" : "right-[calc(100%+1rem)] top-[30%]"} />);
-  if (k % 7 === 5) extras.push(<Sticker key="sticker" turn={side * 12} className={side < 0 ? "-right-5 top-[12%]" : "-left-5 top-[12%]"} />);
-
+  // The note stands on the open side of the photograph, with its arrow in the gap between them,
+  // and starts below the strip where the photograph above tucks over this one.
+  const open = side < 0 ? "left" : "right";
+  const drop = Math.max(28, slot.height * 0.12);
   return (
     <div
       ref={el}
@@ -114,26 +121,51 @@ function Piece({ card, k, slot, side, lone, shown, still }: { card: Card; k: num
       <div className="size-full shadow-[0_22px_34px_-20px_rgb(0_0_0/0.45),0_2px_5px_rgb(0_0_0/0.12)]">
         <Print card={card} />
       </div>
-      <Hold k={k} card={card} />
-      {extras}
-      {card.first && lone && (
-        <p
-          className="absolute top-[34%] w-[9.5rem] font-[family-name:var(--f-hand)] text-[1.5rem] leading-[1.05] text-[#233a8b]"
-          style={{
-            [side < 0 ? "left" : "right"]: "calc(100% + 1.25rem)",
-            textAlign: side < 0 ? "left" : "right",
-            transform: `rotate(${-r - 3 * side}deg)`,
-          }}
-        >
-          {name}
-          <span className="mt-1 block text-[1.125rem] opacity-80">{card.event.when}</span>
-        </p>
+      <Hold seed={seed} card={card} width={slot.width} />
+      {note && (
+        <>
+          <Pointer
+            from={side < 0 ? [31, 17] : [3, 17]}
+            to={side < 0 ? [5, 9] : [29, 9]}
+            seed={seed}
+            colour={note.colour}
+            style={{ [open]: "100%", top: drop }}
+          />
+          <p
+            className={`absolute text-[1.5rem] leading-[1.05] ${HANDWRITING}`}
+            style={{
+              [open]: `calc(100% + ${REACH}px)`,
+              top: drop,
+              width: Math.min(152, room - REACH),
+              color: note.colour,
+              textAlign: side < 0 ? "left" : "right",
+              transform: `rotate(${-r - 3 * side}deg)`,
+            }}
+          >
+            {card.event.name}
+            {/* A name that carries its year needs no season under it. */}
+            {/\d{4}/.test(card.event.name) ? null : <span className="mt-1 block text-[1.125rem]">{card.event.when}</span>}
+          </p>
+        </>
       )}
     </div>
   );
 }
 
-type Placed = { card: Card; slot: Slot; side: number; lone: boolean };
+type Placed = { card: Card; slot: Slot; side: number; lone: boolean; room: number };
+
+// One note for each season, on the event with the most photographs in it: the first photograph of
+// that event with open page beside it. The topmost note is the one in red.
+function notes(placed: Placed[]): Map<string, Note> {
+  const seasons = new Map<string, Placed[]>();
+  for (const p of placed) if (p.lone) seasons.set(p.card.event.when, [...(seasons.get(p.card.event.when) ?? []), p]);
+  const chosen = [...seasons.values()].map((free) => {
+    const most = Math.max(...free.map((p) => p.card.event.photos.length));
+    return free.find((p) => p.card.event.photos.length === most)!;
+  });
+  const top = Math.min(...chosen.map((p) => p.slot.top));
+  return new Map(chosen.map((p) => [p.card.key, { colour: p.slot.top === top ? ACCENT : INK }]));
+}
 type Unit = { kind: "single" | "pair" | "strip"; cards: Card[] };
 
 const PAD = 40;
@@ -229,7 +261,7 @@ function layout(list: Card[], cw: number, H: number): Placed[] {
     u.cards.forEach((card, j) => {
       const p = parts[j];
       const onLeft = j === 0 ? side < 0 : side > 0;
-      out.push({ card, lone: u.kind !== "pair", side: onLeft ? -1 : 1, slot: { top: top + p.dy, left: onLeft ? edge : cw - p.w - edge, width: p.w, height: p.h } });
+      out.push({ card, lone: u.kind !== "pair", side: onLeft ? -1 : 1, room: cw - p.w - 2 * edge, slot: { top: top + p.dy, left: onLeft ? edge : cw - p.w - edge, width: p.w, height: p.h } });
     });
     prev = sizes[k].h;
   });
@@ -279,12 +311,15 @@ export default function Collage({ events }: { events: ClubEvent[] }) {
     return () => io.disconnect();
   }, [placed]);
 
+  const noted = notes(placed);
+
   return (
     <div ref={column} aria-hidden="true" data-print className="relative h-full">
-      {placed.map(({ card, slot, side, lone }, k) => (
+      <InkDefs />
+      {placed.map(({ card, slot, side, room }, k) => (
         <div key={card.key}>
           <span data-mark={card.key} className="absolute left-0 h-px w-px" style={{ top: slot.top + slot.height * 0.3 }} />
-          <Piece card={card} k={k} slot={slot} side={side} lone={lone} shown={seen.has(card.key)} still={still} />
+          <Piece card={card} k={k} slot={slot} side={side} room={room} note={noted.get(card.key)} shown={seen.has(card.key)} still={still} />
         </div>
       ))}
     </div>

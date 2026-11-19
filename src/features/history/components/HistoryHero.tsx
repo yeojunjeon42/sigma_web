@@ -1,4 +1,7 @@
+import { PhotoFrame } from "@/components/ui";
 import Image from "next/image";
+import { pick, type Both, type Locale } from "@/i18n/config";
+import { HISTORY, seasonName } from "@/i18n/dict/history";
 import { splitResult } from "../splitResult";
 import type { HistoryEvent } from "../types";
 import type { ClubEvent } from "../data/photos";
@@ -20,24 +23,29 @@ const MOTION = `
 `;
 
 export default function HistoryHero({
+  locale,
   now,
   facts,
   latest,
   photo,
   event,
 }: {
+  locale: Locale;
   now: HistoryEvent[];
   facts: { label: string; value: string }[];
   latest: number;
-  photo: { src: string; w: number; h: number };
+  photo: { src: string; w: number; h: number; alt: Both };
   event: ClubEvent;
 }) {
+  const t = HISTORY[locale];
+  // "Fall 2026": the season the photograph was taken in.
+  const [taken, takenYear] = event.when.split(" ");
   return (
     <header className="grid grid-cols-6 gap-x-gutter gap-y-lg pb-xxl pt-[calc(var(--masthead)+var(--spacing-xl))] [--Y:clamp(4rem,12vw,7rem)] md:grid-cols-12 lg:min-h-svh lg:grid-rows-[auto_minmax(18rem,1fr)_auto] lg:gap-y-xl lg:pb-lg lg:pt-[calc(var(--masthead)+var(--spacing-lg))] lg:[--Y:min(calc((100svh-var(--masthead)-2*var(--spacing-lg))*0.7/2.83),calc(15vw))]">
       <style>{MOTION}</style>
       <h1 className="contents">
         <span className="sr-only">
-          History, 1984 to {latest}
+          {t.heading(latest)}
         </span>
         <span
           aria-hidden="true"
@@ -50,15 +58,15 @@ export default function HistoryHero({
         </span>
       </h1>
 
-      <section aria-label="Now" className="col-span-3 col-start-4 row-start-1 md:col-span-6 md:col-start-4 lg:col-span-3 lg:col-start-10">
+      <section aria-label={t.now} className="col-span-3 col-start-4 row-start-1 md:col-span-6 md:col-start-4 lg:col-span-3 lg:col-start-10">
         <ul className="flex flex-col gap-y-lg">
           {now.slice(0, 2).map((e) => {
             const w = when(e.date);
-            const [event, result] = splitResult(e.title.en.replaceAll("-", "\u2011"));
+            const [event, result] = splitResult(pick(locale, e.title).replaceAll("-", "\u2011"));
             return (
               <li key={e.id} className="flex flex-col gap-y-xs">
                 <span className={CAP}>
-                  {w ? `${season(w)} ${latest}` : e.award ? "Award" : latest}
+                  {w ? t.seasonYear(seasonName(locale, season(w)), latest) : e.award ? t.award : latest}
                 </span>
                 <span className="flex flex-wrap gap-x-sm text-balance text-lead text-ink lg:text-title">
                   <span className="min-w-0">{event}</span>
@@ -71,12 +79,12 @@ export default function HistoryHero({
       </section>
 
       <figure className="col-span-full row-start-2 flex min-h-0 flex-col gap-sm lg:col-span-6 lg:col-start-4">
-        <div className="u-corner relative aspect-[4/3] overflow-hidden md:aspect-[16/9] bg-ink/10 lg:aspect-auto lg:min-h-0 lg:flex-1">
-          <Image src={photo.src} alt="" fill priority sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
-        </div>
+        <PhotoFrame className="relative aspect-[4/3] md:aspect-[16/9] bg-ink/10 lg:aspect-auto lg:min-h-0 lg:flex-1">
+          <Image src={photo.src} alt={pick(locale, photo.alt)} fill priority sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
+        </PhotoFrame>
         <figcaption className={`flex justify-between gap-x-md ${CAP}`}>
-          {event.name.replace(/, \d{4}$/, "")}
-          <span>{event.when}</span>
+          {pick(locale, { en: event.name, ko: event.ko }).replace(/, \d{4}$/, "")}
+          <span>{takenYear ? t.seasonYear(seasonName(locale, taken), takenYear) : event.when}</span>
         </figcaption>
       </figure>
 
@@ -92,7 +100,7 @@ export default function HistoryHero({
           ))}
         </dl>
         <p className={`${CAP} flex flex-col-reverse gap-y-xs md:col-span-full md:block`}>
-          <span>Running for</span>
+          <span>{t.running}</span>
           <span className="text-lead text-ink md:ml-sm [&>span]:inline">
             <RollingDate />
           </span>

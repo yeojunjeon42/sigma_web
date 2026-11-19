@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
-import Link from "next/link";
+import Link from "@/i18n/Link";
+import { MachineFrame } from "@/components/ui";
 import Pending from "./Pending";
 import PlateArt from "./PlateArt";
 import type { ReelBuild, ReelGroup } from "./ArchiveReel";
@@ -39,7 +40,7 @@ export default function ArchiveGrid({
           >
             {builds.slice(g.from, g.to).map((b, i) => (
               <li key={b.id} id={`b-${b.id}`} style={MARGIN}>
-                <Link href={open(b.id)} prefetch={false} className="group relative block transition-opacity [--color-surface-sunken:var(--color-canvas)] after:pointer-events-none after:absolute after:inset-0 after:border after:border-rule has-[[data-pending]]:opacity-50 has-[[data-pending]]:delay-150">
+                <MachineFrame as={Link} href={open(b.id)} prefetch={false} className="group block transition-opacity [--color-surface-sunken:var(--color-canvas)] has-[[data-pending]]:opacity-50 has-[[data-pending]]:delay-150">
                   <Pending />
                   <PlateArt
                     tile={b.tile.kind === "lift" ? { ...b.tile, box: CLEAR } : b.tile}
@@ -48,7 +49,7 @@ export default function ArchiveGrid({
                     style={CELL}
                   />
                   <div data-offgrid className="absolute inset-x-sm bottom-sm">
-                    <h3 className="u-trim u-knock font-[family-name:var(--f-display)] font-semibold [font-stretch:125%] text-body-sm text-balance text-ink transition-colors [--color-canvas:var(--color-surface-sunken)] group-hover:text-ink-muted">
+                    <h3 className="u-trim u-knock font-[family-name:var(--f-display)] font-bold [font-stretch:125%] text-body-sm text-balance text-ink transition-colors [--color-canvas:var(--color-surface-sunken)] group-hover:text-ink-muted">
                       {b.name}
                       {b.award ? (
                         <span className="md:hidden">
@@ -61,7 +62,7 @@ export default function ArchiveGrid({
                       <p className="mt-xxs truncate text-caption text-accent-deep max-md:hidden">{b.award}</p>
                     ) : null}
                   </div>
-                </Link>
+                </MachineFrame>
               </li>
             ))}
           </ul>

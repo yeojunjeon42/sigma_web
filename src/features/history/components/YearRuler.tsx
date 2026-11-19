@@ -5,6 +5,8 @@ import { pageY, pageScroller, scrollPage, onPageScroll } from "@/lib/pageScroll"
 import { useEffect, useRef, type CSSProperties } from "react";
 import { glide, type Glide } from "@/lib/glide";
 import { spring } from "@/lib/spring";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { HISTORY } from "@/i18n/dict/history";
 
 const SLOP = 5;
 const PITCH = 13;
@@ -45,13 +47,15 @@ export type Mark = {
 
 export default function YearRuler({
   marks,
-  ariaLabel = "The record, entry by entry",
+  ariaLabel,
   actionId,
 }: {
   marks: Mark[];
   ariaLabel?: string;
   actionId?: string;
 }) {
+  const locale = useLocale();
+  const label = ariaLabel ?? HISTORY[locale].dial;
   const valueRef = useRef<HTMLParagraphElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -1146,7 +1150,7 @@ export default function YearRuler({
         data-on=""
         role="slider"
         tabIndex={0}
-        aria-label={ariaLabel}
+        aria-label={label}
         aria-valuemin={0}
         aria-valuemax={marks.length - 1}
         aria-valuenow={0}

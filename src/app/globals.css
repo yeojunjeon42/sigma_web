@@ -12,9 +12,7 @@
 
 @theme {
   --font-sans: var(--f-marks), var(--f-sans), var(--f-kr), ui-sans-serif, system-ui, sans-serif;
-  --font-member-name: var(--f-member-name), var(--font-sans);
   --font-mono: var(--f-mono), var(--f-kr), ui-monospace, SFMono-Regular, monospace;
-  --font-serif: var(--f-serif), var(--f-serif-kr), ui-serif, Georgia, "Times New Roman", serif;
   --default-font-family: var(--font-sans);
   --radius-photo: clamp(10px, 0.6rem + 0.5vw, 16px);
 
@@ -760,10 +758,10 @@
     transition: opacity 160ms ease-out;
   }
 }
-.card-reel {
+.photo-reel {
   container-type: inline-size;
 }
-.card-reel > ul {
+.photo-reel > ul {
   --c: calc((100cqw - 7 * var(--gutter)) / 6);
   --card: calc(100cqw - 2 * var(--gutter) - 2.5rem);
   --max: var(--card);
@@ -777,18 +775,18 @@
   scroll-padding-left: var(--lead);
   padding-left: var(--lead);
 }
-.card-reel > ul > li {
-  --w: min(var(--max), calc(var(--card) * var(--own, 1)));
+.photo-reel > ul > li {
+  --w: min(var(--max), calc(var(--card) * 1.5));
   flex: none;
   width: var(--w);
-  aspect-ratio: var(--own, 1);
+  aspect-ratio: 3 / 2;
   scroll-snap-align: start;
 }
-.card-reel > ul > li:last-child {
+.photo-reel > ul > li:last-child {
   margin-right: calc(100cqw - var(--lead) - var(--w));
 }
 @media (width >= 48rem) {
-  .card-reel > ul {
+  .photo-reel > ul {
     --c: calc((100cqw - 13 * var(--gutter)) / 12);
     --card: calc(6 * var(--c) + 5 * var(--gutter));
     --lead: calc(var(--c) + 2 * var(--gutter));
@@ -796,13 +794,13 @@
   }
 }
 @media (width >= 64rem) {
-  .card-reel > ul {
+  .photo-reel > ul {
     --card: calc(5 * var(--c) + 4 * var(--gutter));
     --lead: calc(2 * var(--c) + 3 * var(--gutter));
   }
 }
 @media (width >= 80rem) {
-  .card-reel > ul {
+  .photo-reel > ul {
     --card: calc(4 * var(--c) + 3 * var(--gutter));
     --lead: calc(3 * var(--c) + 4 * var(--gutter));
   }

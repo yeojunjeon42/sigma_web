@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/i18n/Link";
 import { MOBILE } from "@/lib/browserTheme";
 
 export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {

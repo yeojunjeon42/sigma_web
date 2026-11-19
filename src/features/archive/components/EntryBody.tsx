@@ -1,12 +1,19 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
+import type { Locale } from "@/i18n/config";
+import { ARCHIVE_TEXT } from "@/i18n/dict/archive";
+import { COMMON } from "@/i18n/dict/common";
+import type { Photo } from "../types";
 import type { ReelBuild } from "./ArchiveReel";
+
+// The build's name, then what the photograph shows: "Robot Arm, small arm on an orange base".
+const altFor = (name: string, photo: Photo) => (photo.alt ? `${name}, ${photo.alt}` : name);
 
 const SET = {
   panel: {
     name: "font-[family-name:var(--f-display)] font-bold [font-stretch:125%] text-[clamp(1.5rem,0.9rem+1.1vw,2.125rem)] leading-[1.05] tracking-[-0.02em] text-balance text-ink",
     row: "grid-cols-[5.5rem_minmax(0,1fr)] gap-x-md",
-    body: "prose flow flow-panel mt-xl",
+    body: "prose flow flow-panel",
     media: "mt-xl columns-2 gap-gutter [&>li]:mb-gutter [&>li]:break-inside-avoid",
     sizes: "(min-width: 1024px) 15vw, 46vw",
     wide: "(min-width: 1024px) 40vw, 92vw",
@@ -15,7 +22,7 @@ const SET = {
     name: "font-[family-name:var(--f-display)] font-bold [font-stretch:125%] text-[clamp(1.625rem,7vw,2.5rem)] leading-[1.05] tracking-[-0.02em] text-balance text-ink",
     // The value starts on a column line of the phone's six.
     row: "grid-cols-6 gap-x-gutter [&>dd]:col-span-4 [&>dt]:col-span-2",
-    body: "prose flow mt-xl",
+    body: "prose flow",
     // Padding, not margin: a column drops a margin at its top only some of the time.
     media: "mt-xl columns-2 gap-gutter [&>li]:pb-gutter [&>li]:break-inside-avoid",
     sizes: "46vw",
@@ -23,7 +30,6 @@ const SET = {
   },
 } as const;
 
-const HANGUL = /[가-힣]/;
 
 // With less than this to read, the pictures carry the entry: one to a row at full width.
 const BRIEF = 200;
@@ -50,14 +56,18 @@ function Row({ label, className, value = "", children }: { label: string; classN
   );
 }
 
+// Takes its language as a prop: the phone entry renders it on the server, the reel in the browser.
 export default function EntryBody({
+  locale,
   build: b,
   variant,
 }: {
+  locale: Locale;
   build: ReelBuild;
   variant: keyof typeof SET;
 }) {
   const s = SET[variant];
+  const t = ARCHIVE_TEXT[locale].facts;
   const page = variant === "page";
   // A phone opens on a picture: the first photograph leads, the rest follow the text.
   const lead = page ? b.photos?.[0] : undefined;
@@ -74,7 +84,7 @@ export default function EntryBody({
       {lead ? (
         <Image
           src={lead.src}
-          alt={b.name}
+          alt={altFor(b.name, lead)}
           width={lead.width}
           height={lead.height}
           sizes="100vw"
@@ -88,12 +98,12 @@ export default function EntryBody({
       </h2>
 
       <dl className="mt-lg border-t border-rule-strong text-body-sm text-ink">
-        <Row label="Year" className={s.row}>
+        <Row label={t.year} className={s.row}>
           <span className="tabular-nums">{b.year}</span>
           {!page && b.era && b.era !== b.year ? <span className="ml-sm text-ink-muted tabular-nums">{b.era}</span> : null}
         </Row>
         {b.award ? (
-          <Row label="Result" className={s.row}>
+          <Row label={t.result} className={s.row}>
             <span className="flex items-baseline gap-x-xs">
               <span aria-hidden="true" className="relative -top-[0.167em] inline-block size-[0.34em] shrink-0 bg-accent" />
               <span>
@@ -103,16 +113,21 @@ export default function EntryBody({
           </Row>
         ) : null}
         {b.team?.length ? (
-          // Korean names take the face the Members page sets them in. On the cell, so its metrics never stretch a line.
-          <Row label="Team" className={s.row} value={b.team.some((n) => HANGUL.test(n)) ? "font-member-name" : ""}>
+          <Row label={t.team} className={s.row}>
             {b.team.join(", ")}
           </Row>
         ) : null}
-        {b.tags.length ? <Row label="Topics" className={s.row}>{b.tags.join(" · ")}</Row> : null}
+        {b.tags.length ? <Row label={t.topics} className={s.row}>{b.tags.join(" · ")}</Row> : null}
       </dl>
 
+      {/* Text that exists only in the other language says so, and is marked as that language. */}
+      {b.body && b.lang ? <p className="mt-xl text-caption text-ink-muted">{COMMON[locale].onlyIn[b.lang]}</p> : null}
       {b.body ? (
-        <div className={`${s.body} ${statement ? "flow-lead" : ""}`} dangerouslySetInnerHTML={{ __html: b.body }} />
+        <div
+          lang={b.lang}
+          className={`${s.body} ${b.lang ? "mt-sm" : "mt-xl"} ${statement ? "flow-lead" : ""}`}
+          dangerouslySetInnerHTML={{ __html: b.body }}
+        />
       ) : null}
 
       {photos?.length || columnVideos?.length ? (
@@ -121,7 +136,7 @@ export default function EntryBody({
             <li key={photo.src}>
               <Image
                 src={photo.src}
-                alt={b.name}
+                alt={altFor(b.name, photo)}
                 width={photo.width}
                 height={photo.height}
                 sizes={brief ? s.wide : s.sizes}

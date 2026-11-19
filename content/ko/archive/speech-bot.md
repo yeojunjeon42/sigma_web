@@ -1,0 +1,26 @@
+---
+title: Speech Bot
+year: 2025
+date: 2025
+tags: [2025, Making, AI]
+team: 이건희, 임정수, 전현태, 최원진
+---
+
+## 개요
+
+입력
+
+- 웹캠
+- 마이크
+
+처리
+
+- GPT 4o
+
+출력
+
+- 표정짓기 (서보모터)
+- 얼굴 따라가기 (서보모터)
+- 스피커
+- Speech to text
+- Text to speech

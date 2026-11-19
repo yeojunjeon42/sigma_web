@@ -1,6 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/i18n/Link";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { HOME } from "@/i18n/dict/home";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { DOT, GROUND, GROUND_INK, PLATE_KEY, SCREEN, relief, turnAt } from "@/lib/halftone";
 import { printer, scaled, STRIDE, vignette } from "@/lib/printer";
@@ -59,6 +61,9 @@ const show = (b: HeroBuild) => {
   subs.forEach((f) => f());
 };
 
+// The plate in words: the build's name and its year.
+const label = (b: HeroBuild) => (b.year ? `${b.name}, ${b.year}` : b.name);
+
 export const PLATE_SHOW = "plate:show";
 export const PLATE_RELEASE = "plate:release";
 
@@ -83,6 +88,7 @@ export function HeroCaption({
   className?: string;
   style?: React.CSSProperties;
 }) {
+  const locale = useLocale();
   const b =
     useSyncExternalStore(
       subscribe,
@@ -105,7 +111,7 @@ export function HeroCaption({
         onClick={() => advance?.()}
         className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-end leading-none text-ink transition-opacity hover:opacity-60 lg:min-h-0 lg:min-w-0"
       >
-        Next
+        {HOME[locale].next}
       </button>
     </p>
   );
@@ -115,6 +121,8 @@ type Tones = { key: string; cols: number; rows: number; tone: Float32Array };
 type Box = { x: number; y: number; w: number; h: number };
 
 export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
+  // The canvas is the picture of one build, so its name follows the plate.
+  const now = useSyncExternalStore(subscribe, () => shown, () => null) ?? builds[0];
   const ref = useRef<HTMLCanvasElement>(null);
   // Rebuild on md crossings: the grid is captured at setup.
   const [layout, setLayout] = useState(0);
@@ -833,7 +841,8 @@ export default function HeroPlate({ builds }: { builds: HeroBuild[] }) {
   return (
     <canvas
       ref={ref}
-      aria-hidden="true"
+      role="img"
+      aria-label={now ? label(now) : undefined}
       className="pointer-events-none absolute inset-0 z-0 h-full w-full"
     />
   );

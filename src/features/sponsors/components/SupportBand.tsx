@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useRef } from "react";
 import { Container } from "@/components/ui";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { HOME } from "@/i18n/dict/home";
 import type { Sponsor } from "../api/getSponsors";
 
 // The colours fade in over the ink, and the ink goes only once they are fully there (and is back
@@ -15,6 +17,7 @@ const INK = "[transition:opacity_0s_linear_0s] group-hover/logo:[transition-dela
 // logo is a mask over the text colour, so all print in the one ink; pointing at one shows its own
 // colours.
 export default function SupportBand({ sponsors, cofounded }: { sponsors: Sponsor[]; cofounded: Sponsor[] }) {
+  const t = HOME[useLocale()];
   const chip = useRef<HTMLSpanElement>(null);
   // The chip rides the pointer, a little below and to its right. Its place is written straight to
   // the element: it moves with every pointer event, which is no business of a render.
@@ -29,12 +32,12 @@ export default function SupportBand({ sponsors, cofounded }: { sponsors: Sponsor
 
   // What each one is to the club, shown in the chip while its logo is pointed at.
   const items = [
-    ...sponsors.map((s) => ({ ...s, tie: "Sponsor" })),
-    ...cofounded.map((s) => ({ ...s, tie: "Co-founded" })),
+    ...sponsors.map((s) => ({ ...s, tie: t.sponsor })),
+    ...cofounded.map((s) => ({ ...s, tie: t.cofounded })),
   ];
   if (items.length === 0) return null;
   return (
-    <section aria-label="Supported by" className="hidden py-xxl desk:block">
+    <section aria-label={t.supported} data-thread="supporters" className="hidden py-xxl desk:block">
       <Container>
         <ul data-offgrid className="flex items-baseline justify-center gap-x-xxxl [--logo-cap:clamp(1rem,1.2vw,1.5rem)]">
           {items.map((s) => (
